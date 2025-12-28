@@ -1,0 +1,87 @@
+[
+  {
+    "id": "FISH001",
+    "name": "Cá Bảy Màu Full Red",
+    "type": "fish",
+    "species": "Poecilia reticulata",
+    "price": 25000,
+    "oldprice": 35000,
+    "quantity": 120,
+    "description": "Cá bảy màu màu đỏ rực, dễ nuôi, phù hợp cho người mới.",
+    "instruction": "Nuôi trong hồ nhỏ 20–30L, thay nước 2 lần/tuần.",
+    "storage": "Không áp dụng",
+    "warning": "Không nuôi chung với cá hung dữ.",
+    "images": [
+      "public/data/ca01.jpg"
+    ],
+    "status": "available"
+  },
+  {
+    "id": "FISH002",
+    "name": "Cá Neon Xanh",
+    "type": "fish",
+    "species": "Paracheirodon innesi",
+    "price": 18000,
+    "oldprice": 25000,
+    "quantity": 200,
+    "description": "Cá Neon xanh ánh kim, bơi theo đàn đẹp.",
+    "instruction": "Nuôi theo đàn ≥ 6 con, nước mềm, nhiệt độ 24–26°C.",
+    "storage": "Không áp dụng",
+    "warning": "Nhạy cảm với nước bẩn.",
+    "images": [
+      "public/data/ca02.jpg"
+    ],
+    "status": "available"
+  },
+  {
+    "id": "MED001",
+    "name": "Thuốc Trị Nấm Cá JBL Fungol",
+    "type": "medicine",
+    "species": "All",
+    "price": 120000,
+    "oldprice": 150000,
+    "quantity": 35,
+    "description": "Thuốc đặc trị nấm và vi khuẩn ngoài da cho cá cảnh.",
+    "instruction": "1ml/20L nước, sử dụng 1 lần/ngày trong 3 ngày.",
+    "storage": "Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp.",
+    "warning": "Không dùng quá liều. Tránh xa trẻ em.",
+    "images": [
+      "public/data/thuoc01.jpg"
+    ],
+    "status": "available"
+  },
+  {
+    "id": "MED002",
+    "name": "Muối Hột Thủy Sinh",
+    "type": "medicine",
+    "species": "All",
+    "price": 30000,
+    "oldprice": 45000,
+    "quantity": 100,
+    "description": "Muối giúp sát khuẩn nhẹ, hỗ trợ phòng bệnh cho cá.",
+    "instruction": "1 muỗng/20L nước, dùng 1–2 lần/tuần.",
+    "storage": "Đậy kín, tránh ẩm.",
+    "warning": "Không dùng cho cá nhạy cảm với muối.",
+    "images": [
+      "public/data/thuoc02.jpg"
+    ],
+    "status": "available"
+  },
+  {
+    "id": "EQP001",
+    "name": "Hồ Cá Kính 60x30x36",
+    "type": "equipment",
+    "species": "All",
+    "price": 450000,
+    "oldprice": 520000,
+    "quantity": 15,
+    "description": "Hồ cá kính cường lực, phù hợp nuôi cá cảnh và thủy sinh.",
+    "instruction": "Vệ sinh trước khi sử dụng, đặt nơi bằng phẳng.",
+    "storage": "Tránh va đập mạnh.",
+    "warning": "Không đổ nước quá vạch cho phép.",
+    "images": [
+      "public/data/ho01.jpg"
+    ],
+    "status": "available"
+  },
+]
