@@ -33,12 +33,11 @@ export default function Product() {
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải...</p>;
   if (error) return <p style={{ color: "red", padding: 20 }}>{error}</p>;
 
-  /* ================= PHÂN LOẠI ================= */
+
   const fishList = products.filter((p) => p.type === "fish");
   const medicineList = products.filter((p) => p.type === "medicine");
   const equipmentList = products.filter((p) => p.type === "equipment");
 
-  /* ================= RENDER LIST ================= */
   const renderList = (title, icon, list) => (
     <>
       <h3 style={styles.sectionTitle}>
@@ -103,7 +102,7 @@ export default function Product() {
                   alert("🛒 Thêm vào giỏ hàng (demo)");
                 }}
               >
-                Mua
+                Chọn Mua
               </button>
             </div>
           );
@@ -116,14 +115,13 @@ export default function Product() {
     <div style={styles.container}>
       <h2 style={styles.title}>Danh sách sản phẩm</h2>
 
-      {renderList("Cá cảnh", "🐠", fishList)}
-      {renderList("Thuốc & Hóa chất", "💊", medicineList)}
+      {renderList("Cá cảnh", "", fishList)}
+      {renderList("Thuốc & Hóa chất", "", medicineList)}
       {renderList("Hồ & Thiết bị", "🛠", equipmentList)}
     </div>
   );
 }
 
-/* ================= STYLES ================= */
 
 const styles = {
   container: {

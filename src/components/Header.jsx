@@ -1,30 +1,46 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  // 🔁 Lấy user từ localStorage khi load Header
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // 🚪 Đăng xuất
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+  };
 
   return (
     <header style={styles.header}>
       <div style={styles.container}>
         {/* LOGO */}
         <div style={styles.logo} onClick={() => navigate("/")}>
-          🐠 Aquatic Shop
+          <img
+            src="/data/logo.jpg"
+            alt="Aquatic Shop Logo"
+            style={styles.logoImg}
+          />
+          <span>Aquatic Shop</span>
         </div>
+
 
         {/* MENU */}
         <nav style={styles.nav}>
-          <span style={styles.link} onClick={() => navigate("/")}>
-            Trang chủ
-          </span>
-          <span style={styles.link} onClick={() => navigate("/product")}>
-            Sản phẩm
-          </span>
-          <span style={styles.link} onClick={() => navigate("/fishknowledge")}>
-            Kiến thức nuôi cá
-          </span>
-          <span style={styles.link} onClick={() => navigate("/contact")}>
-            Liên hệ
-          </span>
+          <span style={styles.link} onClick={() => navigate("/")}>Trang chủ</span>
+          <span style={styles.link} onClick={() => navigate("/product")}>Sản phẩm</span>
+          <span style={styles.link} onClick={() => navigate("/knowledge")}>Kiến thức nuôi cá</span>
+          <span style={styles.link} onClick={() => navigate("/contact")}>Liên hệ</span>
         </nav>
 
         {/* ACTIONS */}
@@ -33,24 +49,49 @@ export default function Header() {
             🛒 Giỏ hàng
           </span>
 
-          <button
-            style={styles.loginBtn}
-            onClick={() => navigate("/login")}
-          >
-            Đăng nhập
-          </button>
+          {/* ❌ CHƯA ĐĂNG NHẬP */}
+          {!user && (
+            <>
+              <button
+                style={styles.loginBtn}
+                onClick={() => navigate("/login")}
+              >
+                Đăng nhập
+              </button>
 
-          <button
-            style={styles.registerBtn}
-            onClick={() => navigate("/register")}
-          >
-            Đăng ký
-          </button>
+              <button
+                style={styles.registerBtn}
+                onClick={() => navigate("/register")}
+              >
+                Đăng ký
+              </button>
+            </>
+          )}
+
+          {/* ✅ ĐÃ ĐĂNG NHẬP */}
+          {user && (
+            <>
+              <span
+                style={styles.user}
+                onClick={() => navigate("/profile")}
+              >
+                👤 {user.username || user.email}
+              </span>
+
+              <button
+                style={styles.logoutBtn}
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
   );
 }
+
 
 const styles = {
   header: {
@@ -118,4 +159,36 @@ const styles = {
     cursor: "pointer",
     fontWeight: 500,
   },
+  user: {
+  fontWeight: "600",
+  cursor: "pointer",
+  marginRight: "6px",
+},
+
+logoutBtn: {
+  padding: "6px 12px",
+  background: "#dc3545",
+  color: "#fff",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontWeight: 500,
+},
+logo: {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  fontSize: "18px",
+  fontWeight: "bold",
+  cursor: "pointer",
+},
+
+logoImg: {
+  width: "32px",
+  height: "32px",
+  objectFit: "cover",
+  borderRadius: "50%", // bo tròn logo
+},
+
+
 };

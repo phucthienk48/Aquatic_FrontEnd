@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
+    username: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -20,51 +22,64 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!form.email || !form.password) {
+    if (!form.username || !form.email || !form.password) {
       setError("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("Mật khẩu phải ít nhất 6 ký tự");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp");
       return;
     }
 
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        }),
       });
 
       const result = await res.json();
 
       if (!res.ok || result.success === false) {
-        throw new Error(result.message || "Đăng nhập thất bại");
+        throw new Error(result.message || "Đăng ký thất bại");
       }
 
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
-
-      alert("Đăng nhập thành công!");
-      
-      // window.location.href = "/";
-    //  Điều hướng theo role
-    if (result.user.role === "admin") {
-      navigate("/admin");
-    } else {
-      window.location.href = "/";
-    }
+      alert(" Đăng ký thành công!");
+      navigate("/login");
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    }``
+    }
   };
 
   return (
     <div style={styles.container}>
       <form style={styles.box} onSubmit={handleSubmit}>
-        <h2 style={styles.title}>🔐 Đăng nhập</h2>
+        <h2 style={styles.title}>📝 Đăng ký tài khoản</h2>
 
         {error && <p style={styles.error}>{error}</p>}
+
+        <input
+          style={styles.input}
+          type="text"
+          name="username"
+          placeholder="Tên đăng nhập"
+          value={form.username}
+          onChange={handleChange}
+        />
 
         <input
           style={styles.input}
@@ -84,6 +99,15 @@ export default function Login() {
           onChange={handleChange}
         />
 
+        <input
+          style={styles.input}
+          type="password"
+          name="confirmPassword"
+          placeholder="Nhập lại mật khẩu"
+          value={form.confirmPassword}
+          onChange={handleChange}
+        />
+
         <button
           type="submit"
           style={{
@@ -92,13 +116,13 @@ export default function Login() {
           }}
           disabled={loading}
         >
-          {loading ? "⏳ Đang xử lý..." : "Đăng nhập"}
+          {loading ? "⏳ Đang xử lý..." : "Đăng ký"}
         </button>
 
-        <p style={styles.registerLink}>
-          Chưa có tài khoản?{" "}
-          <Link to="/register" style={styles.link}>
-            Đăng ký ngay
+        <p style={styles.loginLink}>
+          Đã có tài khoản?{" "}
+          <Link to="/login" style={styles.link}>
+            Đăng nhập
           </Link>
         </p>
       </form>
@@ -166,7 +190,7 @@ const styles = {
     textAlign: "center",
   },
 
-  registerLink: {
+  loginLink: {
     textAlign: "center",
     marginTop: "15px",
   },

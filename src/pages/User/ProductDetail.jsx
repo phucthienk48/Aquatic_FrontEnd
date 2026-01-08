@@ -3,20 +3,41 @@ import { useEffect, useState } from "react";
 
 export default function ProductDetail() {
   const { id } = useParams();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?._id || user?.id;
+
   const [product, setProduct] = useState(null);
+  const [mainImage, setMainImage] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Chuẩn hóa ảnh
+  const getImageSrc = (img) => {
+    if (!img) return "/data/placeholder.jpg";
+    if (img.startsWith("http")) return img;
+    if (img.startsWith("/")) return img;
+    return `/${img}`;
+  };
+
+  // Lấy chi tiết sản phẩm
   useEffect(() => {
     if (!id) return;
 
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/product/${id}`);
+        setLoading(true);
+        const res = await fetch(
+          `http://localhost:5000/api/product/${id}`
+        );
         if (!res.ok) throw new Error("Không tìm thấy sản phẩm");
 
         const result = await res.json();
-        setProduct(result.data);
+        const data = result.data || result;
+
+        setProduct(data);
+        setMainImage(data.images?.[0] || "");
       } catch (err) {
         setError(err.message || "Lỗi tải sản phẩm");
       } finally {
@@ -27,23 +48,75 @@ export default function ProductDetail() {
     fetchProduct();
   }, [id]);
 
-  if (loading) return <p style={styles.loading}>⏳ Đang tải sản phẩm...</p>;
-  if (error) return <p style={styles.error}>❌ {error}</p>;
-  if (!product) return <p style={styles.error}>❌ Không có dữ liệu sản phẩm</p>;
+const handleAddToCart = async () => {
+  if (!userId) {
+    alert("Vui lòng đăng nhập");
+    return;
+  }
 
-  const hasDiscount = product.oldprice && product.oldprice > product.price;
+  // ✅ Chuẩn hóa ảnh
+  const image =
+    product.images?.[0]
+      ?.replace(/^\/+/, "") || "data/placeholder.jpg";
+
+  try {
+    const res = await fetch("http://localhost:5000/api/cart/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        image, // ← CHUẨN
+        quantity,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+
+    alert("✅ Đã thêm vào giỏ hàng");
+  } catch (err) {
+    alert(err.message || "Lỗi thêm giỏ hàng");
+  }
+};
+
+
+
+  // ==== UI STATE ====
+  if (loading)
+    return <p style={styles.loading}>⏳ Đang tải sản phẩm...</p>;
+
+  if (error)
+    return <p style={styles.error}>{error}</p>;
+
+  if (!product)
+    return <p style={styles.error}>Không có dữ liệu sản phẩm</p>;
+
+  const hasDiscount =
+    product.oldprice && product.oldprice > product.price;
+
   const discountPercent = hasDiscount
-    ? Math.round(((product.oldprice - product.price) / product.oldprice) * 100)
+    ? Math.round(
+        ((product.oldprice - product.price) /
+          product.oldprice) *
+          100
+      )
     : 0;
 
   return (
     <div style={styles.container}>
       <div style={styles.row}>
+        {/* LEFT */}
         <div style={styles.leftCol}>
           <img
-            src={product.images?.[0] || "https://via.placeholder.com/450"}
+            src={getImageSrc(mainImage)}
             alt={product.name}
             style={styles.mainImage}
+            onError={(e) =>
+              (e.target.src = "/data/placeholder.jpg")
+            }
           />
 
           {product.images?.length > 1 && (
@@ -51,173 +124,111 @@ export default function ProductDetail() {
               {product.images.map((img, index) => (
                 <img
                   key={index}
-                  src={img}
+                  src={getImageSrc(img)}
                   alt=""
-                  style={styles.thumbnail}
+                  style={{
+                    ...styles.thumbnail,
+                    border:
+                      img === mainImage
+                        ? "2px solid #0d6efd"
+                        : "1px solid #ccc",
+                  }}
+                  onClick={() => setMainImage(img)}
                 />
               ))}
             </div>
           )}
         </div>
 
+        {/* RIGHT */}
         <div style={styles.rightCol}>
           <h2 style={styles.title}>{product.name}</h2>
 
-          <p style={styles.subTitle}>
-            Loại: <strong>{product.type}</strong>
-            {product.species && <> | Loài: <strong>{product.species}</strong></>}
-          </p>
-
           <div style={styles.priceGroup}>
-            <span style={styles.price}>{product.price.toLocaleString()} đ</span>
+            <span style={styles.price}>
+              {product.price.toLocaleString()} đ
+            </span>
 
             {hasDiscount && (
               <>
                 <span style={styles.oldPrice}>
                   {product.oldprice.toLocaleString()} đ
                 </span>
-                <span style={styles.discountBadge}>-{discountPercent}%</span>
+                <span style={styles.discountBadge}>
+                  -{discountPercent}%
+                </span>
               </>
             )}
           </div>
 
-          <p>
-            Trạng thái:{" "}
-            {product.status === "available" ? (
-              <span style={styles.inStock}>✔ Còn hàng</span>
-            ) : (
-              <span style={styles.outOfStock}>✖ Hết hàng</span>
-            )}
-          </p>
-
           <p>Số lượng còn: {product.quantity ?? 0}</p>
+
+          {/* 🔢 CHỌN SỐ LƯỢNG */}
+          <div style={styles.qtyBox}>
+            <button
+              onClick={() =>
+                setQuantity((q) => Math.max(1, q - 1))
+              }
+            >
+              −
+            </button>
+            <span>{quantity}</span>
+            <button
+              onClick={() =>
+                setQuantity((q) =>
+                  Math.min(product.quantity, q + 1)
+                )
+              }
+            >
+              +
+            </button>
+          </div>
 
           <button
             style={styles.button}
             disabled={product.status !== "available"}
+            onClick={handleAddToCart}
           >
-            🛒 Thêm vào giỏ hàng
+            <i className="bi bi-cart-plus"></i>{" "}
+            Thêm vào giỏ hàng
           </button>
         </div>
-      </div>
-
-      <div style={styles.detailSection}>
-        <h4>📄 Mô tả sản phẩm</h4>
-        <p>{product.description || "Đang cập nhật"}</p>
-
-        <h4>📌 Hướng dẫn sử dụng / chăm sóc</h4>
-        <p>{product.instruction || "Đang cập nhật"}</p>
-
-        <h4>📦 Bảo quản</h4>
-        <p>{product.storage || "Đang cập nhật"}</p>
-
-        <h4>⚠️ Lưu ý</h4>
-        <p style={styles.warning}>{product.warning || "Không có cảnh báo"}</p>
       </div>
     </div>
   );
 }
 
+/* ================= STYLES ================= */
 const styles = {
-  container: {
-    width: "90%",
-    maxWidth: 1200,
-    margin: "0 auto",
-    padding: "20px 0",
-    fontFamily: "Arial, sans-serif",
-  },
-  row: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "30px",
-  },
-  leftCol: {
-    flex: "1 1 45%",
-  },
-  rightCol: {
-    flex: "1 1 45%",
-  },
-  mainImage: {
-    width: "100%",
-    borderRadius: 8,
-    marginBottom: 10,
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-    objectFit: "cover",
-  },
-  thumbnailContainer: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-  thumbnail: {
-    width: 70,
-    height: 70,
-    objectFit: "cover",
-    border: "1px solid #ccc",
-    borderRadius: 4,
-    cursor: "pointer",
-  },
-  title: {
-    fontSize: "24px",
-    marginBottom: 10,
-  },
-  subTitle: {
-    color: "#555",
-    marginBottom: 10,
-  },
-  priceGroup: {
-    marginBottom: 12,
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    flexWrap: "wrap",
-  },
-  price: {
-    fontSize: "22px",
-    color: "#dc3545",
-    fontWeight: "bold",
-  },
-  oldPrice: {
-    textDecoration: "line-through",
-    color: "#888",
-    fontSize: "16px",
-  },
+  container: { maxWidth: 1200, margin: "0 auto", padding: 20 },
+  row: { display: "flex", gap: 30, flexWrap: "wrap" },
+  leftCol: { flex: 1 },
+  rightCol: { flex: 1 },
+  mainImage: { width: "100%", borderRadius: 8 },
+  thumbnailContainer: { display: "flex", gap: 10, marginTop: 10 },
+  thumbnail: { width: 70, height: 70, cursor: "pointer" },
+  title: { fontSize: 24 },
+  priceGroup: { display: "flex", gap: 10, alignItems: "center" },
+  price: { fontSize: 22, color: "#dc3545", fontWeight: "bold" },
+  oldPrice: { textDecoration: "line-through" },
   discountBadge: {
-    backgroundColor: "#28a745",
+    background: "#28a745",
     color: "#fff",
-    fontSize: "14px",
     padding: "2px 6px",
-    borderRadius: "4px",
   },
-  inStock: {
-    color: "green",
-    fontWeight: "bold",
-  },
-  outOfStock: {
-    color: "red",
-    fontWeight: "bold",
+  qtyBox: {
+    display: "flex",
+    gap: 10,
+    alignItems: "center",
+    margin: "15px 0",
   },
   button: {
     padding: "10px 20px",
-    backgroundColor: "#0d6efd",
+    background: "#0d6efd",
     color: "#fff",
     border: "none",
-    borderRadius: 4,
-    marginTop: 15,
     cursor: "pointer",
   },
-  detailSection: {
-    marginTop: 40,
-  },
-  warning: {
-    color: "red",
-    fontWeight: "bold",
-  },
-  loading: {
-    padding: 20,
-  },
-  error: {
-    padding: 20,
-    color: "red",
-  },
+  loading: { padding: 20 },
+  error: { padding: 20, color: "red" },
 };

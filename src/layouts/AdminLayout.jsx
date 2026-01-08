@@ -1,13 +1,17 @@
 // src/layouts/AdminLayout.jsx
 import { Outlet } from "react-router-dom";
+import HeaderAdmin from "../pages/Admin/HeaderAdmin";
 
 export default function AdminLayout() {
   return (
-    <div className="admin-layout">
-      <aside>MENU ADMIN</aside>
-      <section>
-        <Outlet />
-      </section>
-    </div>
+    <>
+      <HeaderAdmin />
+      <div className="admin-layout">
+
+        <section>
+          <Outlet />
+        </section>
+      </div>
+    </>
   );
 }
