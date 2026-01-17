@@ -1,23 +1,30 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer style={styles.footer}>
       <div style={styles.container}>
+        {/* ==== LOGO ==== */}
         <div>
           <h4 style={styles.title}>🐟 Aquatic Shop</h4>
-          <p>Chuyên cá cảnh, thuốc và vật tư thủy sinh.</p>
+          <p style={styles.text}>
+            Chuyên cá cảnh, thuốc và vật tư thủy sinh.
+          </p>
         </div>
 
+        {/* ==== LINK ==== */}
         <div>
           <h4 style={styles.title}>Liên kết</h4>
-          <p>Trang chủ</p>
-          <p>Sản phẩm</p>
-          <p>Liên hệ</p>
+          <Link to="/" style={styles.link}>Trang chủ</Link>
+          <Link to="/product" style={styles.link}>Sản phẩm</Link>
+          <Link to="/contact" style={styles.link}>Liên hệ</Link>
         </div>
 
+        {/* ==== CONTACT ==== */}
         <div>
           <h4 style={styles.title}>Liên hệ</h4>
-          <p>📞 0123 456 789</p>
-          <p>📧 aquaticshop@gmail.com</p>
+          <p style={styles.text}>📞 0123 456 789</p>
+          <p style={styles.text}>📧 aquaticshop@gmail.com</p>
         </div>
       </div>
 
@@ -27,7 +34,6 @@ export default function Footer() {
     </footer>
   );
 }
-
 const styles = {
   footer: {
     background: "#222",
@@ -35,6 +41,7 @@ const styles = {
     padding: "30px 0 10px",
     marginTop: "40px",
   },
+
   container: {
     width: "90%",
     maxWidth: "1200px",
@@ -42,11 +49,29 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     gap: "20px",
+    flexWrap: "wrap",
   },
+
   title: {
     color: "#fff",
-    marginBottom: "8px",
+    marginBottom: "10px",
+    fontSize: "16px",
   },
+
+  text: {
+    fontSize: "14px",
+    marginBottom: "6px",
+  },
+
+  link: {
+    display: "block",
+    color: "#ccc",
+    textDecoration: "none",
+    marginBottom: "6px",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+
   bottom: {
     textAlign: "center",
     marginTop: "20px",

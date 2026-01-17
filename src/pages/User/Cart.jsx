@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Cart() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -41,6 +43,12 @@ export default function Cart() {
       { method: "DELETE" }
     );
     setCart({ items: [] });
+  };
+  
+  const navigate = useNavigate();
+
+  const goToCheckout = () => {
+    navigate("/checkout");
   };
 
   if (!cart || cart.items.length === 0)
@@ -114,10 +122,17 @@ export default function Cart() {
           </span>
         </h4>
 
-        <button style={styles.clearBtn} onClick={clearCart}>
-          <i className="bi bi-trash3"></i> Xóa toàn bộ giỏ
-        </button>
+        <div style={styles.actions}>
+          <button style={styles.checkoutBtn} onClick={goToCheckout}>
+            <i className="bi bi-credit-card"></i> Thanh toán
+          </button>
+
+          <button style={styles.clearBtn} onClick={clearCart}>
+            <i className="bi bi-trash3"></i> Xóa toàn bộ giỏ
+          </button>
+        </div>
       </div>
+
     </div>
   );
 }
@@ -221,4 +236,18 @@ const styles = {
     marginTop: 60,
     fontSize: 18,
   },
+  actions: {
+  display: "flex",
+  gap: 10,
+},
+checkoutBtn: {
+  background: "#2e7d32",
+  color: "#fff",
+  border: "none",
+  padding: "10px 16px",
+  borderRadius: 8,
+  cursor: "pointer",
+  fontWeight: 600,
+},
+
 };

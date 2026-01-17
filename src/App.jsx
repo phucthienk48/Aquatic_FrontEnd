@@ -15,8 +15,14 @@ import Contact from "./pages/User/Contact";
 import KnowledgeList from "./pages/User/KnowledgeList";
 import KnowledgeDetail from "./pages/User/KnowledgeDetail";
 import ProductDetail from "./pages/User/ProductDetail";
+import Checkout from "./pages/User/Checkout";
+import Orders from "./pages/User/Orders";
 
 import Dashboard from "./pages/Admin/Dashboard";
+import HomeAdmin from "./pages/Admin/HomeAdmin";
+import UserManagement from "./pages/Admin/UserManagement";
+import AdminOrders from "./pages/Admin/AdminOrders";
+import AdminProduct from "./pages/Admin/AdminProduct";
 
 function App() {
   return (
@@ -33,6 +39,8 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -44,7 +52,10 @@ function App() {
 
         {/* ADMIN */}
         <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin" element={<HomeAdmin />} />
+          <Route path="/admin/users" element={<UserManagement />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/products" element={<AdminProduct />} />
         </Route>
 
       </Routes>
