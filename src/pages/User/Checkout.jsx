@@ -18,6 +18,16 @@ export default function Checkout() {
   });
 
   /* ===== FETCH CART ===== */
+    const getImageUrl = (image) => {
+    if (!image) return "/data/placeholder.jpg";
+
+    // Ảnh Cloudinary / URL đầy đủ
+    if (image.startsWith("http")) return image;
+
+    // Ảnh local
+    return `/${image.replace(/^\/+/, "")}`;
+  };
+
   useEffect(() => {
     if (!userId) return;
 
@@ -85,7 +95,7 @@ export default function Checkout() {
       );
 
       alert("🎉 Đặt hàng thành công!");
-      navigate("/order");
+      navigate("/orders");
     } catch (err) {
       console.error(err);
       alert("❌ Có lỗi xảy ra");
@@ -143,12 +153,14 @@ export default function Checkout() {
   {cart.items.map((item) => (
     <div key={item.product} style={styles.productRow}>
       <img
-        src={`/${item.image}`}
+        src={getImageUrl(item.image)}
         alt={item.name}
         style={styles.productImg}
-        onError={(e) => (e.target.src = "/data/placeholder.jpg")}
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = "/data/placeholder.jpg";
+        }}
       />
-
       <div style={styles.productInfo}>
         <h5 style={styles.productName}>{item.name}</h5>
 

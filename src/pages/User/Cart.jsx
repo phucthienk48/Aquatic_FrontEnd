@@ -18,6 +18,16 @@ export default function Cart() {
     if (userId) fetchCart();
   }, [userId]);
 
+  const getImageUrl = (image) => {
+    if (!image) return "/data/placeholder.jpg";
+
+    // Cloudinary hoặc URL đầy đủ
+    if (image.startsWith("http")) return image;
+
+    // Ảnh local
+    return `/${image.replace(/^\/+/, "")}`;
+  };
+
   const updateQty = async (productId, quantity) => {
     if (quantity < 1) return;
 
@@ -68,12 +78,13 @@ export default function Cart() {
       {cart.items.map((item) => (
         <div key={item.product} style={styles.item}>
           <img
-            src={`/${item.image}`}
+            src={getImageUrl(item.image)}
             alt={item.name}
             style={styles.image}
-            onError={(e) =>
-              (e.target.src = "/data/placeholder.jpg")
-            }
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/data/placeholder.jpg";
+            }}
           />
 
           <div style={styles.info}>

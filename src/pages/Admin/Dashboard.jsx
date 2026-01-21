@@ -19,13 +19,22 @@ export default function AdminLayout() {
 
         <div style={styles.menuItem} onClick={() => navigate("/admin")}>
           <i className="bi bi-speedometer2"></i>
-          <span> Dashboard</span>
+          <span> Liên Hệ</span>
         </div>
 
         <div style={styles.menuItem} onClick={() => navigate("/admin/shop")}>
           <i className="bi bi-shop"></i>
           <span> Thông tin shop</span>
         </div>
+
+          <div style={styles.menuItem} onClick={() => navigate("/admin/live")}>
+            <i
+              className="bi bi-camera-video-fill"
+              style={{ marginRight: 8, fontSize: 18 }}
+            ></i>
+            <span>Phòng Live</span>
+          </div>
+
 
         <div style={styles.menuItem} onClick={() => navigate("/admin/users")}>
           <i className="bi bi-people-fill"></i>
@@ -41,6 +50,11 @@ export default function AdminLayout() {
           <i className="bi bi-box-seam-fill"></i>
           <span> Quản lý đơn hàng</span>
         </div>
+
+          <div style={styles.menuItem} onClick={() => navigate("/admin/comment")}>
+            <i className="bi bi-chat-left-text"></i>
+            <span> Quản lý bình luận</span>
+          </div>
 
         <div style={styles.menuItem} onClick={() => navigate("/admin/reports")}>
           <i className="bi bi-graph-up-arrow"></i>

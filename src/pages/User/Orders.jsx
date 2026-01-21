@@ -3,32 +3,55 @@ import { useEffect, useState } from "react";
 export default function Orders() {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?._id || user?.id;
+  const token = localStorage.getItem("token");
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /* ===== FETCH ORDERS ===== */
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/orders/user/${userId}`
+      );
+      const data = await res.json();
+      console.log("ORDERS API:", data);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
-
-    const fetchOrders = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:5000/api/orders/user/${userId}`
-        );
-        const data = await res.json();
-
-        console.log("ORDERS API:", data);
-        setOrders(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOrders();
   }, [userId]);
+
+  /* ===== CANCEL ORDER ===== */
+  const cancelOrder = async (orderId) => {
+    if (!window.confirm("Bạn chắc chắn muốn hủy đơn hàng này?")) return;
+
+    try {
+      await fetch(
+        `http://localhost:5000/api/orders/${orderId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: "đã hủy" }),
+        }
+      );
+
+      fetchOrders(); // reload lại danh sách
+    } catch (err) {
+      console.error("Cancel order error:", err);
+      alert("Hủy đơn thất bại");
+    }
+  };
 
   /* ===== GUARDS ===== */
   if (!userId)
@@ -39,6 +62,12 @@ export default function Orders() {
 
   if (orders.length === 0)
     return <p style={styles.center}>📦 Bạn chưa có đơn hàng nào</p>;
+
+  const getImageUrl = (image) => {
+    if (!image) return "/data/placeholder.jpg";
+    if (image.startsWith("http")) return image;
+    return `/${image.replace(/^\/+/, "")}`;
+  };
 
   /* ===== RENDER ===== */
   return (
@@ -51,12 +80,8 @@ export default function Orders() {
           <div style={styles.header}>
             <div>
               <p><b>Mã đơn:</b> {order._id}</p>
-              <p>
-                <b>Ngày đặt:</b>{" "}
-                {new Date(order.createdAt).toLocaleString()}
-              </p>
+              <p><b>Ngày đặt:</b> {new Date(order.createdAt).toLocaleString()}</p>
             </div>
-
             <span style={statusStyle(order.status)}>
               {order.status}
             </span>
@@ -88,8 +113,7 @@ export default function Orders() {
           <div style={styles.section}>
             <h4>💳 Thanh toán</h4>
             <p>
-              <b>Phương thức:</b>{" "}
-              {order.paymentMethod?.toUpperCase()}
+              <b>Phương thức:</b> {order.paymentMethod?.toUpperCase()}
             </p>
           </div>
 
@@ -97,30 +121,27 @@ export default function Orders() {
           <div style={styles.section}>
             <h4>🛒 Sản phẩm</h4>
 
-            {Array.isArray(order.items) &&
-              order.items.map((item, index) => (
-                <div key={index} style={styles.item}>
-                  <img
-                    src={`/${item.image}`}
-                    alt={item.name}
-                    style={styles.image}
-                    onError={(e) =>
-                      (e.target.src =
-                        "/data/placeholder.jpg")
-                    }
-                  />
-
-                  <div style={styles.info}>
-                    <h5>{item.name}</h5>
-                    <p>Số lượng: {item.quantity}</p>
-                    <p>Đơn giá: {item.price.toLocaleString()} đ</p>
-                    <p style={styles.subtotal}>
-                      Thành tiền:{" "}
-                      {(item.price * item.quantity).toLocaleString()} đ
-                    </p>
-                  </div>
+            {order.items.map((item, index) => (
+              <div key={index} style={styles.item}>
+                <img
+                  src={getImageUrl(item.image)}
+                  alt={item.name}
+                  style={styles.image}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/data/placeholder.jpg";
+                  }}
+                />
+                <div style={styles.info}>
+                  <h5>{item.name}</h5>
+                  <p>Số lượng: {item.quantity}</p>
+                  <p>Đơn giá: {item.price.toLocaleString()} đ</p>
+                  <p style={styles.subtotal}>
+                    Thành tiền: {(item.price * item.quantity).toLocaleString()} đ
+                  </p>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
 
           {/* ===== TOTAL ===== */}
@@ -130,15 +151,38 @@ export default function Orders() {
               {order.totalPrice.toLocaleString()} đ
             </span>
           </div>
+
+          {/* ===== ACTION ===== */}
+          {order.status === "chờ xử lý" && (
+            <div style={{ marginTop: 16, textAlign: "right" }}>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => cancelOrder(order._id)}
+              >
+                ❌ Hủy đơn hàng
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
   );
 }
 
+
 /* ===== STYLES ===== */
 
 const styles = {
+  cancelBtn: {
+  background: "#ef4444",
+  color: "#fff",
+  border: "none",
+  padding: "10px 18px",
+  borderRadius: 8,
+  fontWeight: 600,
+  cursor: "pointer",
+},
+
   container: {
     maxWidth: 950,
     margin: "20px auto",

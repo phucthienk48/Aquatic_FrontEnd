@@ -17,12 +17,17 @@ import KnowledgeDetail from "./pages/User/KnowledgeDetail";
 import ProductDetail from "./pages/User/ProductDetail";
 import Checkout from "./pages/User/Checkout";
 import Orders from "./pages/User/Orders";
+import LiveRoom from "./pages/User/LiveRoom";
 
 import Dashboard from "./pages/Admin/Dashboard";
 import HomeAdmin from "./pages/Admin/HomeAdmin";
 import UserManagement from "./pages/Admin/UserManagement";
 import AdminOrders from "./pages/Admin/AdminOrders";
 import AdminProduct from "./pages/Admin/AdminProduct";
+import ShopAdmin from "./pages/Admin/ShopAdmin";
+import AdminContact from "./pages/Admin/AdminContact";
+import AdminLive from "./pages/Admin/AdminLive";
+import AdminComment from "./pages/Admin/AdminComment";
 
 function App() {
   return (
@@ -45,6 +50,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
            <Route path="/profile" element={<Profile />} />
+
+          <Route path="/live" element={<LiveRoom />} /> 
         </Route>
 
         {/* AUTH */}
@@ -52,10 +59,14 @@ function App() {
 
         {/* ADMIN */}
         <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<HomeAdmin />} />
+          <Route path="/admin" element={<AdminContact />} />
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/products" element={<AdminProduct />} />
+          <Route path="/admin/shop" element={<ShopAdmin />} />
+          <Route path="/admin/live" element={<AdminLive />} />
+          <Route path="/admin/comment" element={<AdminComment />} />
+
         </Route>
 
       </Routes>

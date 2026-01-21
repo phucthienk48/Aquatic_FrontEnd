@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 export default function Product() {
   const navigate = useNavigate();
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?._id || user?.id;
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,9 +33,42 @@ export default function Product() {
     }
   };
 
+  /* ================= ADD TO CART ================= */
+  const handleAddToCart = async (product) => {
+    if (!userId) {
+      alert("Vui lòng đăng nhập");
+      return;
+    }
+
+    const image =
+      product.images?.[0]?.replace(/^\/+/, "") ||
+      "data/placeholder.jpg";
+
+    try {
+      const res = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          image,
+          quantity: 1,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      alert("✅ Đã thêm vào giỏ hàng");
+    } catch (err) {
+      alert(err.message || "Lỗi thêm giỏ hàng");
+    }
+  };
+
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải...</p>;
   if (error) return <p style={{ color: "red", padding: 20 }}>{error}</p>;
-
 
   const fishList = products.filter((p) => p.type === "fish");
   const medicineList = products.filter((p) => p.type === "medicine");
@@ -53,9 +89,7 @@ export default function Product() {
             <div
               key={item._id}
               style={styles.card}
-              onClick={() =>
-                item._id && navigate(`/product/${item._id}`)
-              }
+              onClick={() => navigate(`/product/${item._id}`)}
             >
               <img
                 src={item.images?.[0] || "https://via.placeholder.com/250"}
@@ -69,7 +103,6 @@ export default function Product() {
                 <p style={styles.species}>Loài: {item.species}</p>
               )}
 
-              {/* PRICE */}
               <div style={styles.priceBox}>
                 {hasDiscount && (
                   <span style={styles.oldprice}>
@@ -95,14 +128,21 @@ export default function Product() {
                 )}
               </div>
 
+              {/* BUTTON */}
               <button
-                style={styles.button}
+                style={{
+                  ...styles.button,
+                  opacity: userId ? 1 : 0.6,
+                  cursor: userId ? "pointer" : "not-allowed",
+                }}
+                disabled={!userId}
                 onClick={(e) => {
                   e.stopPropagation();
-                  alert("🛒 Thêm vào giỏ hàng (demo)");
+                  handleAddToCart(item);
                 }}
               >
-                Chọn Mua
+                <i className="bi bi-cart-plus me-2"></i>
+                {userId ? "Chọn Mua" : "Đăng nhập để mua"}
               </button>
             </div>
           );
@@ -115,8 +155,8 @@ export default function Product() {
     <div style={styles.container}>
       <h2 style={styles.title}>Danh sách sản phẩm</h2>
 
-      {renderList("Cá cảnh", "", fishList)}
-      {renderList("Thuốc & Hóa chất", "", medicineList)}
+      {renderList("Cá cảnh", "🐠", fishList)}
+      {renderList("Thuốc & Hóa chất", "💊", medicineList)}
       {renderList("Hồ & Thiết bị", "🛠", equipmentList)}
     </div>
   );

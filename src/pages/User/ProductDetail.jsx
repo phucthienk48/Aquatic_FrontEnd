@@ -1,5 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ProductComment from "./ProductComment";
+
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -193,7 +195,72 @@ const handleAddToCart = async () => {
             Thêm vào giỏ hàng
           </button>
         </div>
+        
       </div>
+            {/* ===== PRODUCT INFO ===== */}
+      <div style={styles.infoBox}>
+        <h3>Thông tin sản phẩm</h3>
+
+        <div style={styles.infoRow}>
+          <span>Loại sản phẩm:</span>
+          <strong>{product.type}</strong>
+        </div>
+
+        <div style={styles.infoRow}>
+          <span>Chủng loại:</span>
+          <strong>{product.species}</strong>
+        </div>
+
+        <div style={styles.infoRow}>
+          <span>Tình trạng:</span>
+          <strong
+            style={{
+              color:
+                product.status === "available"
+                  ? "green"
+                  : "red",
+            }}
+          >
+            {product.status === "available"
+              ? "Còn hàng"
+              : "Hết hàng"}
+          </strong>
+        </div>
+      </div>
+
+      {/* ===== DESCRIPTION ===== */}
+      {product.description && (
+        <div style={styles.section}>
+          <h3>Mô tả sản phẩm</h3>
+          <p>{product.description}</p>
+        </div>
+      )}
+
+      {/* ===== INSTRUCTION ===== */}
+      {product.instruction && (
+        <div style={styles.section}>
+          <h3>Hướng dẫn sử dụng / chăm sóc</h3>
+          <p>{product.instruction}</p>
+        </div>
+      )}
+
+      {/* ===== STORAGE ===== */}
+      {product.storage && (
+        <div style={styles.section}>
+          <h3>Bảo quản</h3>
+          <p>{product.storage}</p>
+        </div>
+      )}
+
+      {/* ===== WARNING ===== */}
+      {product.warning && (
+        <div style={{ ...styles.section, color: "#d9534f" }}>
+          <h3>Cảnh báo</h3>
+          <p>{product.warning}</p>
+        </div>
+      )}
+
+      <ProductComment productId={id} />
     </div>
   );
 }
@@ -231,4 +298,25 @@ const styles = {
   },
   loading: { padding: 20 },
   error: { padding: 20, color: "red" },
+  infoBox: {
+  marginTop: 30,
+  padding: 20,
+  background: "#f8f9fa",
+  borderRadius: 6,
+},
+
+infoRow: {
+  display: "flex",
+  gap: 10,
+  marginBottom: 8,
+},
+
+section: {
+  marginTop: 30,
+  padding: 20,
+  background: "#fff",
+  borderRadius: 6,
+  lineHeight: 1.7,
+},
+
 };

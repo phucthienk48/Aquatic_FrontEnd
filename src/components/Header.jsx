@@ -42,6 +42,7 @@ export default function Header() {
           <span style={styles.link} onClick={() => navigate("/knowledge")}>Kiến thức nuôi cá</span>
           <span style={styles.link} onClick={() => navigate("/contact")}>Liên hệ</span>
           <span style={styles.link} onClick={() => navigate("/orders")}>Đơn hàng</span>
+          <span style={styles.link} onClick={() => navigate("/live")}>Phòng live</span>
         </nav>
 
         {/* ACTIONS */}
