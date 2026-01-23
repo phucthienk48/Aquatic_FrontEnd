@@ -28,6 +28,7 @@ import ShopAdmin from "./pages/Admin/ShopAdmin";
 import AdminContact from "./pages/Admin/AdminContact";
 import AdminLive from "./pages/Admin/AdminLive";
 import AdminComment from "./pages/Admin/AdminComment";
+import AdminKnowledge from "./pages/Admin/AdminKnowledge";
 
 function App() {
   return (
@@ -66,7 +67,7 @@ function App() {
           <Route path="/admin/shop" element={<ShopAdmin />} />
           <Route path="/admin/live" element={<AdminLive />} />
           <Route path="/admin/comment" element={<AdminComment />} />
-
+          <Route path="/admin/knowledge" element={<AdminKnowledge />} />
         </Route>
 
       </Routes>

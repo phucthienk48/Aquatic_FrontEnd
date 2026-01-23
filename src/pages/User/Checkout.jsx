@@ -16,6 +16,11 @@ export default function Checkout() {
     address: "",
     note: "",
   });
+  // ===== BANK CONFIG =====
+    const BANK_ID = "970436";        // Mã ngân hàng (VD: Vietcombank)
+    const ACCOUNT_NO = "1030670478"; // Số tài khoản nhận tiền
+    const ACCOUNT_NAME = "NGUYEN THIEN PHUC";
+
 
   /* ===== FETCH CART ===== */
     const getImageUrl = (image) => {
@@ -104,140 +109,227 @@ export default function Checkout() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>🧾 Thanh toán</h2>
+      <h2 className="text-center mb-4 fw-bold text-primary">
+        <i className="bi bi-receipt-cutoff me-2"></i>
+        Thanh toán
+      </h2>
+
 
       {/* ===== SHIPPING ===== */}
-      <div style={styles.box}>
-        <h4>📍 Thông tin giao hàng</h4>
-
-        <input
-          style={styles.input}
-          placeholder="Họ tên người nhận"
-          value={shippingAddress.fullName}
-          onChange={(e) =>
-            setShippingAddress({ ...shippingAddress, fullName: e.target.value })
-          }
-        />
-
-        <input
-          style={styles.input}
-          placeholder="Số điện thoại"
-          value={shippingAddress.phone}
-          onChange={(e) =>
-            setShippingAddress({ ...shippingAddress, phone: e.target.value })
-          }
-        />
-
-        <input
-          style={styles.input}
-          placeholder="Địa chỉ giao hàng"
-          value={shippingAddress.address}
-          onChange={(e) =>
-            setShippingAddress({ ...shippingAddress, address: e.target.value })
-          }
-        />
-
-        <textarea
-          style={styles.textarea}
-          placeholder="Ghi chú"
-          value={shippingAddress.note}
-          onChange={(e) =>
-            setShippingAddress({ ...shippingAddress, note: e.target.value })
-          }
-        />
-      </div>
-{/* ===== PRODUCT DETAILS ===== */}
-<div style={styles.box}>
-  <h4>🛍️ Sản phẩm trong đơn hàng</h4>
-
-  {cart.items.map((item) => (
-    <div key={item.product} style={styles.productRow}>
-      <img
-        src={getImageUrl(item.image)}
-        alt={item.name}
-        style={styles.productImg}
-        onError={(e) => {
-          e.target.onerror = null;
-          e.target.src = "/data/placeholder.jpg";
-        }}
-      />
-      <div style={styles.productInfo}>
-        <h5 style={styles.productName}>{item.name}</h5>
-
-        <p style={styles.muted}>
-          Đơn giá: {item.price.toLocaleString()} đ
-        </p>
-
-        <p style={styles.muted}>
-          Số lượng: <b>x{item.quantity}</b>
-        </p>
+    <div className="card shadow-sm mb-4">
+      <div className="card-header bg-light fw-semibold">
+        <i className="bi bi-geo-alt-fill text-danger me-2"></i>
+        Thông tin giao hàng
       </div>
 
-      <div style={styles.productTotal}>
-        {(item.price * item.quantity).toLocaleString()} đ
+      <div className="card-body">
+        {/* HỌ TÊN */}
+        <div className="input-group mb-3">
+          <span className="input-group-text">
+            <i className="bi bi-person-fill"></i>
+          </span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Họ tên người nhận"
+            value={shippingAddress.fullName}
+            onChange={(e) =>
+              setShippingAddress({ ...shippingAddress, fullName: e.target.value })
+            }
+          />
+        </div>
+
+        {/* SĐT */}
+        <div className="input-group mb-3">
+          <span className="input-group-text">
+            <i className="bi bi-telephone-fill"></i>
+          </span>
+          <input
+            type="tel"
+            className="form-control"
+            placeholder="Số điện thoại"
+            value={shippingAddress.phone}
+            onChange={(e) =>
+              setShippingAddress({ ...shippingAddress, phone: e.target.value })
+            }
+          />
+        </div>
+
+        {/* ĐỊA CHỈ */}
+        <div className="input-group mb-3">
+          <span className="input-group-text">
+            <i className="bi bi-house-door-fill"></i>
+          </span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Địa chỉ giao hàng"
+            value={shippingAddress.address}
+            onChange={(e) =>
+              setShippingAddress({ ...shippingAddress, address: e.target.value })
+            }
+          />
+        </div>
+
+        {/* GHI CHÚ */}
+        <div className="form-floating">
+          <textarea
+            className="form-control"
+            placeholder="Ghi chú"
+            style={{ height: 90 }}
+            value={shippingAddress.note}
+            onChange={(e) =>
+              setShippingAddress({ ...shippingAddress, note: e.target.value })
+            }
+          />
+          <label>
+            <i className="bi bi-pencil-square me-1"></i>
+            Ghi chú cho người giao hàng
+          </label>
+        </div>
       </div>
     </div>
-  ))}
 
-  <hr />
+  {/* ===== PRODUCT DETAILS ===== */}
+  <div className="card shadow-sm mb-4">
+    <div className="card-header bg-light fw-semibold">
+      <i className="bi bi-bag-fill text-primary me-2"></i>
+      Sản phẩm trong đơn hàng
+    </div>
 
-  <div style={styles.totalRow}>
-    <span><b>Tổng thanh toán</b></span>
-    <span style={styles.total}>
-      {totalPrice.toLocaleString()} đ
-    </span>
+    <div className="card-body p-0">
+      {cart.items.map((item) => (
+        <div
+          key={item.product}
+          className="d-flex align-items-center gap-3 px-3 py-3 border-bottom"
+        >
+          {/* ẢNH */}
+          <img
+            src={getImageUrl(item.image)}
+            alt={item.name}
+            className="rounded border"
+            style={{ width: 80, height: 80, objectFit: "cover" }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/data/placeholder.jpg";
+            }}
+          />
+
+          {/* INFO */}
+          <div className="flex-grow-1">
+            <h6 className="mb-1 fw-semibold">{item.name}</h6>
+
+            <div className="text-muted small">
+              <i className="bi bi-tag me-1"></i>
+              Đơn giá: {item.price.toLocaleString()} VNĐ
+            </div>
+
+            <div className="text-muted small">
+              <i className="bi bi-box me-1"></i>
+              Số lượng: <b>x{item.quantity}</b>
+            </div>
+          </div>
+
+          {/* TỔNG */}
+          <div className="fw-bold text-success text-end">
+            {(item.price * item.quantity).toLocaleString()} VNĐ
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* TOTAL */}
+    <div className="card-footer d-flex justify-content-between align-items-center bg-white">
+      <span className="fw-semibold">
+        <i className="bi bi-cash-stack me-1 text-success"></i>
+        Tổng thanh toán
+      </span>
+
+      <span className="fs-5 fw-bold text-danger">
+        {totalPrice.toLocaleString()} VNĐ
+      </span>
+    </div>
   </div>
-</div>
+
 
       {/* ===== PAYMENT ===== */}
-      <div style={styles.box}>
-        <h4>💳 Phương thức thanh toán</h4>
+    <div className="card shadow-sm mb-4">
+      <div className="card-header bg-light fw-semibold">
+        <i className="bi bi-credit-card-fill text-success me-2"></i>
+        Phương thức thanh toán
+      </div>
 
-        <label style={styles.radio}>
+      <div className="card-body">
+        <div className="form-check mb-2">
           <input
+            className="form-check-input"
             type="radio"
             checked={paymentMethod === "cod"}
             onChange={() => setPaymentMethod("cod")}
           />
-          Thanh toán khi nhận hàng (COD)
-        </label>
+          <label className="form-check-label">
+            <i className="bi bi-cash-coin me-2 text-warning"></i>
+            Thanh toán khi nhận hàng (COD)
+          </label>
+        </div>
 
-        <label style={styles.radio}>
+        <div className="form-check">
           <input
+            className="form-check-input"
             type="radio"
             checked={paymentMethod === "vietqr"}
             onChange={() => setPaymentMethod("vietqr")}
           />
-          Chuyển khoản VietQR
-        </label>
+          <label className="form-check-label">
+            <i className="bi bi-qr-code-scan me-2 text-primary"></i>
+            Chuyển khoản VietQR
+          </label>
+        </div>
 
-        {paymentMethod === "vietqr" && (
-          <>
-            {!isVietQRValid ? (
-              <p style={styles.warning}>
-                ⚠️ Vui lòng nhập <b>Họ tên</b> và <b>Số điện thoại</b> để hiển thị mã QR
+      {paymentMethod === "vietqr" && (
+        <>
+          {!isVietQRValid ? (
+            <div className="alert alert-warning mt-3">
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              Nhập họ tên & số điện thoại để tạo mã VietQR
+            </div>
+          ) : (
+            <div className="text-center mt-3">
+              <p className="fw-semibold mb-2">
+                <i className="bi bi-qr-code-scan me-2"></i>
+                Quét mã VietQR để thanh toán
               </p>
-            ) : (
-              <div style={styles.qrBox}>
-                <p><b>Quét mã VietQR để thanh toán</b></p>
-                <img
-                  src={`https://api.vietqr.io/image/970422-1234567890-print.png?amount=${totalPrice}&addInfo=${encodeURIComponent(
-                    transferContent
-                  )}`}
-                  alt="VietQR"
-                  style={styles.qr}
-                />
-                <p>Nội dung CK: <b>{transferContent}</b></p>
-              </div>
-            )}
-          </>
-        )}
+
+              <img
+                src={`https://api.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-print.png?amount=${totalPrice}&addInfo=${encodeURIComponent(
+                  transferContent
+                )}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`}
+                alt="VietQR"
+                style={{ width: 270 }}
+              />
+
+              {/* <p className="small text-muted mt-2">
+                Nội dung CK: <b>{transferContent}</b>
+              </p> */}
+            </div>
+          )}
+        </>
+      )}
+
+
       </div>
+    </div>
+
 
       {/* ===== ACTION ===== */}
-      <button style={styles.submitBtn} onClick={placeOrder}>
-        🛍️ Đặt hàng
+      <button
+        className="btn btn-success btn-lg w-100 d-flex align-items-center justify-content-center gap-2"
+        onClick={placeOrder}
+      >
+        <i className="bi bi-bag-check-fill"></i>
+        Đặt hàng
       </button>
+
     </div>
   );
 }

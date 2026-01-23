@@ -58,9 +58,15 @@ export default function UserManagement() {
 
       const method = editingUser ? "PUT" : "POST";
 
-      const bodyData = editingUser
-        ? { username: formData.username, email: formData.email, role: formData.role }
-        : formData;
+        const bodyData = editingUser
+          ? {
+              username: formData.username,
+              email: formData.email,
+              role: formData.role,
+              ...(formData.password && { password: formData.password }),
+            }
+          : formData;
+
 
       const res = await fetch(url, {
         method,
@@ -138,17 +144,17 @@ export default function UserManagement() {
             required
           />
 
-          {!editingUser && (
-            <input
-              style={styles.input}
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          )}
+{editingUser && (
+  <input
+    style={styles.input}
+    name="password"
+    type="password"
+    placeholder="Mật khẩu mới (nếu muốn đổi)"
+    value={formData.password}
+    onChange={handleChange}
+  />
+)}
+
 
           <select
             style={styles.input}
@@ -162,11 +168,26 @@ export default function UserManagement() {
 
           <div>
             <button style={styles.saveBtn} type="submit">
+              <i
+                className="bi bi-check-circle me-2"
+                style={{ fontSize: 16 }}
+              ></i>
               Lưu
             </button>
-            <button style={styles.cancelBtn} type="button" onClick={resetForm}>
+
+            <button
+              style={styles.cancelBtn}
+              type="button"
+              onClick={resetForm}
+            >
+              <i
+                className="bi bi-x-circle me-2"
+                style={{ fontSize: 16 }}
+              ></i>
               Hủy
             </button>
+
+
           </div>
         </form>
       )}
@@ -190,12 +211,21 @@ export default function UserManagement() {
                 <td style={styles.td}>{u.role}</td>
                 <td style={styles.td}>
                   <button style={styles.editBtn} onClick={() => handleEdit(u)}>
+                    <i
+                      className="bi bi-pencil-square me-2"
+                      style={{ fontSize: 14 }}
+                    ></i>
                     Sửa
                   </button>
+
                   <button
                     style={styles.deleteBtn}
                     onClick={() => handleDelete(u._id)}
                   >
+                    <i
+                      className="bi bi-trash me-2"
+                      style={{ fontSize: 14 }}
+                    ></i>
                     Xóa
                   </button>
                 </td>

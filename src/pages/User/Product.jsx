@@ -8,9 +8,11 @@ export default function Product() {
   const userId = user?._id || user?.id;
 
   const [products, setProducts] = useState([]);
+  const [ratings, setRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  /* ================= FETCH PRODUCTS ================= */
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -20,12 +22,19 @@ export default function Product() {
       const res = await fetch("http://localhost:5000/api/product");
       if (!res.ok) throw new Error("Không thể tải sản phẩm");
 
-      const result = await res.json();
-      const list = Array.isArray(result)
-        ? result
-        : result.data || result.products || [];
+      const data = await res.json();
+      const list = Array.isArray(data)
+        ? data
+        : data.products || data.data || [];
 
       setProducts(list);
+
+      /* 🔥 fetch rating cho từng product */
+      const ratingMap = {};
+      for (const p of list) {
+        ratingMap[p._id] = await fetchRating(p._id);
+      }
+      setRatings(ratingMap);
     } catch (err) {
       setError(err.message || "Có lỗi xảy ra");
     } finally {
@@ -33,12 +42,49 @@ export default function Product() {
     }
   };
 
+  /* ================= FETCH RATING ================= */
+  const fetchRating = async (productId) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/comment/product/${productId}`
+      );
+      const comments = await res.json();
+
+      if (!Array.isArray(comments) || comments.length === 0) {
+        return { avg: 0, count: 0 };
+      }
+
+      const total = comments.reduce(
+        (sum, c) => sum + (c.rating || 0),
+        0
+      );
+
+      return {
+        avg: total / comments.length,
+        count: comments.length,
+      };
+    } catch {
+      return { avg: 0, count: 0 };
+    }
+  };
+
+  /* ================= RENDER STAR ================= */
+  const renderStars = (avg = 0) => {
+    const full = Math.floor(avg);
+    const half = avg - full >= 0.5;
+
+    return [...Array(5)].map((_, i) => {
+      if (i < full)
+        return <i key={i} className="bi bi-star-fill text-warning"></i>;
+      if (i === full && half)
+        return <i key={i} className="bi bi-star-half text-warning"></i>;
+      return <i key={i} className="bi bi-star text-warning"></i>;
+    });
+  };
+
   /* ================= ADD TO CART ================= */
   const handleAddToCart = async (product) => {
-    if (!userId) {
-      alert("Vui lòng đăng nhập");
-      return;
-    }
+    if (!userId) return alert("Vui lòng đăng nhập");
 
     const image =
       product.images?.[0]?.replace(/^\/+/, "") ||
@@ -74,123 +120,179 @@ export default function Product() {
   const medicineList = products.filter((p) => p.type === "medicine");
   const equipmentList = products.filter((p) => p.type === "equipment");
 
-  const renderList = (title, icon, list) => (
-    <>
-      <h3 style={styles.sectionTitle}>
-        {icon} {title}
-      </h3>
+  /* ================= RENDER LIST ================= */
+const renderList = (title, icon, list) => (
+  <div style={styles.section}>
+    {/* ===== BANNER TIÊU ĐỀ ===== */}
+    <div style={styles.ribbonWrap}>
+      <div style={styles.ribbonTail} />
+      <div style={styles.ribbon}>
+        <span style={styles.ribbonIcon}>{icon}</span>
+        {title}
+      </div>
+      
+    </div>
+    <div style={styles.divider}></div>
+    {/* ===== GRID SẢN PHẨM ===== */}
+    <div style={styles.grid}>
+      {list.map((item) => {
+        const hasDiscount =
+          item.oldprice && item.oldprice > item.price;
 
-      <div style={styles.grid}>
-        {list.map((item) => {
-          const hasDiscount =
-            item.oldprice && item.oldprice > item.price;
+        const r = ratings[item._id] || { avg: 0, count: 0 };
 
-          return (
-            <div
-              key={item._id}
-              style={styles.card}
-              onClick={() => navigate(`/product/${item._id}`)}
-            >
-              <img
-                src={item.images?.[0] || "https://via.placeholder.com/250"}
-                alt={item.name}
-                style={styles.image}
-              />
+        return (
+          <div
+            key={item._id}
+            style={styles.card}
+            onClick={() => navigate(`/product/${item._id}`)}
+          >
+            <img
+              src={item.images?.[0] || "https://via.placeholder.com/250"}
+              alt={item.name}
+              style={styles.image}
+            />
 
-              <h4 style={styles.name}>{item.name}</h4>
+            <h4 style={styles.name}>{item.name}</h4>
 
-              {item.type === "fish" && item.species && (
-                <p style={styles.species}>Loài: {item.species}</p>
+            {/* RATING */}
+            <div style={styles.rating}>
+              {renderStars(r.avg)}
+              <span style={styles.ratingText}>
+                {r.avg.toFixed(1)} ({r.count})
+              </span>
+            </div>
+
+            {/* PRICE */}
+            <div style={styles.priceBox}>
+              {hasDiscount && (
+                <span style={styles.oldprice}>
+                  {item.oldprice.toLocaleString()} đ
+                </span>
               )}
 
-              <div style={styles.priceBox}>
-                {hasDiscount && (
-                  <span style={styles.oldprice}>
-                    {item.oldprice.toLocaleString()} đ
-                  </span>
-                )}
-
-                <span
-                  style={
-                    hasDiscount ? styles.priceSale : styles.priceNormal
-                  }
-                >
-                  {item.price.toLocaleString()} đ
-                </span>
-
-                {hasDiscount && (
-                  <span style={styles.discount}>
-                    -{Math.round(
-                      ((item.oldprice - item.price) / item.oldprice) *
-                        100
-                    )}%
-                  </span>
-                )}
-              </div>
-
-              {/* BUTTON */}
-              <button
-                style={{
-                  ...styles.button,
-                  opacity: userId ? 1 : 0.6,
-                  cursor: userId ? "pointer" : "not-allowed",
-                }}
-                disabled={!userId}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleAddToCart(item);
-                }}
+              <span
+                style={
+                  hasDiscount ? styles.priceSale : styles.priceNormal
+                }
               >
-                <i className="bi bi-cart-plus me-2"></i>
-                {userId ? "Chọn Mua" : "Đăng nhập để mua"}
-              </button>
+                {item.price.toLocaleString()} đ
+              </span>
+
+              {hasDiscount && (
+                <span style={styles.discount}>
+                  -
+                  {Math.round(
+                    ((item.oldprice - item.price) /
+                      item.oldprice) *
+                      100
+                  )}
+                  %
+                </span>
+              )}
             </div>
-          );
-        })}
-      </div>
-    </>
-  );
+
+            <button
+              style={{
+                ...styles.button,
+                opacity: userId ? 1 : 0.6,
+                cursor: userId ? "pointer" : "not-allowed",
+              }}
+              disabled={!userId}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart(item);
+              }}
+            >
+              <i className="bi bi-cart-plus me-2"></i>
+              {userId ? "Chọn Mua" : "Đăng nhập để mua"}
+            </button>
+          </div>
+        );
+      })}
+    </div>
+    
+  </div>
+);
+
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Danh sách sản phẩm</h2>
 
-      {renderList("Cá cảnh", "🐠", fishList)}
-      {renderList("Thuốc & Hóa chất", "💊", medicineList)}
+      {renderList("Cá cảnh", "", fishList)}
+      {renderList("Thuốc & Hóa chất", "", medicineList)}
       {renderList("Hồ & Thiết bị", "🛠", equipmentList)}
     </div>
   );
 }
 
+/* ================= STYLE ================= */
 
 const styles = {
   container: {
-    width: "90%",
+    width: "92%",
     maxWidth: "1200px",
     margin: "auto",
     padding: "20px 0",
   },
 
   title: {
-    marginBottom: "30px",
+    marginBottom: 30,
+    fontSize: 26,
+    fontWeight: 700,
   },
 
-  sectionTitle: {
-    margin: "30px 0 15px",
-    color: "#0d6efd",
+  /* ===== SECTION ===== */
+  section: {
+    marginBottom: 40,
   },
 
+  /* ===== RIBBON TITLE ===== */
+  ribbonWrap: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+
+  ribbonTail: {
+    width: 0,
+    height: 0,
+    borderTop: "18px solid transparent",
+    borderBottom: "18px solid transparent",
+    borderRight: "20px solid #dc3545",
+  },
+
+  ribbon: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    background: "#dc3545",
+    color: "#fff",
+    padding: "8px 26px",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    borderRadius: "0 6px 6px 0",
+    fontSize: 15,
+  },
+
+  ribbonIcon: {
+    fontSize: 18,
+  },
+
+  /* ===== GRID ===== */
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+    gap: 22,
   },
 
+  /* ===== CARD ===== */
   card: {
     background: "#fff",
-    borderRadius: "6px",
-    padding: "15px",
-    boxShadow: "0 0 10px rgba(0,0,0,.1)",
+    borderRadius: 12,
+    padding: 14,
+    boxShadow: "0 6px 18px rgba(0,0,0,.08)",
     textAlign: "center",
     cursor: "pointer",
     transition: "transform .2s, box-shadow .2s",
@@ -198,63 +300,90 @@ const styles = {
 
   image: {
     width: "100%",
-    height: "180px",
+    height: 210,
     objectFit: "cover",
-    borderRadius: "6px",
-    marginBottom: "10px",
+    borderRadius: 10,
+    marginBottom: 6,
   },
 
   name: {
-    fontSize: "16px",
-    marginBottom: "6px",
+    fontSize: 16,
+    fontWeight: 600,
+    lineHeight: 1.4,
+    margin: "6px 0 4px",
+    color: "#222",
+
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
   },
 
-  species: {
-    fontSize: "14px",
-    color: "#444",
+  rating: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 6,
+    alignItems: "center",
+  },
+
+  ratingText: {
+    fontSize: 13,
+    color: "#666",
   },
 
   priceBox: {
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
-    gap: "8px",
-    margin: "8px 0",
+    gap: 8,
+    margin: "10px 0",
     flexWrap: "wrap",
   },
 
   oldprice: {
-    fontSize: "14px",
-    color: "#888",
     textDecoration: "line-through",
+    color: "#999",
+    fontSize: 13,
   },
 
   priceSale: {
-    fontSize: "16px",
-    fontWeight: "bold",
     color: "#dc3545",
+    fontWeight: 700,
+    fontSize: 16,
   },
 
   priceNormal: {
-    fontSize: "16px",
-    fontWeight: "bold",
     color: "#0d6efd",
+    fontWeight: 700,
+    fontSize: 16,
   },
 
   discount: {
-    fontSize: "13px",
     background: "#dc3545",
     color: "#fff",
     padding: "2px 6px",
-    borderRadius: "4px",
+    borderRadius: 6,
+    fontSize: 12,
   },
 
   button: {
-    padding: "8px 20px",
+    marginTop: 8,
+    padding: "9px 20px",
     background: "#0d6efd",
     color: "#fff",
     border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
+    borderRadius: 8,
+    fontWeight: 600,
   },
+  divider: {
+    height: 6,
+    width: "100%",
+    margin: "12px 0 24px",
+    borderRadius: 4,
+    background:
+      "linear-gradient(90deg, #dc3545, #fd7e14, #ffc107, #198754, #0dcaf0, #0d6efd, #6f42c1)",
+  },
+
+
+
 };
+

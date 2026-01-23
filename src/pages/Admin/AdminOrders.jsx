@@ -124,22 +124,32 @@ export default function AdminOrder() {
                 </select>
 
                 </td>
-                <td style={styles.td}>
-                  <div style={styles.actionGroup}>
-                      <button
-                        style={styles.viewBtn}
-                        onClick={() => setSelectedOrder(o)}
-                        >
-                        Xem
-                        </button>
-                        <button
-                        style={styles.deleteBtn}
-                        onClick={() => deleteOrder(o._id)}
-                        >
-                        Xóa
-                      </button>
-                  </div>
-                </td>
+<td style={styles.td}>
+  <div style={styles.actionGroup}>
+    <button
+      style={styles.viewBtn}
+      onClick={() => setSelectedOrder(o)}
+    >
+      <i
+        className="bi bi-eye me-2"
+        style={{ fontSize: 14 }}
+      ></i>
+      Xem
+    </button>
+
+    <button
+      style={styles.deleteBtn}
+      onClick={() => deleteOrder(o._id)}
+    >
+      <i
+        className="bi bi-trash me-2"
+        style={{ fontSize: 14 }}
+      ></i>
+      Xóa
+    </button>
+  </div>
+</td>
+
             </tr>
             ))}
         </tbody>

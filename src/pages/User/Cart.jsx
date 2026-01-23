@@ -90,7 +90,7 @@ export default function Cart() {
           <div style={styles.info}>
             <h5>{item.name}</h5>
             <p style={styles.price}>
-              {item.price.toLocaleString()} đ
+              {item.price.toLocaleString()} VNĐ
             </p>
 
             <div style={styles.qtyRow}>
@@ -126,10 +126,11 @@ export default function Cart() {
       ))}
 
       <div style={styles.footer}>
-        <h4>
-          💰 Tổng tiền:{" "}
+        <h4 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <i className="bi bi-cash-stack" style={{ fontSize: 22, color: "#198754" }}></i>
+          Tổng tiền:
           <span style={styles.total}>
-            {total.toLocaleString()} đ
+            {total.toLocaleString()} VNĐ
           </span>
         </h4>
 
@@ -214,12 +215,20 @@ const styles = {
   },
 
   removeBtn: {
-    border: "none",
-    background: "transparent",
+    border: "1px solid #dc3545",
+    background: "#fff",
     color: "#dc3545",
     cursor: "pointer",
-    padding: 0,
+    padding: "6px 12px",
+    borderRadius: 8,
+    fontSize: 14,
+    fontWeight: 600,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "all 0.25s ease",
   },
+
 
   footer: {
     display: "flex",

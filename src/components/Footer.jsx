@@ -6,7 +6,7 @@ export default function Footer() {
       <div style={styles.container}>
         {/* ==== LOGO ==== */}
         <div>
-          <h4 style={styles.title}>🐟 Aquatic Shop</h4>
+          <h4 style={styles.title}>PHÚC LONG AQUATIC</h4>
           <p style={styles.text}>
             Chuyên cá cảnh, thuốc và vật tư thủy sinh.
           </p>
@@ -23,7 +23,7 @@ export default function Footer() {
         {/* ==== CONTACT ==== */}
         <div>
           <h4 style={styles.title}>Liên hệ</h4>
-          <p style={styles.text}>📞 0123 456 789</p>
+          <p style={styles.text}>📞 0397 960 604</p>
           <p style={styles.text}>📧 aquaticshop@gmail.com</p>
         </div>
       </div>

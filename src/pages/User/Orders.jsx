@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import WriteComment from "./WriteComment"
 
 export default function Orders() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -72,54 +73,121 @@ export default function Orders() {
   /* ===== RENDER ===== */
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>📦 Đơn hàng của tôi</h2>
+      <h2 style={styles.title}>
+        <i className="bi bi-box-seam" style={{ marginRight: 8 }}></i>
+        Đơn hàng của tôi
+      </h2>
 
       {orders.map((order) => (
         <div key={order._id} style={styles.orderBox}>
           {/* ===== HEADER ===== */}
-          <div style={styles.header}>
-            <div>
-              <p><b>Mã đơn:</b> {order._id}</p>
-              <p><b>Ngày đặt:</b> {new Date(order.createdAt).toLocaleString()}</p>
-            </div>
-            <span style={statusStyle(order.status)}>
-              {order.status}
-            </span>
-          </div>
+            <div style={styles.header}>
+              <div>
+                <p style={styles.headerLine}>
+                  <i className="bi bi-receipt" style={styles.headerIcon}></i>
+                  <b> Mã đơn:</b> MDH{order._id.slice(-8).toUpperCase()}
+                </p>
 
+                <p style={styles.headerLine}>
+                  <i className="bi bi-calendar-event" style={styles.headerIcon}></i>
+                  <b> Ngày đặt:</b>{" "}
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
+              </div>
+
+              <span style={statusStyle(order.status)}>
+                <i className="bi bi-info-circle me-1"></i>
+                {order.status}
+              </span>
+            </div>
           {/* ===== USER INFO ===== */}
           {order.user && (
             <div style={styles.section}>
-              <h4>👤 Thông tin người đặt</h4>
-              <p><b>Tài khoản:</b> {order.user.username}</p>
-              <p><b>Email:</b> {order.user.email}</p>
+              <h4>
+                <i
+                  className="bi bi-person-circle"
+                  style={{ marginRight: 8, color: "#1976d2" }}
+                ></i>
+                Thông tin người đặt
+              </h4>
+
+              <p>
+                <i className="bi bi-person" style={{ marginRight: 6 }}></i>
+                <b>Tài khoản:</b> {order.user.username}
+              </p>
+
+              <p>
+                <i className="bi bi-envelope" style={{ marginRight: 6 }}></i>
+                <b>Email:</b> {order.user.email}
+              </p>
             </div>
           )}
 
           {/* ===== SHIPPING ADDRESS ===== */}
           {order.shippingAddress && (
             <div style={styles.section}>
-              <h4>📍 Địa chỉ giao hàng</h4>
-              <p><b>Họ tên:</b> {order.shippingAddress.fullName}</p>
-              <p><b>SĐT:</b> {order.shippingAddress.phone}</p>
-              <p><b>Địa chỉ:</b> {order.shippingAddress.address}</p>
+              <h4>
+                <i
+                  className="bi bi-geo-alt-fill"
+                  style={{ marginRight: 8, color: "#d32f2f" }}
+                ></i>
+                Địa chỉ giao hàng
+              </h4>
+
+              <p>
+                <i className="bi bi-person-badge" style={{ marginRight: 6 }}></i>
+                <b>Họ tên:</b> {order.shippingAddress.fullName}
+              </p>
+
+              <p>
+                <i className="bi bi-telephone" style={{ marginRight: 6 }}></i>
+                <b>SĐT:</b> {order.shippingAddress.phone}
+              </p>
+
+              <p>
+                <i className="bi bi-house-door" style={{ marginRight: 6 }}></i>
+                <b>Địa chỉ:</b> {order.shippingAddress.address}
+              </p>
+
               {order.shippingAddress.note && (
-                <p><b>Ghi chú:</b> {order.shippingAddress.note}</p>
+                <p>
+                  <i className="bi bi-sticky" style={{ marginRight: 6 }}></i>
+                  <b>Ghi chú:</b> {order.shippingAddress.note}
+                </p>
               )}
+
             </div>
           )}
 
           {/* ===== PAYMENT ===== */}
           <div style={styles.section}>
-            <h4>💳 Thanh toán</h4>
-            <p>
-              <b>Phương thức:</b> {order.paymentMethod?.toUpperCase()}
-            </p>
+          <h4>
+            <i
+              className="bi bi-credit-card-2-front"
+              style={{ marginRight: 8, color: "#1976d2" }}
+            ></i>
+            Thanh toán
+          </h4>
+
+          <p>
+            <i
+              className="bi bi-wallet2"
+              style={{ marginRight: 6, color: "#555" }}
+            ></i>
+            <b>Phương thức:</b> {order.paymentMethod?.toUpperCase()}
+          </p>
+
           </div>
 
           {/* ===== ITEMS ===== */}
           <div style={styles.section}>
-            <h4>🛒 Sản phẩm</h4>
+            <h4>
+              <i
+                className="bi bi-cart-check"
+                style={{ marginRight: 8, color: "#2e7d32" }}
+              ></i>
+              Sản phẩm
+            </h4>
 
             {order.items.map((item, index) => (
               <div key={index} style={styles.item}>
@@ -133,12 +201,43 @@ export default function Orders() {
                   }}
                 />
                 <div style={styles.info}>
-                  <h5>{item.name}</h5>
-                  <p>Số lượng: {item.quantity}</p>
-                  <p>Đơn giá: {item.price.toLocaleString()} đ</p>
+                  <h5 style={{ marginBottom: 4 }}>{item.name}</h5>
+
+                  <p>
+                    <i className="bi bi-stack" /> Số lượng: {item.quantity}
+                  </p>
+
+                  <p>
+                    <i className="bi bi-cash-coin" /> Đơn giá:{" "}
+                    {item.price.toLocaleString()} đ
+                  </p>
+
                   <p style={styles.subtotal}>
                     Thành tiền: {(item.price * item.quantity).toLocaleString()} đ
                   </p>
+                    {order.status === "hoàn thành" && (
+                      <div style={styles.commentBox}>
+                        <div style={styles.commentHeader}>
+                          <i className="bi bi-star-fill" style={{ color: "#fbc02d" }}></i>
+                          <span style={{ marginLeft: 6 }}>
+                            { /* đã có comment hay chưa */ }
+                            Đánh giá sản phẩm
+                          </span>
+                        </div>
+
+                        <WriteComment
+                          userId={userId}
+                          productId={
+                            typeof item.product === "object"
+                              ? item.product._id
+                              : item.product
+                          }
+                          orderId={order._id}
+                        />
+                      </div>
+                    )}
+
+
                 </div>
               </div>
             ))}
@@ -159,7 +258,8 @@ export default function Orders() {
                 style={styles.cancelBtn}
                 onClick={() => cancelOrder(order._id)}
               >
-                ❌ Hủy đơn hàng
+                <i className="bi bi-x-circle-fill" style={{ marginRight: 6 }}></i> Hủy đơn hàng
+
               </button>
             </div>
           )}
@@ -246,6 +346,21 @@ const styles = {
   total: {
     color: "#2e7d32",
   },
+  commentBox: {
+  marginTop: 12,
+  padding: 12,
+  background: "#fafafa",
+  borderRadius: 10,
+  border: "1px dashed #ddd",
+},
+
+commentHeader: {
+  display: "flex",
+  alignItems: "center",
+  fontWeight: 600,
+  marginBottom: 8,
+},
+
 };
 
 /* ===== STATUS COLOR ===== */

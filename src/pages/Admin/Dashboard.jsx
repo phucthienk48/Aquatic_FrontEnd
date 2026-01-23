@@ -56,6 +56,11 @@ export default function AdminLayout() {
             <span> Quản lý bình luận</span>
           </div>
 
+          <div style={styles.menuItem} onClick={() => navigate("/admin/knowledge")}>
+            <i className="bi bi-book-half"></i>
+            <span> Kiến thức nuôi cá</span>
+          </div>
+
         <div style={styles.menuItem} onClick={() => navigate("/admin/reports")}>
           <i className="bi bi-graph-up-arrow"></i>
           <span> Báo cáo thống kê</span>
