@@ -17,15 +17,17 @@ export default function AdminLayout() {
           ADMIN
         </h2> */}
 
-        <div style={styles.menuItem} onClick={() => navigate("/admin")}>
-          <i className="bi bi-speedometer2"></i>
-          <span> Liên Hệ</span>
-        </div>
 
-        <div style={styles.menuItem} onClick={() => navigate("/admin/shop")}>
-          <i className="bi bi-shop"></i>
-          <span> Thông tin shop</span>
-        </div>
+
+          <div style={styles.menuItem} onClick={() => navigate("/admin")}>
+            <i className="bi bi-shop"></i>
+            <span> Thông tin shop</span>
+          </div>
+          
+          <div style={styles.menuItem} onClick={() => navigate("/admin/contact")}>
+            <i className="bi bi-envelope-paper-fill me-2"></i>
+            <span> Liên Hệ</span>
+          </div>
 
           <div style={styles.menuItem} onClick={() => navigate("/admin/live")}>
             <i

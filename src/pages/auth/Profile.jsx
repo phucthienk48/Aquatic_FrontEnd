@@ -6,48 +6,82 @@ export default function Profile() {
 
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
+    avatar: "",
+    phone: "",
+    address: "",
   });
 
+  /* ================= LOAD USER ================= */
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       navigate("/login");
-    } else {
-      const parsed = JSON.parse(storedUser);
-      setUser(parsed);
-      setForm({
-        username: parsed.username || "",
-        email: parsed.email || "",
-        password: "",
-        confirmPassword: "",
-      });
+      return;
     }
+
+    const parsed = JSON.parse(storedUser);
+    setUser(parsed);
+    setForm({
+      username: parsed.username || "",
+      email: parsed.email || "",
+      password: "",
+      confirmPassword: "",
+      avatar: parsed.avatar || "",
+      phone: parsed.phone || "",
+      address: parsed.address || "",
+    });
   }, [navigate]);
 
   if (!user) return null;
 
-  /* ===== UPDATE PROFILE ===== */
+  /* ================= CLOUDINARY UPLOAD ================= */
+  const uploadAvatar = async (file) => {
+    setUploading(true);
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // 🔴 sửa
+    data.append("folder", "avatars");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload", // 🔴 sửa
+      { method: "POST", body: data }
+    );
+
+    const result = await res.json();
+    setUploading(false);
+
+    return result.secure_url;
+  };
+
+  /* ================= UPDATE PROFILE ================= */
   const handleUpdate = async () => {
     if (form.password && form.password.length < 6) {
-      return alert("❌ Mật khẩu phải ít nhất 6 ký tự");
+      return alert("Mật khẩu phải ít nhất 6 ký tự");
     }
 
     if (form.password !== form.confirmPassword) {
-      return alert("❌ Mật khẩu xác nhận không khớp");
+      return alert("Mật khẩu xác nhận không khớp");
     }
 
     try {
-      const userId = user._id || user.id;
+      setLoading(true);
+      const userId = user.id || user._id;
 
       const payload = {
         username: form.username,
         email: form.email,
+        phone: form.phone,
+        address: form.address,
+        ...(form.avatar && { avatar: form.avatar }),
         ...(form.password && { password: form.password }),
       };
 
@@ -64,31 +98,29 @@ export default function Profile() {
 
       const updatedUser = {
         ...user,
-        username: form.username,
-        email: form.email,
+        ...payload,
+        avatar: payload.avatar ?? user.avatar,
       };
 
-      localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
-      setEditing(false);
-      setForm((prev) => ({
-        ...prev,
-        password: "",
-        confirmPassword: "",
-      }));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      alert("✅ Cập nhật thông tin thành công");
+      setEditing(false);
+      alert("Cập nhật thông tin thành công");
     } catch {
-      alert("❌ Không thể cập nhật thông tin");
+      alert("Không thể cập nhật thông tin");
+    } finally {
+      setLoading(false);
     }
   };
 
-  /* ===== DELETE ACCOUNT ===== */
+
+  /* ================= DELETE ACCOUNT ================= */
   const handleDelete = async () => {
-    if (!window.confirm("⚠ Bạn chắc chắn muốn xóa tài khoản?")) return;
+    if (!window.confirm("Bạn chắc chắn muốn xóa tài khoản?")) return;
 
     try {
-      const userId = user._id || user.id;
+      const userId = user.id || user._id;
       await fetch(`http://localhost:5000/api/users/${userId}`, {
         method: "DELETE",
       });
@@ -96,44 +128,64 @@ export default function Profile() {
       localStorage.clear();
       navigate("/register");
     } catch {
-      alert("❌ Không thể xóa tài khoản");
+      alert("Không thể xóa tài khoản");
     }
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2 style={styles.title}>
+        <h4 style={styles.title}>
           <i className="bi bi-person-circle"></i> Hồ sơ cá nhân
-        </h2>
+        </h4>
 
-        <div style={styles.field}>
-          <label>
-            <i className="bi bi-person"></i> Tên người dùng
-          </label>
-          <input
-            type="text"
-            disabled={!editing}
-            value={form.username}
-            onChange={(e) =>
-              setForm({ ...form, username: e.target.value })
-            }
+        {/* ===== AVATAR ===== */}
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <img
+            src={user.avatar || "/data/default-avatar.png"}
+            alt="avatar"
+            style={styles.avatar}
           />
+
+          {editing && (
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                className="form-control mt-2"
+                onChange={async (e) => {
+                  const url = await uploadAvatar(e.target.files[0]);
+                  setForm({ ...form, avatar: url });
+                }}
+              />
+              {uploading && (
+                <small className="text-muted">Đang upload ảnh...</small>
+              )}
+            </div>
+          )}
         </div>
 
-        <div style={styles.field}>
-          <label>
-            <i className="bi bi-envelope"></i> Email
-          </label>
-          <input
-            type="email"
-            disabled={!editing}
-            value={form.email}
-            onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
-            }
-          />
-        </div>
+        {/* ===== INPUTS ===== */}
+        {[
+          { label: "Tên người dùng", key: "username", icon: "bi-person" },
+          { label: "Email", key: "email", icon: "bi-envelope" },
+          { label: "Số điện thoại", key: "phone", icon: "bi-telephone" },
+          { label: "Địa chỉ", key: "address", icon: "bi-geo-alt" },
+        ].map((item) => (
+          <div key={item.key} style={styles.field}>
+            <label>
+              <i className={`bi ${item.icon}`}></i> {item.label}
+            </label>
+            <input
+              className="form-control"
+              disabled={!editing}
+              value={form[item.key]}
+              onChange={(e) =>
+                setForm({ ...form, [item.key]: e.target.value })
+              }
+            />
+          </div>
+        ))}
 
         {editing && (
           <>
@@ -143,6 +195,7 @@ export default function Profile() {
               </label>
               <input
                 type="password"
+                className="form-control"
                 value={form.password}
                 onChange={(e) =>
                   setForm({ ...form, password: e.target.value })
@@ -156,36 +209,35 @@ export default function Profile() {
               </label>
               <input
                 type="password"
+                className="form-control"
                 value={form.confirmPassword}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    confirmPassword: e.target.value,
-                  })
+                  setForm({ ...form, confirmPassword: e.target.value })
                 }
               />
             </div>
           </>
         )}
 
+        {/* ===== BUTTONS ===== */}
         {!editing ? (
           <>
             <button
-              style={styles.editBtn}
+              className="btn btn-primary w-100 mb-2"
               onClick={() => setEditing(true)}
             >
               <i className="bi bi-pencil-square"></i> Chỉnh sửa
             </button>
 
             <button
-              style={styles.backBtn}
+              className="btn btn-outline-secondary w-100 mb-2"
               onClick={() => navigate("/")}
             >
               <i className="bi bi-house"></i> Trang chủ
             </button>
 
             <button
-              style={styles.deleteBtn}
+              className="btn btn-danger w-100"
               onClick={handleDelete}
             >
               <i className="bi bi-trash"></i> Xóa tài khoản
@@ -194,14 +246,15 @@ export default function Profile() {
         ) : (
           <>
             <button
-              style={styles.saveBtn}
+              className="btn btn-success w-100 mb-2"
               onClick={handleUpdate}
+              disabled={loading}
             >
               <i className="bi bi-save"></i> Lưu thay đổi
             </button>
 
             <button
-              style={styles.cancelBtn}
+              className="btn btn-secondary w-100"
               onClick={() => setEditing(false)}
             >
               <i className="bi bi-x-circle"></i> Hủy
@@ -213,93 +266,40 @@ export default function Profile() {
   );
 }
 
+/* ================= STYLES ================= */
+
 const styles = {
   container: {
     minHeight: "100vh",
-    backgroundImage: "url('/data/banner01.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
+    background: "#e0f2fe",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
   },
-
-
   card: {
     width: "100%",
     maxWidth: 420,
-    background: "rgba(255,255,255,0.95)",
+    background: "#fff",
     padding: 28,
     borderRadius: 14,
-    boxShadow: "0 8px 25px rgba(0,0,0,0.25)",
-    backdropFilter: "blur(4px)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
   },
-
-
   title: {
     textAlign: "center",
-    marginBottom: 24,
-    color: "#dc3545",
+    marginBottom: 20,
+    color: "#0284c7",
   },
-
+  avatar: {
+    width: 110,
+    height: 110,
+    borderRadius: "50%",
+    objectFit: "cover",
+    border: "3px solid #0284c7",
+  },
   field: {
-    marginBottom: 14,
+    marginBottom: 12,
     display: "flex",
     flexDirection: "column",
     gap: 4,
-  },
-
-  editBtn: {
-    width: "100%",
-    padding: 10,
-    background: "#0d6efd",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    marginBottom: 10,
-    cursor: "pointer",
-  },
-
-  saveBtn: {
-    width: "100%",
-    padding: 10,
-    background: "#198754",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    marginBottom: 10,
-    cursor: "pointer",
-  },
-
-  cancelBtn: {
-    width: "100%",
-    padding: 10,
-    background: "#6c757d",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    marginBottom: 10,
-    cursor: "pointer",
-  },
-
-  backBtn: {
-    width: "100%",
-    padding: 10,
-    background: "#fff",
-    border: "1px solid #ddd",
-    borderRadius: 8,
-    marginBottom: 10,
-    cursor: "pointer",
-  },
-
-  deleteBtn: {
-    width: "100%",
-    padding: 10,
-    background: "#dc3545",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    cursor: "pointer",
   },
 };

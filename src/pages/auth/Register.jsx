@@ -7,6 +7,8 @@ export default function Register() {
   const [form, setForm] = useState({
     username: "",
     email: "",
+    phone: "",
+    address: "",
     password: "",
     confirmPassword: "",
   });
@@ -22,18 +24,25 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    if (!form.username || !form.email || !form.password) {
-      setError("Vui lòng nhập đầy đủ thông tin");
+    const { username, email, phone, address, password, confirmPassword } = form;
+
+    if (!username || !email || !password) {
+      setError("Vui lòng nhập đầy đủ thông tin bắt buộc");
       return;
     }
 
-    if (form.password.length < 6) {
+    if (password.length < 6) {
       setError("Mật khẩu phải ít nhất 6 ký tự");
       return;
     }
 
-    if (form.password !== form.confirmPassword) {
+    if (password !== confirmPassword) {
       setError("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    if (phone && !/^[0-9]{9,11}$/.test(phone)) {
+      setError("Số điện thoại không hợp lệ");
       return;
     }
 
@@ -44,19 +53,21 @@ export default function Register() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: form.username,
-          email: form.email,
-          password: form.password,
+          username,
+          email,
+          password,
+          phone,
+          address,
         }),
       });
 
       const result = await res.json();
 
-      if (!res.ok || result.success === false) {
+      if (!res.ok) {
         throw new Error(result.message || "Đăng ký thất bại");
       }
 
-      alert(" Đăng ký thành công!");
+      alert("🎉 Đăng ký thành công!");
       navigate("/login");
     } catch (err) {
       setError(err.message);
@@ -74,9 +85,8 @@ export default function Register() {
 
         <input
           style={styles.input}
-          type="text"
           name="username"
-          placeholder="Tên đăng nhập"
+          placeholder="Tên đăng nhập *"
           value={form.username}
           onChange={handleChange}
         />
@@ -85,8 +95,24 @@ export default function Register() {
           style={styles.input}
           type="email"
           name="email"
-          placeholder="Email"
+          placeholder="Email *"
           value={form.email}
+          onChange={handleChange}
+        />
+
+        <input
+          style={styles.input}
+          name="phone"
+          placeholder="Số điện thoại"
+          value={form.phone}
+          onChange={handleChange}
+        />
+
+        <input
+          style={styles.input}
+          name="address"
+          placeholder="Địa chỉ"
+          value={form.address}
           onChange={handleChange}
         />
 
@@ -94,7 +120,7 @@ export default function Register() {
           style={styles.input}
           type="password"
           name="password"
-          placeholder="Mật khẩu"
+          placeholder="Mật khẩu *"
           value={form.password}
           onChange={handleChange}
         />
@@ -103,7 +129,7 @@ export default function Register() {
           style={styles.input}
           type="password"
           name="confirmPassword"
-          placeholder="Nhập lại mật khẩu"
+          placeholder="Nhập lại mật khẩu *"
           value={form.confirmPassword}
           onChange={handleChange}
         />

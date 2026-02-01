@@ -271,8 +271,16 @@ export default function AdminProductManagement() {
             </select>
 
             <div style={styles.actionRow}>
-              <button style={styles.saveBtn} onClick={submitForm}>💾 Lưu</button>
-              <button style={styles.cancelBtn} onClick={resetForm}>❌ Hủy</button>
+              <button style={styles.saveBtn} onClick={submitForm}>
+                <i className="bi bi-save" style={{ marginRight: 6 }}></i>
+                Lưu
+              </button>
+
+              <button style={styles.cancelBtn} onClick={resetForm}>
+                <i className="bi bi-x-circle" style={{ marginRight: 6 }}></i>
+                Hủy
+              </button>
+
             </div>
           </div>
         </div>

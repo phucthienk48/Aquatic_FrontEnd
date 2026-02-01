@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
+import SearchProduct from "../pages/User/Tools/SearchProduct";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -75,14 +75,15 @@ export default function Header() {
                 height: isMobile ? "55px" : "90px",
               }}
             />
-            <span>PHÚC LONG AQUATIC</span>
+            <span style={styles.shopName}>PHÚC LONG AQUATIC</span>
+
           </div>
 
           {/* SEARCH */}
-          <div
+          {/* <div
             style={{
               ...styles.searchBox,
-              width: isMobile ? "100%" : "420px",
+              width: isMobile ? "100%" : "380px",
             }}
           >
             <input
@@ -92,7 +93,10 @@ export default function Header() {
             <button style={styles.searchBtn}>
               <i className="bi bi-search"></i>
             </button>
-          </div>
+          </div> */}
+          {/* SEARCH */}
+          <SearchProduct isMobile={isMobile} />
+
 
           {/* SUPPORT – ẨN MOBILE */}
           {!isMobile && (
@@ -111,8 +115,8 @@ export default function Header() {
               <i className="bi bi-bag-fill" style={styles.cartIcon}></i>
               Giỏ hàng
               {cartCount > 0 && (
-  <span style={styles.cartBadge}>{cartCount}</span>
-)}
+                <span style={styles.cartBadge}>{cartCount}</span>
+              )}
             </span>
 
             {!user && (
@@ -194,8 +198,18 @@ const styles = {
     position: "sticky",
     top: 0,
     zIndex: 1000,
-    background: "#fff",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+    background: "linear-gradient(180deg, #ecfeff, #f0f9ff)",
+    boxShadow: "0 4px 12px rgba(0, 150, 180, 0.15)",
+  },
+  shopName: {
+    fontSize: "20px",
+    fontWeight: "800",
+    letterSpacing: "2px",
+    background: "linear-gradient(90deg, #fb923c, #f97316, #ea580c)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textShadow: "0 4px 14px rgba(249,115,22,0.45)",
+    textTransform: "uppercase",
   },
 
   container: {
@@ -209,9 +223,9 @@ const styles = {
 
   /* ===== TOP ===== */
   topHeader: {
-    background: "#fff",
-    borderBottom: "1px solid #eee",
-    padding: "15px 0 0 0",
+    background: "#ecfeff",
+    borderBottom: "1px solid #0284",
+    padding: "15px 0 5px 0",
   },
 
   logo: {
@@ -221,12 +235,13 @@ const styles = {
     fontSize: "18px",
     fontWeight: 700,
     cursor: "pointer",
-    color: "#dc3545",
+    color: "#0ea5a4", // xanh ngọc
   },
 
   logoImg: {
     borderRadius: "50%",
     objectFit: "cover",
+    border: "2px solid #67e8f9",
   },
 
   actions: {
@@ -241,9 +256,9 @@ const styles = {
   searchBox: {
     display: "flex",
     alignItems: "center",
-    background: "#fff",
+    background: "#ffffff",
     borderRadius: "24px",
-    border: "1px solid #ddd",
+    border: "1px solid #bae6fd",
     overflow: "hidden",
   },
 
@@ -253,11 +268,12 @@ const styles = {
     outline: "none",
     padding: "10px 14px",
     fontSize: "14px",
+    background: "#ffffff",
   },
 
   searchBtn: {
     border: "none",
-    background: "#dc3545",
+    background: "linear-gradient(135deg, #0ea5a4, #0284c7)",
     color: "#fff",
     padding: "0 16px",
     cursor: "pointer",
@@ -269,12 +285,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "10px",
-    color: "#dc3545",
+    color: "red",
   },
 
   supportText: {
     fontSize: "13px",
-    color: "#666",
+    color: "black",
   },
 
   /* ===== CART ===== */
@@ -284,33 +300,33 @@ const styles = {
     gap: "6px",
     cursor: "pointer",
     position: "relative",
-    padding: "6px 12px",
+    padding: "6px 14px",
     borderRadius: "20px",
     fontWeight: 600,
     fontSize: "14px",
-    color: "#dc3545",
+    color: "#0f766e",
+    background: "linear-gradient(135deg, #ccfbf1, #e0f2fe)",
   },
 
   cartIcon: {
     fontSize: "26px",
   },
 
-cartBadge: {
-  position: "absolute",
-  top: 1,
-  right: 2,
-  background: "#dc3545",
-  color: "#fff",
-  borderRadius: "50%",
-  minWidth: 18,
-  height: 18,
-  fontSize: 11,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: 600,
-},
-
+  cartBadge: {
+    position: "absolute",
+    top: 0,
+    right: 2,
+    background: "red",
+    color: "#fff",
+    borderRadius: "50%",
+    minWidth: 18,
+    height: 18,
+    fontSize: 11,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 600,
+  },
 
   /* ===== USER ===== */
   user: {
@@ -319,7 +335,7 @@ cartBadge: {
     gap: "6px",
     cursor: "pointer",
     fontWeight: 700,
-    color: "#dc3545",
+    color: "#0284c7",
   },
 
   userIcon: {
@@ -328,34 +344,34 @@ cartBadge: {
 
   loginBtn: {
     padding: "6px 12px",
-    background: "#fff",
-    color: "#dc3545",
-    border: "1px solid #dc3545",
-    borderRadius: "6px",
+    background: "#ffffff",
+    color: "#0284c7",
+    border: "1px solid #0284c7",
+    borderRadius: "8px",
     cursor: "pointer",
   },
 
   registerBtn: {
     padding: "6px 12px",
-    background: "#dc3545",
+    background: "linear-gradient(135deg, #14b8a6, #0ea5a4)",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
   },
 
   logoutBtn: {
     padding: "6px 12px",
-    background: "#333",
+    background: "#64748b",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "8px",
     cursor: "pointer",
   },
 
   /* ===== MENU ===== */
   bottomHeader: {
-    background: "#dc3545",
+    background: "linear-gradient(135deg, #0369a1, #0284c7)",
   },
 
   menu: {
@@ -363,12 +379,14 @@ cartBadge: {
     maxWidth: "1200px",
     margin: "auto",
     display: "flex",
-    padding: "15px 0",
+    padding: "14px 0",
   },
 
   link: {
-    color: "#fff",
+    color: "#ecfeff",
     fontWeight: 600,
     cursor: "pointer",
   },
 };
+
+

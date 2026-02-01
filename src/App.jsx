@@ -18,9 +18,11 @@ import ProductDetail from "./pages/User/ProductDetail";
 import Checkout from "./pages/User/Checkout";
 import Orders from "./pages/User/Orders";
 import LiveRoom from "./pages/User/LiveRoom";
+import ProductList from "./pages/User/ProductList";
+import RecommendProduct from "./pages/User/RecommendProduct"
 
 import Dashboard from "./pages/Admin/Dashboard";
-import HomeAdmin from "./pages/Admin/HomeAdmin";
+import AdminProfile from "./pages/auth/AdminProfile"
 import UserManagement from "./pages/Admin/UserManagement";
 import AdminOrders from "./pages/Admin/AdminOrders";
 import AdminProduct from "./pages/Admin/AdminProduct";
@@ -38,7 +40,9 @@ function App() {
         {/* USER */}
         <Route element={<UserLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/product" element={<Product />} />
+          <Route path="/products" element={<Product />} />
+          <Route path="/product" element={<ProductList />} />
+          <Route path="/recommened" element={<RecommendProduct />} />
           
         <Route path="/knowledge" element={<KnowledgeList />} />
         <Route path="/knowledge/:id" element={<KnowledgeDetail />} />
@@ -60,11 +64,13 @@ function App() {
 
         {/* ADMIN */}
         <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<AdminContact />} />
+          <Route path="/admin" element={<ShopAdmin />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin/contact" element={<AdminContact />} />
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/products" element={<AdminProduct />} />
-          <Route path="/admin/shop" element={<ShopAdmin />} />
+          
           <Route path="/admin/live" element={<AdminLive />} />
           <Route path="/admin/comment" element={<AdminComment />} />
           <Route path="/admin/knowledge" element={<AdminKnowledge />} />

@@ -50,11 +50,19 @@ export default function Knowledge() {
 
       {/* HERO – POSTER GIỚI THIỆU (GIỮ NGUYÊN) */}
       <div style={styles.hero}>
-        <img
-          src="./public/data/banner07.png"
+        {/* <img
+          src="./public/data/banner06.png"
           alt="Cá cảnh"
           style={styles.heroImage}
+        /> */}
+        <video
+          src="/data/poster1.mp4"
+          autoPlay
+          muted
+          loop
+          style={styles.heroImage}
         />
+
 
         <div style={styles.heroContent}>
           <h3 style={styles.heroTitle}>

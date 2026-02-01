@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Product() {
+export default function RecommendProduct() {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -12,15 +12,19 @@ export default function Product() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* ================= FETCH PRODUCTS ================= */
+  /* ================= FETCH RECOMMEND ================= */
   useEffect(() => {
-    fetchProducts();
+    fetchRecommend();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchRecommend = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/product");
-      if (!res.ok) throw new Error("Không thể tải sản phẩm");
+      const url = userId
+        ? `http://localhost:5000/api/recommend?userId=${userId}`
+        : `http://localhost:5000/api/recommend`;
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Không thể tải sản phẩm gợi ý");
 
       const data = await res.json();
       const list = Array.isArray(data)
@@ -29,7 +33,7 @@ export default function Product() {
 
       setProducts(list);
 
-      /* 🔥 fetch rating cho từng product */
+      /* fetch rating */
       const ratingMap = {};
       for (const p of list) {
         ratingMap[p._id] = await fetchRating(p._id);
@@ -113,116 +117,113 @@ export default function Product() {
     }
   };
 
-  if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải...</p>;
+  if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải gợi ý...</p>;
   if (error) return <p style={{ color: "red", padding: 20 }}>{error}</p>;
 
-  const fishList = products.filter((p) => p.type === "fish");
-  const medicineList = products.filter((p) => p.type === "medicine");
-  const equipmentList = products.filter((p) => p.type === "equipment");
-
   /* ================= RENDER LIST ================= */
-const renderList = (title, icon, list) => (
-  <div style={styles.section}>
-    {/* ===== BANNER TIÊU ĐỀ ===== */}
-    <div style={styles.ribbonWrap}>
-      <div style={styles.ribbonTail} />
-      <div style={styles.ribbon}>
-        <span style={styles.ribbonIcon}>{icon}</span>
-        {title}
+  const renderList = (title, icon, list) => (
+    <div style={styles.section}>
+      <div style={styles.ribbonWrap}>
+        <div style={styles.ribbonTail} />
+        <div style={styles.ribbon}>
+          <span style={styles.ribbonIcon}>{icon}</span>
+          {title}
+        </div>
       </div>
-      
-    </div>
-    <div style={styles.divider}></div>
-    {/* ===== GRID SẢN PHẨM ===== */}
-    <div style={styles.grid}>
-      {list.map((item) => {
-        const hasDiscount =
-          item.oldprice && item.oldprice > item.price;
 
-        const r = ratings[item._id] || { avg: 0, count: 0 };
+      <div style={styles.divider}></div>
 
-        return (
-          <div
-            key={item._id}
-            style={styles.card}
-            onClick={() => navigate(`/product/${item._id}`)}
-          >
-            <img
-              src={item.images?.[0] || "https://via.placeholder.com/250"}
-              alt={item.name}
-              style={styles.image}
-            />
+      <div style={styles.grid}>
+        {list.map((item) => {
+          const hasDiscount =
+            item.oldprice && item.oldprice > item.price;
 
-            <h4 style={styles.name}>{item.name}</h4>
+          const r = ratings[item._id] || { avg: 0, count: 0 };
 
-            {/* RATING */}
-            <div style={styles.rating}>
-              {renderStars(r.avg)}
-              <span style={styles.ratingText}>
-                {r.avg.toFixed(1)} ({r.count})
-              </span>
-            </div>
-
-            {/* PRICE */}
-            <div style={styles.priceBox}>
-              {hasDiscount && (
-                <span style={styles.oldprice}>
-                  {item.oldprice.toLocaleString()} VNĐ
-                </span>
-              )}
-
-              <span
-                style={
-                  hasDiscount ? styles.priceSale : styles.priceNormal
-                }
-              >
-                {item.price.toLocaleString()} VNĐ
-              </span>
-
-              {hasDiscount && (
-                <span style={styles.discount}>
-                  -
-                  {Math.round(
-                    ((item.oldprice - item.price) /
-                      item.oldprice) *
-                      100
-                  )}
-                  %
-                </span>
-              )}
-            </div>
-
-            <button
-              style={{
-                ...styles.button,
-                opacity: userId ? 1 : 0.6,
-                cursor: userId ? "pointer" : "not-allowed",
-              }}
-              disabled={!userId}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(item);
-              }}
+          return (
+            <div
+              key={item._id}
+              style={styles.card}
+              onClick={() => navigate(`/product/${item._id}`)}
             >
-              <i className="bi bi-cart-plus me-2"></i>
-              {userId ? "Chọn Mua" : "Đăng nhập để mua"}
-            </button>
-          </div>
-        );
-      })}
-    </div>
-    
-  </div>
-);
+              <img
+                src={item.images?.[0] || "https://via.placeholder.com/250"}
+                alt={item.name}
+                style={styles.image}
+              />
 
+              <h4 style={styles.name}>{item.name}</h4>
+
+              <div style={styles.rating}>
+                {renderStars(r.avg)}
+                <span style={styles.ratingText}>
+                  {r.avg.toFixed(1)} ({r.count})
+                </span>
+              </div>
+
+              <div style={styles.priceBox}>
+                {hasDiscount && (
+                  <span style={styles.oldprice}>
+                    {item.oldprice.toLocaleString()} VNĐ
+                  </span>
+                )}
+
+                <span
+                  style={
+                    hasDiscount
+                      ? styles.priceSale
+                      : styles.priceNormal
+                  }
+                >
+                  {item.price.toLocaleString()} VNĐ
+                </span>
+
+                {hasDiscount && (
+                  <span style={styles.discount}>
+                    -
+                    {Math.round(
+                      ((item.oldprice - item.price) /
+                        item.oldprice) *
+                        100
+                    )}
+                    %
+                  </span>
+                )}
+              </div>
+
+              <button
+                style={{
+                  ...styles.button,
+                  opacity: userId ? 1 : 0.6,
+                  cursor: userId ? "pointer" : "not-allowed",
+                }}
+                disabled={!userId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart(item);
+                }}
+              >
+                <i className="bi bi-cart-plus me-2"></i>
+                {userId ? "Chọn Mua" : "Đăng nhập để mua"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Danh sách sản phẩm</h2>
+      <h2 style={styles.title}>
+         {userId ? "Gợi ý dành cho bạn" : "Sản phẩm nổi bật"}
+      </h2>
 
-      {renderList("Cá cảnh", "", fishList)}
-      {renderList("Thuốc & Hóa chất", "", medicineList)}
-      {renderList("Hồ & Thiết bị", "🛠", equipmentList)}
+      {renderList(
+        userId ? "Phù hợp với nhu cầu của bạn" : "Bán chạy & đánh giá cao",
+        "",
+        products
+      )}
     </div>
   );
 }
@@ -236,25 +237,13 @@ const styles = {
     margin: "auto",
     padding: "20px 0",
   },
-
   title: {
     marginBottom: 30,
     fontSize: 26,
     fontWeight: 700,
   },
-
-  /* ===== SECTION ===== */
-  section: {
-    marginBottom: 40,
-  },
-
-  /* ===== RIBBON TITLE ===== */
-  ribbonWrap: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: 18,
-  },
-
+  section: { marginBottom: 40 },
+  ribbonWrap: { display: "flex", alignItems: "center", marginBottom: 18 },
   ribbonTail: {
     width: 0,
     height: 0,
@@ -262,7 +251,6 @@ const styles = {
     borderBottom: "18px solid transparent",
     borderRight: "20px solid #dc3545",
   },
-
   ribbon: {
     display: "flex",
     alignItems: "center",
@@ -271,92 +259,44 @@ const styles = {
     color: "#fff",
     padding: "8px 26px",
     fontWeight: 600,
-    textTransform: "uppercase",
     borderRadius: "0 6px 6px 0",
-    fontSize: 15,
   },
-
-  ribbonIcon: {
-    fontSize: 18,
-  },
-
-  /* ===== GRID ===== */
+  ribbonIcon: { fontSize: 18 },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
     gap: 22,
   },
-
-  /* ===== CARD ===== */
   card: {
     background: "#fff",
     borderRadius: 12,
     padding: 14,
     boxShadow: "0 6px 18px rgba(0,0,0,.08)",
-    textAlign: "center",
     cursor: "pointer",
-    transition: "transform .2s, box-shadow .2s",
+    transition: "transform .2s",
+    textAlign: "center",
   },
-
   image: {
     width: "100%",
     height: 210,
     objectFit: "cover",
     borderRadius: 10,
-    marginBottom: 6,
   },
-
   name: {
     fontSize: 16,
     fontWeight: 600,
-    lineHeight: 1.4,
-    margin: "6px 0 4px",
-    color: "#222",
-
+    margin: "6px 0",
     display: "-webkit-box",
     WebkitLineClamp: 2,
     WebkitBoxOrient: "vertical",
     overflow: "hidden",
   },
-
-  rating: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 6,
-    alignItems: "center",
-  },
-
-  ratingText: {
-    fontSize: 13,
-    color: "#666",
-  },
-
-  priceBox: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 8,
-    margin: "10px 0",
-    flexWrap: "wrap",
-  },
-
-  oldprice: {
-    textDecoration: "line-through",
-    color: "#999",
-    fontSize: 13,
-  },
-
-  priceSale: {
-    color: "#dc3545",
-    fontWeight: 700,
-    fontSize: 16,
-  },
-
-  priceNormal: {
-    color: "#0d6efd",
-    fontWeight: 700,
-    fontSize: 16,
-  },
-
+  rating: { display: "flex", justifyContent: "center", gap: 6 },
+  ratingText: { fontSize: 13, color: "#666" },
+  priceBox: { display: "flex", gap: 8, justifyContent: "center" },
+  oldprice: { textDecoration: "line-through", color: "#999", fontSize: 13 },
+  priceSale: { color: "#dc3545", fontWeight: 700 },
+  priceNormal: { color: "#0d6efd", fontWeight: 700 },
   discount: {
     background: "#dc3545",
     color: "#fff",
@@ -364,9 +304,8 @@ const styles = {
     borderRadius: 6,
     fontSize: 12,
   },
-
   button: {
-    marginTop: 8,
+    marginTop: 10,
     padding: "9px 20px",
     background: "#0d6efd",
     color: "#fff",
@@ -376,14 +315,9 @@ const styles = {
   },
   divider: {
     height: 6,
-    width: "100%",
     margin: "12px 0 24px",
     borderRadius: 4,
     background:
       "linear-gradient(90deg, #dc3545, #fd7e14, #ffc107, #198754, #0dcaf0, #0d6efd, #6f42c1)",
   },
-
-
-
 };
-

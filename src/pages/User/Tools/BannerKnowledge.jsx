@@ -40,11 +40,19 @@ export default function BannerKnowledge() {
             navigate(`/knowledge/${list[0].knowledgeId}`)
           }
         >
-          <img
+          {/* <img
             src={list[0].img || "/data/banner07.png"}
             alt={list[0].title}
             style={styles.mainImage}
-          />
+          /> */}
+          <video
+              src="/data/poster1.mp4"
+              autoPlay
+              muted
+              loop
+              style={styles.mainImage}
+            />
+
 
           <div style={styles.mainContent}>
             <h3>{list[0].title}</h3>

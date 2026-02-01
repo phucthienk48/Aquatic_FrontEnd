@@ -41,7 +41,20 @@ export default function Login() {
       }
 
       localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: result.user._id || result.user.id,
+        username: result.user.username,
+        email: result.user.email,
+        role: result.user.role,
+        avatar: result.user.avatar || "",
+        phone: result.user.phone || "",
+        address: result.user.address || "",
+        password: result.user.password, // giữ nguyên nếu backend trả
+      })
+    );
+
 
       alert("Đăng nhập thành công!");
       
