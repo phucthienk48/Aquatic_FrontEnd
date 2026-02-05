@@ -202,7 +202,7 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0, 150, 180, 0.15)",
   },
   shopName: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: "800",
     letterSpacing: "2px",
     background: "linear-gradient(90deg, #fb923c, #f97316, #ea580c)",

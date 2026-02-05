@@ -165,6 +165,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     background: "#f1f5f9",
+    fontFamily: '"Times New Roman", Times, serif',
   },
 
   box: {

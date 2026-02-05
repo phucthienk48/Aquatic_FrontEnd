@@ -74,7 +74,7 @@ export default function SearchProduct({ isMobile }) {
       <div
         style={{
           ...styles.searchBox,
-          width: isMobile ? "100%" : "380px",
+          width: isMobile ? "100%" : "300px",
         }}
       >
         <input

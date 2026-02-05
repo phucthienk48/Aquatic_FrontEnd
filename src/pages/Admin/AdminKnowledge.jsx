@@ -6,6 +6,7 @@ const UPLOAD_URL = "http://localhost:5000/api/upload";
 export default function AdminKnowledge() {
   const [list, setList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const emptyForm = {
@@ -16,13 +17,7 @@ export default function AdminKnowledge() {
     _imgFile: null,
     _imgPreview: "",
     instructions: [
-      {
-        heading: "",
-        content: "",
-        image: "",
-        _file: null,
-        _preview: "",
-      },
+      { heading: "", content: "", image: "", _file: null, _preview: "" },
     ],
   };
 
@@ -39,25 +34,21 @@ export default function AdminKnowledge() {
     fetchData();
   }, []);
 
-  /* ================= UPLOAD IMAGE (GIỐNG SHOP ADMIN) ================= */
+  /* ================= UPLOAD ================= */
   const uploadImage = async (file) => {
     if (!file) return "";
-
     const fd = new FormData();
     fd.append("image", file);
 
     setUploading(true);
-    const res = await fetch(UPLOAD_URL, {
-      method: "POST",
-      body: fd,
-    });
+    const res = await fetch(UPLOAD_URL, { method: "POST", body: fd });
     const data = await res.json();
     setUploading(false);
 
     return data.url;
   };
 
-  /* ================= FORM ================= */
+  /* ================= FORM HANDLER ================= */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -87,22 +78,14 @@ export default function AdminKnowledge() {
     e.preventDefault();
 
     let coverImg = form.img;
-    if (form._imgFile) {
-      coverImg = await uploadImage(form._imgFile);
-    }
+    if (form._imgFile) coverImg = await uploadImage(form._imgFile);
 
     const instructions = await Promise.all(
-      form.instructions.map(async (ins) => {
-        let image = ins.image;
-        if (ins._file) {
-          image = await uploadImage(ins._file);
-        }
-        return {
-          heading: ins.heading,
-          content: ins.content,
-          image,
-        };
-      })
+      form.instructions.map(async (ins) => ({
+        heading: ins.heading,
+        content: ins.content,
+        image: ins._file ? await uploadImage(ins._file) : ins.image,
+      }))
     );
 
     const payload = {
@@ -143,6 +126,7 @@ export default function AdminKnowledge() {
     });
 
     setEditingId(knowledgeId);
+    setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -155,171 +139,178 @@ export default function AdminKnowledge() {
   const resetForm = () => {
     setForm(emptyForm);
     setEditingId(null);
+    setShowForm(false);
   };
 
   /* ================= UI ================= */
   return (
     <div className="container py-4">
-      <h3 className="mb-4">
-        <i className="bi bi-journal-text me-2"></i>
-        Quản lý kiến thức nuôi cá
+      <h3 className="mb-3">
+        <i className="bi bi-journal-text me-2"></i>Quản lý kiến thức nuôi cá
       </h3>
 
+      {/* ===== ADD BUTTON ===== */}
+      <div className="text-end mb-3">
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            resetForm();
+            setShowForm(true);
+          }}
+        >
+          <i className="bi bi-plus-circle me-1"></i> Thêm bài viết
+        </button>
+      </div>
+
       {/* ===== FORM ===== */}
-      <form className="card shadow-sm border-0 mb-5" onSubmit={handleSubmit}>
-        <div className="card-header bg-primary text-white">
-          <i className="bi bi-pencil-square me-2"></i>
-          {editingId ? "Chỉnh sửa bài viết" : "Thêm bài viết mới"}
-        </div>
-
-        <div className="card-body row g-3">
-          <div className="col-md-4">
-            <label className="form-label">Knowledge ID</label>
-            <input
-              className="form-control"
-              name="knowledgeId"
-              value={form.knowledgeId}
-              onChange={handleChange}
-              disabled={Boolean(editingId)}
-              required
-            />
+      {showForm && (
+        <form className="card shadow-sm border-0 mb-4" onSubmit={handleSubmit}>
+          <div
+            className={`card-header ${
+              editingId ? "bg-warning" : "bg-primary"
+            } text-white`}
+          >
+            <i
+              className={`bi ${
+                editingId ? "bi-pencil" : "bi-plus-circle"
+              } me-2`}
+            ></i>
+            {editingId ? "Chỉnh sửa bài viết" : "Thêm bài viết mới"}
           </div>
 
-          <div className="col-md-8">
-            <label className="form-label">Tiêu đề</label>
-            <input
-              className="form-control"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              required
-            />
+          <div className="card-body row g-3">
+            <div className="col-md-4">
+              <label className="form-label">Knowledge ID</label>
+              <input
+                className="form-control"
+                name="knowledgeId"
+                value={form.knowledgeId}
+                onChange={handleChange}
+                disabled={!!editingId}
+                required
+              />
+            </div>
+
+            <div className="col-md-8">
+              <label className="form-label">Tiêu đề</label>
+              <input
+                className="form-control"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="col-12">
+              <label className="form-label">Tóm tắt</label>
+              <textarea
+                className="form-control"
+                rows="2"
+                name="summary"
+                value={form.summary}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* COVER */}
+            <div className="col-md-6">
+              <label className="form-label">Ảnh đại diện</label>
+              <input
+                type="file"
+                className="form-control"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  setForm({
+                    ...form,
+                    _imgFile: file,
+                    _imgPreview: URL.createObjectURL(file),
+                  });
+                }}
+              />
+              {(form._imgPreview || form.img) && (
+                <img
+                  src={form._imgPreview || form.img}
+                  style={styles.coverPreview}
+                />
+              )}
+            </div>
+
+            {/* INSTRUCTIONS */}
+            <div className="col-12">
+              <h5>Nội dung hướng dẫn</h5>
+              {form.instructions.map((ins, i) => (
+                <div key={i} className="border rounded p-3 mb-3">
+                  <input
+                    className="form-control mb-2"
+                    placeholder="Heading"
+                    value={ins.heading}
+                    onChange={(e) =>
+                      handleInstructionChange(i, "heading", e.target.value)
+                    }
+                    required
+                  />
+                  <textarea
+                    className="form-control mb-2"
+                    placeholder="Nội dung"
+                    value={ins.content}
+                    onChange={(e) =>
+                      handleInstructionChange(i, "content", e.target.value)
+                    }
+                    required
+                  />
+                  <input
+                    type="file"
+                    className="form-control"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (!file) return;
+                      const copy = [...form.instructions];
+                      copy[i]._file = file;
+                      copy[i]._preview = URL.createObjectURL(file);
+                      setForm({ ...form, instructions: copy });
+                    }}
+                  />
+                  {(ins._preview || ins.image) && (
+                    <img
+                      src={ins._preview || ins.image}
+                      style={styles.sectionImage}
+                    />
+                  )}
+
+                  {form.instructions.length > 1 && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger mt-2"
+                      onClick={() => removeInstruction(i)}
+                    >
+                      Xóa section
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={addInstruction}
+              >
+                <i className="bi bi-plus-circle me-1"></i>Thêm section
+              </button>
+            </div>
           </div>
 
-          <div className="col-12">
-            <label className="form-label">Tóm tắt</label>
-            <textarea
-              className="form-control"
-              rows="2"
-              name="summary"
-              value={form.summary}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* COVER IMAGE */}
-          <div className="col-md-6">
-            <label className="form-label">
-              <i className="bi bi-image me-1"></i> Ảnh đại diện
-            </label>
-            <input
-              type="file"
-              className="form-control"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                setForm({
-                  ...form,
-                  _imgFile: file,
-                  _imgPreview: URL.createObjectURL(file),
-                });
-              }}
-            />
-
-            {form._imgPreview && (
-              <img src={form._imgPreview} style={styles.coverPreview} />
+          <div className="card-footer text-end">
+            {uploading && (
+              <span className="text-warning me-3">Đang upload ảnh...</span>
             )}
-
-            {!form._imgPreview && form.img && (
-              <img src={form.img} style={styles.coverPreview} />
-            )}
-          </div>
-
-          {/* INSTRUCTIONS */}
-          <div className="col-12">
-            <h5 className="mt-3">
-              <i className="bi bi-list-check me-2"></i>Nội dung hướng dẫn
-            </h5>
-
-            {form.instructions.map((ins, i) => (
-              <div key={i} className="border rounded p-3 mb-3 bg-light">
-                <input
-                  className="form-control mb-2"
-                  placeholder="Heading"
-                  value={ins.heading}
-                  onChange={(e) =>
-                    handleInstructionChange(i, "heading", e.target.value)
-                  }
-                  required
-                />
-
-                <textarea
-                  className="form-control mb-2"
-                  placeholder="Nội dung"
-                  value={ins.content}
-                  onChange={(e) =>
-                    handleInstructionChange(i, "content", e.target.value)
-                  }
-                  required
-                />
-
-                <input
-                  type="file"
-                  className="form-control"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    const copy = [...form.instructions];
-                    copy[i]._file = file;
-                    copy[i]._preview = URL.createObjectURL(file);
-                    setForm({ ...form, instructions: copy });
-                  }}
-                />
-
-                {ins._preview && (
-                  <img src={ins._preview} style={styles.sectionImage} />
-                )}
-
-                {!ins._preview && ins.image && (
-                  <img src={ins.image} style={styles.sectionImage} />
-                )}
-
-                {form.instructions.length > 1 && (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-outline-danger mt-2"
-                    onClick={() => removeInstruction(i)}
-                  >
-                    <i className="bi bi-trash me-1"></i>Xóa section
-                  </button>
-                )}
-              </div>
-            ))}
-
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={addInstruction}
-            >
-              <i className="bi bi-plus-circle me-1"></i>Thêm section
+            <button className="btn btn-success me-2">
+              {editingId ? "Cập nhật" : "Tạo mới"}
             </button>
-          </div>
-        </div>
-
-        <div className="card-footer text-end">
-          {uploading && (
-            <span className="text-warning me-3">
-              <i className="bi bi-cloud-upload me-1"></i>Đang upload ảnh...
-            </span>
-          )}
-          <button className="btn btn-success me-2">
-            <i className="bi bi-save me-1"></i>
-            {editingId ? "Cập nhật" : "Tạo mới"}
-          </button>
-          {editingId && (
             <button
               type="button"
               className="btn btn-secondary"
@@ -327,22 +318,19 @@ export default function AdminKnowledge() {
             >
               Hủy
             </button>
-          )}
-        </div>
-      </form>
+          </div>
+        </form>
+      )}
 
       {/* ===== LIST ===== */}
       <div className="card shadow-sm border-0">
-        <div className="card-header bg-dark text-white">
-          <i className="bi bi-list-ul me-2"></i>Danh sách bài viết
-        </div>
-
+        <div className="card-header bg-dark text-white">Danh sách bài viết</div>
         <table className="table table-hover mb-0">
           <thead>
             <tr>
-              <th>Knowledge ID</th>
+              <th>ID</th>
               <th>Tiêu đề</th>
-              <th width="160">Hành động</th>
+              <th width="140">Hành động</th>
             </tr>
           </thead>
           <tbody>

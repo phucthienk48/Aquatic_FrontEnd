@@ -209,11 +209,11 @@ export default function Orders() {
 
                   <p>
                     <i className="bi bi-cash-coin" /> Đơn giá:{" "}
-                    {item.price.toLocaleString()} đ
+                    {item.price.toLocaleString()} VNĐ
                   </p>
 
                   <p style={styles.subtotal}>
-                    Thành tiền: {(item.price * item.quantity).toLocaleString()} đ
+                    Thành tiền: {(item.price * item.quantity).toLocaleString()} VNĐ
                   </p>
                     {order.status === "hoàn thành" && (
                       <div style={styles.commentBox}>
@@ -247,7 +247,7 @@ export default function Orders() {
           <div style={styles.footer}>
             <span><b>Tổng tiền:</b></span>
             <span style={styles.total}>
-              {order.totalPrice.toLocaleString()} đ
+              {order.totalPrice.toLocaleString()} VNĐ
             </span>
           </div>
 

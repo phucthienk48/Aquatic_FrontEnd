@@ -104,7 +104,7 @@ export default function AdminOrder() {
             <tr key={o._id}>
                 <td style={styles.td}>{o._id.slice(-6)}</td>
                 <td style={styles.td}>{o.user?.username}</td>
-                <td style={styles.td}>{o.totalPrice.toLocaleString()} ₫</td>
+                <td style={styles.td}>{o.totalPrice.toLocaleString()} VNĐ</td>
                 <td style={styles.td}>
                 <select
                 style={{
@@ -124,31 +124,31 @@ export default function AdminOrder() {
                 </select>
 
                 </td>
-<td style={styles.td}>
-  <div style={styles.actionGroup}>
-    <button
-      style={styles.viewBtn}
-      onClick={() => setSelectedOrder(o)}
-    >
-      <i
-        className="bi bi-eye me-2"
-        style={{ fontSize: 14 }}
-      ></i>
-      Xem
-    </button>
+                  <td style={styles.td}>
+                    <div style={styles.actionGroup}>
+                      <button
+                        style={styles.viewBtn}
+                        onClick={() => setSelectedOrder(o)}
+                      >
+                        <i
+                          className="bi bi-eye me-2"
+                          style={{ fontSize: 14 }}
+                        ></i>
+                        Xem
+                      </button>
 
-    <button
-      style={styles.deleteBtn}
-      onClick={() => deleteOrder(o._id)}
-    >
-      <i
-        className="bi bi-trash me-2"
-        style={{ fontSize: 14 }}
-      ></i>
-      Xóa
-    </button>
-  </div>
-</td>
+                      <button
+                        style={styles.deleteBtn}
+                        onClick={() => deleteOrder(o._id)}
+                      >
+                        <i
+                          className="bi bi-trash me-2"
+                          style={{ fontSize: 14 }}
+                        ></i>
+                        Xóa
+                      </button>
+                    </div>
+                  </td>
 
             </tr>
             ))}
@@ -156,29 +156,29 @@ export default function AdminOrder() {
         </table>
 
 
-{/* ===== CHI TIẾT ĐƠN HÀNG ===== */}
-{selectedOrder && (
-  <div style={styles.detailOverlay}>
-    <div style={styles.detailBox}>
-      <h3 style={styles.detailTitle}>Chi tiết đơn hàng</h3>
+            {/* ===== CHI TIẾT ĐƠN HÀNG ===== */}
+            {selectedOrder && (
+              <div style={styles.detailOverlay}>
+                <div style={styles.detailBox}>
+                  <h3 style={styles.detailTitle}>Chi tiết đơn hàng</h3>
 
-      {/* ==== THÔNG TIN NGƯỜI NHẬN ==== */}
-      <div style={styles.section}>
-        <h4 style={styles.sectionTitle}>Thông tin người nhận</h4>
+                  {/* ==== THÔNG TIN NGƯỜI NHẬN ==== */}
+                  <div style={styles.section}>
+                    <h4 style={styles.sectionTitle}>Thông tin người nhận</h4>
 
-        <p style={styles.detailText}>
-          <b>Người nhận:</b> {selectedOrder.shippingAddress?.fullName || "—"}
-        </p>
-        <p style={styles.detailText}>
-          <b>SĐT:</b> {selectedOrder.shippingAddress?.phone || "—"}
-        </p>
-        <p style={styles.detailText}>
-          <b>Địa chỉ:</b> {selectedOrder.shippingAddress?.address || "—"}
-        </p>
-        <p style={styles.detailText}>
-          <b>Ghi chú:</b> {selectedOrder.note || "Không có"}
-        </p>
-      </div>
+                    <p style={styles.detailText}>
+                      <b>Người nhận:</b> {selectedOrder.shippingAddress?.fullName || "—"}
+                    </p>
+                    <p style={styles.detailText}>
+                      <b>SĐT:</b> {selectedOrder.shippingAddress?.phone || "—"}
+                    </p>
+                    <p style={styles.detailText}>
+                      <b>Địa chỉ:</b> {selectedOrder.shippingAddress?.address || "—"}
+                    </p>
+                    <p style={styles.detailText}>
+                      <b>Ghi chú:</b> {selectedOrder.note || "Không có"}
+                    </p>
+                  </div>
 
             {/* ==== THÔNG TIN ĐƠN HÀNG ==== */}
             <div style={styles.section}>
@@ -218,10 +218,10 @@ export default function AdminOrder() {
                       <td style={styles.td}>{item.name}</td>
                       <td style={styles.td}>{item.quantity}</td>
                       <td style={styles.td}>
-                        {item.price.toLocaleString()} ₫
+                        {item.price.toLocaleString()} VNĐ
                       </td>
                       <td style={styles.td}>
-                        {(item.price * item.quantity).toLocaleString()} ₫
+                        {(item.price * item.quantity).toLocaleString()} VNĐ
                       </td>
                     </tr>
                   ))}
@@ -232,7 +232,7 @@ export default function AdminOrder() {
             {/* ==== TỔNG TIỀN ==== */}
             <div style={styles.totalPrice}>
               Tổng thanh toán:{" "}
-              <b>{selectedOrder.totalPrice.toLocaleString()} ₫</b>
+              <b>{selectedOrder.totalPrice.toLocaleString()} VNĐ</b>
             </div>
 
             <button
