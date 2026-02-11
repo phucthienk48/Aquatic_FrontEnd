@@ -33,6 +33,8 @@ import AdminComment from "./pages/Admin/AdminComment";
 import AdminKnowledge from "./pages/Admin/AdminKnowledge";
 import AdminReport from "./pages/Admin/AdminReport";
 
+import LiveCommentList from "./pages/livestream/LiveCommentList";
+
 function App() {
   return (
     <BrowserRouter>
@@ -76,6 +78,8 @@ function App() {
           <Route path="/admin/comment" element={<AdminComment />} />
           <Route path="/admin/knowledge" element={<AdminKnowledge />} />
           <Route path="/admin/reports" element={<AdminReport />} />
+
+          <Route path="/admin/livelist" element={<LiveCommentList />} />
         </Route>
 
       </Routes>

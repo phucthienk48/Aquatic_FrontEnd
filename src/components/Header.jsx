@@ -8,7 +8,7 @@ export default function Header() {
   const [isMobile, setIsMobile] = useState(false);
   const [cartCount, setCartCount] = useState(0);
 
-  /* ===== LOAD USER ===== */
+  /*  LOAD USER */
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -20,7 +20,7 @@ export default function Header() {
     }
   }, []);
 
-  /* ===== RESPONSIVE ===== */
+  /*  RESPONSIVE */
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -52,10 +52,10 @@ export default function Header() {
       console.error("Lỗi lấy giỏ hàng:", err);
     }
   };
+  
 
   return (
     <header style={styles.header}>
-      {/* ===== TOP HEADER ===== */}
       <div style={styles.topHeader}>
         <div
           style={{
@@ -157,7 +157,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ===== BOTTOM MENU ===== */}
+      {/*  BOTTOM MENU  */}
       <div style={styles.bottomHeader}>
         <nav
           style={{
@@ -190,8 +190,6 @@ export default function Header() {
     </header>
   );
 }
-
-/* ================= STYLE ================= */
 
 const styles = {
   header: {
