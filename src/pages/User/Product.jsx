@@ -12,7 +12,7 @@ export default function Product() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* ================= FETCH PRODUCTS ================= */
+  /*  FETCH PRODUCTS  */
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -29,7 +29,7 @@ export default function Product() {
 
       setProducts(list);
 
-      /* 🔥 fetch rating cho từng product */
+      /* fetch rating cho từng product */
       const ratingMap = {};
       for (const p of list) {
         ratingMap[p._id] = await fetchRating(p._id);
@@ -42,7 +42,7 @@ export default function Product() {
     }
   };
 
-  /* ================= FETCH RATING ================= */
+  /*  FETCH RATING  */
   const fetchRating = async (productId) => {
     try {
       const res = await fetch(
@@ -68,7 +68,7 @@ export default function Product() {
     }
   };
 
-  /* ================= RENDER STAR ================= */
+  /*  RENDER STAR  */
   const renderStars = (avg = 0) => {
     const full = Math.floor(avg);
     const half = avg - full >= 0.5;
@@ -82,7 +82,7 @@ export default function Product() {
     });
   };
 
-  /* ================= ADD TO CART ================= */
+  /*  ADD TO CART  */
   const handleAddToCart = async (product) => {
     if (!userId) return alert("Vui lòng đăng nhập");
 
@@ -120,10 +120,10 @@ export default function Product() {
   const medicineList = products.filter((p) => p.type === "medicine");
   const equipmentList = products.filter((p) => p.type === "equipment");
 
-  /* ================= RENDER LIST ================= */
+  /*  RENDER LIST  */
 const renderList = (title, icon, list) => (
   <div style={styles.section}>
-    {/* ===== BANNER TIÊU ĐỀ ===== */}
+    {/* BANNER TIÊU ĐỀ */}
     <div style={styles.ribbonWrap}>
       <div style={styles.ribbonTail} />
       <div style={styles.ribbon}>
@@ -133,7 +133,7 @@ const renderList = (title, icon, list) => (
       
     </div>
     <div style={styles.divider}></div>
-    {/* ===== GRID SẢN PHẨM ===== */}
+    {/* GRID SẢN PHẨM */}
     <div style={styles.grid}>
       {list.map((item) => {
         const hasDiscount =
@@ -227,7 +227,7 @@ const renderList = (title, icon, list) => (
   );
 }
 
-/* ================= STYLE ================= */
+/*  STYLE  */
 
 const styles = {
   container: {
@@ -243,12 +243,12 @@ const styles = {
     fontWeight: 700,
   },
 
-  /* ===== SECTION ===== */
+  /* SECTION */
   section: {
     marginBottom: 40,
   },
 
-  /* ===== RIBBON TITLE ===== */
+  /* RIBBON TITLE */
   ribbonWrap: {
     display: "flex",
     alignItems: "center",
@@ -280,14 +280,14 @@ const styles = {
     fontSize: 18,
   },
 
-  /* ===== GRID ===== */
+  /* GRID */
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
     gap: 22,
   },
 
-  /* ===== CARD ===== */
+  /* CARD */
   card: {
     background: "#fff",
     borderRadius: 12,

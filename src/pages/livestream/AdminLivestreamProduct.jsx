@@ -10,6 +10,7 @@ export default function AdminLivestreamProduct({ livestreamId }) {
   const [liveProducts, setLiveProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
+  const [search, setSearch] = useState("");
 
   /*  LOAD DATA  */
 
@@ -24,6 +25,10 @@ export default function AdminLivestreamProduct({ livestreamId }) {
     await Promise.all([fetchProducts(), fetchLiveProducts()]);
     setLoading(false);
   };
+  const filteredProducts = products.filter((p) =>
+    p.name?.toLowerCase().includes(search.toLowerCase())
+    );
+
 
   const fetchProducts = async () => {
     try {
@@ -219,31 +224,66 @@ export default function AdminLivestreamProduct({ livestreamId }) {
           : " Thêm sản phẩm"}
       </button>
 
-      {showProducts && (
-        <div>
-          {products.length === 0 && (
-            <p>Không có sản phẩm</p>
-          )}
+{showProducts && (
+  <div>
+    {/* SEARCH BOX */}
+    <div className="mb-3 position-relative">
+      <i className="bi bi-search position-absolute"
+         style={{ top: 10, left: 10, color: "#999" }}></i>
 
-          {products.map((p) => (
-            <div
-              key={p._id}
-              className="d-flex justify-content-between border-bottom py-2"
-            >
-              <span>{p.name}</span>
+      <input
+        type="text"
+        className="form-control ps-5"
+        placeholder="Tìm sản phẩm theo tên..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </div>
 
-              <button
-                className="btn btn-sm btn-success"
-                onClick={() =>
-                  addToLivestream(p._id)
-                }
-              >
-                <i className="bi bi-plus-lg"></i> Thêm 
-              </button>
+    {filteredProducts.length === 0 && (
+      <p className="text-muted">Không tìm thấy sản phẩm</p>
+    )}
+
+    {filteredProducts.map((p) => (
+      <div
+        key={p._id}
+        className="d-flex align-items-center justify-content-between border rounded p-2 mb-2"
+      >
+        {/* LEFT: IMAGE + INFO */}
+        <div className="d-flex align-items-center gap-2">
+          <img
+            src={getImageUrl(p.images)}
+            width="60"
+            height="60"
+            style={{
+              objectFit: "cover",
+              borderRadius: 6,
+              border: "1px solid #eee",
+            }}
+            alt=""
+          />
+
+          <div>
+            <div className="fw-semibold">{p.name}</div>
+            <div className="text-danger small fw-bold">
+              {Number(p.price || 0).toLocaleString()} VNĐ
             </div>
-          ))}
+          </div>
         </div>
-      )}
+
+        {/* RIGHT: ADD BUTTON */}
+        <button
+          className="btn btn-sm btn-success"
+          onClick={() => addToLivestream(p._id)}
+        >
+          <i className="bi bi-plus-lg me-1"></i>
+          Thêm
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
     </div>
   );
 }

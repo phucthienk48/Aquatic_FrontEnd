@@ -12,7 +12,7 @@ export default function RecommendProduct() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* ================= FETCH RECOMMEND ================= */
+  /* FETCH RECOMMEND */
   useEffect(() => {
     fetchRecommend();
   }, []);
@@ -46,7 +46,7 @@ export default function RecommendProduct() {
     }
   };
 
-  /* ================= FETCH RATING ================= */
+  /* FETCH RATING */
   const fetchRating = async (productId) => {
     try {
       const res = await fetch(
@@ -72,7 +72,7 @@ export default function RecommendProduct() {
     }
   };
 
-  /* ================= RENDER STAR ================= */
+  /* RENDER STAR */
   const renderStars = (avg = 0) => {
     const full = Math.floor(avg);
     const half = avg - full >= 0.5;
@@ -86,7 +86,7 @@ export default function RecommendProduct() {
     });
   };
 
-  /* ================= ADD TO CART ================= */
+  /* ADD TO CART */
   const handleAddToCart = async (product) => {
     if (!userId) return alert("Vui lòng đăng nhập");
 
@@ -120,7 +120,7 @@ export default function RecommendProduct() {
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải gợi ý...</p>;
   if (error) return <p style={{ color: "red", padding: 20 }}>{error}</p>;
 
-  /* ================= RENDER LIST ================= */
+  /* RENDER LIST */
   const renderList = (title, icon, list) => (
     <div style={styles.section}>
       <div style={styles.ribbonWrap}>
@@ -228,7 +228,7 @@ export default function RecommendProduct() {
   );
 }
 
-/* ================= STYLE ================= */
+/* STYLE */
 
 const styles = {
   container: {

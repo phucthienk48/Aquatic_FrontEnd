@@ -9,7 +9,7 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* ===== FETCH ORDERS ===== */
+  /*  FETCH ORDERS  */
   const fetchOrders = async () => {
     try {
       const res = await fetch(
@@ -30,7 +30,7 @@ export default function Orders() {
     fetchOrders();
   }, [userId]);
 
-  /* ===== CANCEL ORDER ===== */
+  /*  CANCEL ORDER  */
   const cancelOrder = async (orderId) => {
     if (!window.confirm("Bạn chắc chắn muốn hủy đơn hàng này?")) return;
 
@@ -54,7 +54,7 @@ export default function Orders() {
     }
   };
 
-  /* ===== GUARDS ===== */
+  /*  GUARDS  */
   if (!userId)
     return <p style={styles.center}>⚠️ Vui lòng đăng nhập</p>;
 
@@ -70,7 +70,7 @@ export default function Orders() {
     return `/${image.replace(/^\/+/, "")}`;
   };
 
-  /* ===== RENDER ===== */
+  /*  RENDER  */
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>
@@ -80,7 +80,7 @@ export default function Orders() {
 
       {orders.map((order) => (
         <div key={order._id} style={styles.orderBox}>
-          {/* ===== HEADER ===== */}
+          {/*  HEADER  */}
             <div style={styles.header}>
               <div>
                 <p style={styles.headerLine}>
@@ -100,7 +100,7 @@ export default function Orders() {
                 {order.status}
               </span>
             </div>
-          {/* ===== USER INFO ===== */}
+          {/*  USER INFO  */}
           {order.user && (
             <div style={styles.section}>
               <h4>
@@ -123,7 +123,7 @@ export default function Orders() {
             </div>
           )}
 
-          {/* ===== SHIPPING ADDRESS ===== */}
+          {/*  SHIPPING ADDRESS  */}
           {order.shippingAddress && (
             <div style={styles.section}>
               <h4>
@@ -159,7 +159,7 @@ export default function Orders() {
             </div>
           )}
 
-          {/* ===== PAYMENT ===== */}
+          {/*  PAYMENT  */}
           <div style={styles.section}>
           <h4>
             <i
@@ -179,7 +179,7 @@ export default function Orders() {
 
           </div>
 
-          {/* ===== ITEMS ===== */}
+          {/*  ITEMS  */}
           <div style={styles.section}>
             <h4>
               <i
@@ -243,7 +243,7 @@ export default function Orders() {
             ))}
           </div>
 
-          {/* ===== TOTAL ===== */}
+          {/*  TOTAL  */}
           <div style={styles.footer}>
             <span><b>Tổng tiền:</b></span>
             <span style={styles.total}>
@@ -251,7 +251,7 @@ export default function Orders() {
             </span>
           </div>
 
-          {/* ===== ACTION ===== */}
+          {/*  ACTION  */}
           {order.status === "chờ xử lý" && (
             <div style={{ marginTop: 16, textAlign: "right" }}>
               <button
@@ -270,7 +270,7 @@ export default function Orders() {
 }
 
 
-/* ===== STYLES ===== */
+/*  STYLES  */
 
 const styles = {
   cancelBtn: {
@@ -363,7 +363,7 @@ commentHeader: {
 
 };
 
-/* ===== STATUS COLOR ===== */
+/*  STATUS COLOR  */
 const statusStyle = (status) => {
   const base = {
     padding: "6px 14px",

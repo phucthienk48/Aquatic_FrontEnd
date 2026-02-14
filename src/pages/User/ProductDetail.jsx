@@ -118,7 +118,7 @@ const handleAddToCart = async () => {
     return;
   }
 
-  // ✅ Chuẩn hóa ảnh
+  //  Chuẩn hóa ảnh
   const image =
     product.images?.[0]
       ?.replace(/^\/+/, "") || "data/placeholder.jpg";
@@ -310,7 +310,6 @@ const handleAddToCart = async () => {
   );
 }
 
-/* ================= STYLES ================= */
 const styles = {
   container: {
     maxWidth: "1200px",

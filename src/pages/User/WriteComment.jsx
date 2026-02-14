@@ -13,7 +13,6 @@ export default function WriteComment({ userId, productId, orderId }) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  /* ================= LOAD COMMENT ================= */
 useEffect(() => {
     setLoading(true);
     }, [userId, productId, orderId]);
@@ -50,7 +49,7 @@ useEffect(() => {
     }, [userId, productId, orderId]);
 
 
-  /* ================= UPLOAD IMAGE ================= */
+  /* UPLOAD IMAGE */
   const uploadImage = async (file) => {
     if (!file) return "";
     const fd = new FormData();
@@ -66,12 +65,12 @@ useEffect(() => {
     return data.url;
   };
 
-  /* ================= REMOVE IMAGE ================= */
+  /* REMOVE IMAGE */
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  /* ================= SUBMIT ================= */
+  /* SUBMIT */
   const handleSubmit = async () => {
     if (!content.trim()) return alert("Vui lòng nhập nội dung");
 
@@ -107,7 +106,7 @@ useEffect(() => {
       const data = await res.json();
       if (!res.ok) return alert(data.message || "Lỗi gửi đánh giá");
 
-      /* 🔥 update state để hiển thị form sửa */
+      /*  update state để hiển thị form sửa */
       setComment(data);
       setImages(data.images || []);
       setImageFiles([]);
@@ -216,7 +215,7 @@ if (loading) return <p>⏳ Đang tải đánh giá...</p>;
 
 }
 
-/* ================= STYLE ================= */
+/* STYLE */
 const styles = {
   card: {
     marginTop: 12,

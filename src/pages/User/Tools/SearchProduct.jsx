@@ -10,7 +10,7 @@ export default function SearchProduct({ isMobile }) {
   const navigate = useNavigate();
   const boxRef = useRef(null);
 
-  /* ================= FETCH SEARCH ================= */
+  /* FETCH SEARCH */
   useEffect(() => {
     if (!keyword.trim()) {
       setProducts([]);
@@ -42,7 +42,7 @@ export default function SearchProduct({ isMobile }) {
     return () => clearTimeout(delay);
   }, [keyword]);
 
-  /* ================= CLICK OUTSIDE ================= */
+  /* CLICK OUTSIDE */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (boxRef.current && !boxRef.current.contains(e.target)) {
@@ -55,7 +55,7 @@ export default function SearchProduct({ isMobile }) {
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  /* ================= HANDLERS ================= */
+  /* HANDLERS */
   const handleSearchAll = () => {
     if (!keyword.trim()) return;
     navigate(`/product?keyword=${keyword}`);
@@ -67,7 +67,7 @@ export default function SearchProduct({ isMobile }) {
     setShow(false);
   };
 
-  /* ================= RENDER ================= */
+  /* RENDER */
   return (
     <>
       {/* SEARCH BOX */}
@@ -159,7 +159,7 @@ export default function SearchProduct({ isMobile }) {
   );
 }
 
-/* ================= STYLES (Shopee-like) ================= */
+/* STYLES (Shopee-like) */
 const styles = {
   searchBox: {
     display: "flex",

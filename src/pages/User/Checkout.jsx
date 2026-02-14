@@ -16,13 +16,11 @@ export default function Checkout() {
     address: "",
     note: "",
   });
-  // ===== BANK CONFIG =====
+
     const BANK_ID = "970436";        // Mã ngân hàng (VD: Vietcombank)
     const ACCOUNT_NO = "1030670478"; // Số tài khoản nhận tiền
     const ACCOUNT_NAME = "NGUYEN THIEN PHUC";
 
-
-  /* ===== FETCH CART ===== */
     const getImageUrl = (image) => {
     if (!image) return "/data/placeholder.jpg";
 
@@ -63,7 +61,6 @@ export default function Checkout() {
 
   const transferContent = `${shippingAddress.fullName} ${shippingAddress.phone}`;
 
-  /* ===== PLACE ORDER ===== */
   const placeOrder = async () => {
     if (
       !shippingAddress.fullName ||
@@ -113,7 +110,6 @@ export default function Checkout() {
         <i className="bi bi-receipt-cutoff me-2"></i>
         Thanh toán
       </h2>
-
 
       {/* ===== SHIPPING ===== */}
     <div className="card shadow-sm mb-4">

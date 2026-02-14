@@ -14,7 +14,6 @@ export default function Contact() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  /* ================= FETCH SHOP INFO ================= */
   useEffect(() => {
     fetchShop();
   }, []);
@@ -29,7 +28,6 @@ export default function Contact() {
     }
   };
 
-  /* ================= FORM ================= */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -66,7 +64,7 @@ export default function Contact() {
       </h1>
 
       <div className="row g-4">
-        {/* ================= FORM ================= */}
+        {/*  FORM  */}
         <div className="col-md-6">
           <form style={styles.formCard} onSubmit={handleSubmit}>
             <h4 style={styles.formTitle}>
@@ -155,7 +153,7 @@ export default function Contact() {
           </form>
         </div>
 
-        {/* ================= SHOP INFO ================= */}
+        {/*  SHOP INFO  */}
         <div className="col-md-6">
           <div style={styles.infoCard}>
             {/* LOGO */}
@@ -226,7 +224,7 @@ export default function Contact() {
   );
 }
 
-/* ================= STYLES ================= */
+/*  STYLES  */
 const styles = {
   page: { maxWidth: 1100, margin: "40px auto", padding: 16 },
   title: { textAlign: "center", marginBottom: 40, fontWeight: 700 },

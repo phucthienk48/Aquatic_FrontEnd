@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import socket from "../../socket/socket";
+import { useNavigate } from "react-router-dom";
 
 const LIVE_PRODUCT_API = "http://localhost:5000/api/productlive";
 
 export default function UserLivestreamProduct({ livestreamId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user.id;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!livestreamId) return;
@@ -25,6 +29,43 @@ export default function UserLivestreamProduct({ livestreamId }) {
   const handleUpdate = ({ livestreamId: id }) => {
     if (id === livestreamId) {
       fetchLiveProducts();
+    }
+  };
+
+  const handleGoToDetail = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
+  const handleAddToCart = async (product) => {
+    if (!userId) return alert("Vui lòng đăng nhập");
+
+    const image =
+      product.images?.[0]?.replace(/^\/+/, "") ||
+      "data/placeholder.jpg";
+
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/cart/add",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            productId: product._id,
+            name: product.name,
+            price: product.price,
+            image,
+            quantity: 1,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      alert("✅ Đã thêm vào giỏ hàng");
+    } catch (err) {
+      alert(err.message || "Lỗi thêm giỏ hàng");
     }
   };
 
@@ -82,56 +123,60 @@ export default function UserLivestreamProduct({ livestreamId }) {
   return (
     <div style={styles.wrapper}>
       {products.map((item) => (
-        <div key={item._id} style={styles.item}>
-          
-          {/* IMAGE WRAPPER */}
-          <div style={styles.imageWrapper}>
-            <img
-              src={getImageUrl(item.product?.images)}
-              alt=""
-              style={styles.image}
-            />
+      <div
+        key={item._id}
+        style={styles.item}
+        onClick={() => handleGoToDetail(item.product?._id)}
+      >
+        {/* IMAGE WRAPPER */}
+        <div style={styles.imageWrapper}>
+          <img
+            src={getImageUrl(item.product?.images)}
+            alt=""
+            style={styles.image}
+          />
 
-            {/* BADGE */}
-            <div style={styles.badge}>
-              <i className="bi bi-pin-angle-fill"></i>
-              GHIM
-            </div>
+          <div style={styles.badge}>
+            <i className="bi bi-pin-angle-fill"></i>
+            GHIM
           </div>
-
-          {/* INFO */}
-          <div style={styles.info}>
-            <div style={styles.name}>
-              {item.product?.name}
-            </div>
-
-            <div>
-              <span style={styles.price}>
-                {Number(
-                  item.product?.price || 0
-                ).toLocaleString()} VNĐ
-              </span>
-
-              {item.product?.oldprice && (
-                <span style={styles.oldPrice}>
-                  {Number(
-                    item.product.oldprice
-                  ).toLocaleString()} VNĐ
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* BUY BUTTON */}
-          <button style={styles.buyBtn}>
-            <i className="bi bi-cart-plus"></i>
-             Mua
-          </button>
         </div>
-      ))}
-    </div>
-  );
 
+        {/* INFO */}
+        <div style={styles.info}>
+          <div style={styles.name}>
+            {item.product?.name}
+          </div>
+
+          <div>
+            <span style={styles.price}>
+              {Number(item.product?.price || 0).toLocaleString()} VNĐ
+            </span>
+
+            {item.product?.oldprice && (
+              <span style={styles.oldPrice}>
+                {Number(item.product.oldprice).toLocaleString()} VNĐ
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* BUY BUTTON */}
+        <button
+          style={styles.buyBtn}
+          onClick={(e) => {
+            e.stopPropagation(); // ngăn không cho chuyển trang
+            handleAddToCart(item.product);
+          }}
+        >
+          <i className="bi bi-cart-plus"></i>
+          Chọn Mua
+        </button>
+      </div>
+
+      ))}
+    </div>  
+  );
 }
 const styles = {
   wrapper: {
@@ -152,6 +197,8 @@ const styles = {
     padding: "8px 10px",
     borderRadius: 10,
     border: "1.5px solid #ff7a00",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
 
   imageWrapper: {
@@ -212,16 +259,22 @@ const styles = {
   },
 
   buyBtn: {
-    background: "#ff7a00",
+    background: "linear-gradient(135deg, #ff7a18, #ff4d4f)",
     border: "none",
     color: "#fff",
-    width: 60,
-    height: 30,
-    borderRadius: "15%",
+    padding: "6px 14px",
+    minWidth: 80,
+    height: 32,
+    borderRadius: 20,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 16,
+    gap: 6,
+    fontSize: 13,
+    fontWeight: 600,
+    boxShadow: "0 2px 6px rgba(255,77,79,0.3)",
+    transition: "all 0.2s ease",
   },
+
 };
