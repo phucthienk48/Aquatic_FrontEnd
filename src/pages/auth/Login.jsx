@@ -75,7 +75,10 @@ export default function Login() {
   return (
     <div style={styles.container}>
       <form style={styles.box} onSubmit={handleSubmit}>
-        <h2 style={styles.title}>🔐 Đăng nhập</h2>
+        <h2 style={styles.title}>
+        <i className="bi bi-shield-lock-fill" style={{ marginRight: "8px" }}></i>
+          Đăng nhập
+        </h2>
 
         {error && <p style={styles.error}>{error}</p>}
 

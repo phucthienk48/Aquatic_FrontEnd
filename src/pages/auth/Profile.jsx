@@ -19,7 +19,7 @@ export default function Profile() {
     address: "",
   });
 
-  /* ================= LOAD USER ================= */
+  /*  LOAD USER  */
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -42,7 +42,7 @@ export default function Profile() {
 
   if (!user) return null;
 
-  /* ================= CLOUDINARY UPLOAD ================= */
+  /*  CLOUDINARY UPLOAD  */
   const uploadAvatar = async (file) => {
     setUploading(true);
 
@@ -62,7 +62,7 @@ export default function Profile() {
     return result.secure_url;
   };
 
-  /* ================= UPDATE PROFILE ================= */
+  /*  UPDATE PROFILE  */
   const handleUpdate = async () => {
     if (form.password && form.password.length < 6) {
       return alert("Mật khẩu phải ít nhất 6 ký tự");
@@ -115,7 +115,7 @@ export default function Profile() {
   };
 
 
-  /* ================= DELETE ACCOUNT ================= */
+  /*  DELETE ACCOUNT  */
   const handleDelete = async () => {
     if (!window.confirm("Bạn chắc chắn muốn xóa tài khoản?")) return;
 
@@ -266,7 +266,7 @@ export default function Profile() {
   );
 }
 
-/* ================= STYLES ================= */
+/*  STYLES  */
 
 const styles = {
   container: {

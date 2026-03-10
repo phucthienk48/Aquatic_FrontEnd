@@ -8,8 +8,11 @@ const LIVE_PRODUCT_API = "http://localhost:5000/api/productlive";
 export default function UserLivestreamProduct({ livestreamId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user.id;
+  const [cartSuccess, setCartSuccess] = useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const userId = user?._id || user?.id;
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,7 +40,18 @@ export default function UserLivestreamProduct({ livestreamId }) {
   };
 
   const handleAddToCart = async (product) => {
-    if (!userId) return alert("Vui lòng đăng nhập");
+    if (!userId) {
+      setCartSuccess({
+        type: "error",
+        message: "Vui lòng đăng nhập",
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
+
+      return;
+    }
 
     const image =
       product.images?.[0]?.replace(/^\/+/, "") ||
@@ -63,9 +77,26 @@ export default function UserLivestreamProduct({ livestreamId }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      alert("✅ Đã thêm vào giỏ hàng");
+      // Popup thành công
+      setCartSuccess({
+        type: "success",
+        message: "Đã thêm vào giỏ hàng",
+        productName: product.name,
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
+
     } catch (err) {
-      alert(err.message || "Lỗi thêm giỏ hàng");
+      setCartSuccess({
+        type: "error",
+        message: err.message || "Lỗi thêm giỏ hàng",
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
     }
   };
 
@@ -175,6 +206,61 @@ export default function UserLivestreamProduct({ livestreamId }) {
       </div>
 
       ))}
+    {cartSuccess && (
+      <div style={styles.overlay}>
+        <div style={styles.popup}>
+          <div
+            style={{
+              ...styles.iconCircle,
+              background:
+                cartSuccess.type === "success"
+                  ? "rgba(25,118,210,0.12)"
+                  : "rgba(220,53,69,0.12)",
+              color:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545",
+            }}
+          >
+            <i
+              className={`bi ${
+                cartSuccess.type === "success"
+                  ? "bi-cart-check-fill"
+                  : "bi-exclamation-circle-fill"
+              }`}
+            />
+          </div>
+
+          <h5
+            style={{
+              ...styles.title,
+              color:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545",
+            }}
+          >
+            {cartSuccess.message}
+          </h5>
+
+          {cartSuccess.productName && (
+            <p style={styles.productName}>
+              {cartSuccess.productName}
+            </p>
+          )}
+
+          <div
+            style={{
+              ...styles.progressBar,
+              background:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545",
+            }}
+          />
+        </div>
+      </div>
+    )}
     </div>  
   );
 }
@@ -276,5 +362,58 @@ const styles = {
     boxShadow: "0 2px 6px rgba(255,77,79,0.3)",
     transition: "all 0.2s ease",
   },
+  overlay: {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.25)",
+  backdropFilter: "blur(5px)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+},
+
+popup: {
+  width: "360px",
+  padding: "30px 25px 38px",
+  borderRadius: "18px",
+  background: "#ffffff",
+  textAlign: "center",
+  boxShadow: "0 20px 60px rgba(25,118,210,0.25)",
+  position: "relative",
+  animation: "fadeScaleIn 0.25s ease",
+},
+
+iconCircle: {
+  width: "75px",
+  height: "75px",
+  borderRadius: "50%",
+  margin: "0 auto 15px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "34px",
+},
+
+title: {
+  fontWeight: 600,
+  marginBottom: 6,
+},
+
+productName: {
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 10,
+},
+
+progressBar: {
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  height: "4px",
+  width: "100%",
+  animation: "progressShrink 2.5s linear",
+  borderRadius: "0 0 18px 18px",
+},
 
 };

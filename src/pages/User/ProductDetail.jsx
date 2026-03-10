@@ -17,6 +17,7 @@ export default function ProductDetail() {
 
   const [ratingAvg, setRatingAvg] = useState(0);
   const [ratingCount, setRatingCount] = useState(0);
+  const [cartSuccess, setCartSuccess] = useState(null);
 
   useEffect(() => {
     if (!id) return;
@@ -112,41 +113,64 @@ export default function ProductDetail() {
     fetchProduct();
   }, [id]);
 
-const handleAddToCart = async () => {
-  if (!userId) {
-    alert("Vui lòng đăng nhập");
-    return;
-  }
+  const handleAddToCart = async () => {
+    if (!userId) {
+      setCartSuccess({
+        type: "error",
+        message: "Vui lòng đăng nhập",
+      });
 
-  //  Chuẩn hóa ảnh
-  const image =
-    product.images?.[0]
-      ?.replace(/^\/+/, "") || "data/placeholder.jpg";
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
 
-  try {
-    const res = await fetch("http://localhost:5000/api/cart/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId,
-        productId: product._id,
-        name: product.name,
-        price: product.price,
-        image, // ← CHUẨN
-        quantity,
-      }),
-    });
+      return;
+    }
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+    // Chuẩn hóa ảnh
+    const image =
+      product.images?.[0]?.replace(/^\/+/, "") ||
+      "data/placeholder.jpg";
 
-    alert("✅ Đã thêm vào giỏ hàng");
-  } catch (err) {
-    alert(err.message || "Lỗi thêm giỏ hàng");
-  }
-};
+    try {
+      const res = await fetch("http://localhost:5000/api/cart/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          productId: product._id,
+          name: product.name,
+          price: product.price,
+          image,
+          quantity,
+        }),
+      });
 
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
 
+      // ✅ Popup thành công
+      setCartSuccess({
+        type: "success",
+        message: "Đã thêm vào giỏ hàng",
+        productName: product.name,
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
+
+    } catch (err) {
+      setCartSuccess({
+        type: "error",
+        message: err.message || "Lỗi thêm giỏ hàng",
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
+    }
+  };
 
   // ==== UI STATE ====
   if (loading)
@@ -232,7 +256,6 @@ const handleAddToCart = async () => {
             </span>
           </div>
 
-
           <div style={styles.priceGroup}>
             <span style={styles.price}>
               {product.price.toLocaleString()} VNĐ
@@ -268,7 +291,7 @@ const handleAddToCart = async () => {
               style={styles.qtyBtn}
               onClick={() =>
                 setQuantity((q) =>
-                  Math.min(product.quantity, q + 1)
+                  Math.min(product.quantity, 99 ,q + 1)
                 )
               }
             >
@@ -306,6 +329,62 @@ const handleAddToCart = async () => {
       )}
 
       <ProductComment productId={id} />
+      {cartSuccess && (
+      <div style={styles.overlay}>
+        <div style={styles.popup}>
+          
+          <div
+            style={{
+              ...styles.iconCircle,
+              background:
+                cartSuccess.type === "success"
+                  ? "rgba(25,118,210,0.12)"
+                  : "rgba(220,53,69,0.12)",
+              color:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545"
+            }}
+          >
+            <i
+              className={`bi ${
+                cartSuccess.type === "success"
+                  ? "bi-cart-check-fill"
+                  : "bi-exclamation-circle-fill"
+              }`}
+            ></i>
+          </div>
+
+          <h5
+            style={{
+              ...styles.title,
+              color:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545"
+            }}
+          >
+            {cartSuccess.message}
+          </h5>
+
+          {cartSuccess.productName && (
+            <p style={styles.productName}>
+              {cartSuccess.productName}
+            </p>
+          )}
+
+          <div
+            style={{
+              ...styles.progressBar,
+              background:
+                cartSuccess.type === "success"
+                  ? "#1976d2"
+                  : "#dc3545"
+            }}
+          />
+        </div>
+      </div>
+    )}
     </div>
   );
 }
@@ -325,18 +404,20 @@ const styles = {
     flexWrap: "wrap",
   },
 
-  /* ===== LEFT ===== */
   leftCol: {
     flex: "1 1 420px",
   },
+  
   title: {
     fontSize: "30px",
-    lineHeight: "1.3",
     fontWeight: "700",
-    background: "linear-gradient(90deg, #fd7e14, #ff922b)",
+    lineHeight: "1.3",
+    marginBottom: "14px",
+    background: "linear-gradient(90deg, #0072ff, #00c6ff )",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
-    textShadow: "0 2px 6px rgba(253, 126, 20, 0.25)",
+    textShadow: "0 2px 6px rgba(0,0,0,0.15)",
+    letterSpacing: "0.3px"
   },
 
 
@@ -403,62 +484,66 @@ const styles = {
     fontSize: "14px",
   },
 
-  /* ===== PRICE ===== */
+/* ===== PRICE ===== */
+
   priceGroup: {
     display: "flex",
     alignItems: "center",
-    gap: "14px",
+    gap: "12px",
     margin: "18px 0",
+    padding: "12px 16px",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    background: "#fafafa"
   },
 
   price: {
-    fontSize: "30px",
+    fontSize: "28px",
     fontWeight: "700",
-    color: "#dc3545",
+    color: "#ee4d2d"
   },
 
   oldPrice: {
-    fontSize: "16px",
+    fontSize: "15px",
     textDecoration: "line-through",
-    color: "#adb5bd",
+    color: "#9ca3af"
   },
 
   discountBadge: {
-    background: "#dc3545",
+    background: "#ee4d2d",
     color: "#fff",
-    padding: "4px 10px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "600",
+    padding: "3px 8px",
+    borderRadius: "6px",
+    fontSize: "13px",
+    fontWeight: "600"
   },
+  
 
-  /* ===== QUANTITY ===== */
-  qtyBox: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    marginBottom: "18px",
-    border: "1px solid #dee2e6",
-    borderRadius: "12px",
-    padding: "6px 12px",
-    width: "fit-content",
-  },
+qtyBox: {
+  display: "flex",
+  alignItems: "center",
+  border: "1px solid #ddd",
+  borderRadius: "6px",
+  overflow: "hidden",
+  width: "120px",
+  marginBottom: "18px"
+},
 
-  qtyBtn: {
-    width: "40px",
-    height: "40px",
-    padding: "0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+qtyBtn: {
+  width: "40px",
+  height: "40px",
+  border: "none",
+  background: "#f8f9fa",
+  cursor: "pointer",
+  fontSize: "16px"
+},
 
-  qtyValue: {
-    minWidth: "36px",
-    textAlign: "center",
-    fontSize: "16px",
-    fontWeight: "600",
-  },
+qtyValue: {
+  flex: 1,
+  textAlign: "center",
+  fontWeight: "600",
+  fontSize: "16px"
+},
 
   /* ===== BUTTONS ===== */
   button: {
@@ -477,7 +562,7 @@ const styles = {
   },
 
 backBtn: {
-  display: "flex",          // ← xuống hàng
+  display: "flex",          
   alignItems: "center",
   gap: "8px",
   background: "#f8f9fa",
@@ -489,7 +574,7 @@ backBtn: {
   fontWeight: "500",
   cursor: "pointer",
   marginTop: "16px",
-  width: "fit-content",     // không kéo full hàng
+  width: "fit-content",    
   transition: "all 0.2s ease",
 },
 
@@ -507,5 +592,56 @@ backBtn: {
     fontSize: "18px",
     color: "#dc3545",
   },
+  overlay: {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.25)",
+  backdropFilter: "blur(5px)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+},
+
+popup: {
+  width: "360px",
+  padding: "30px 25px 38px",
+  borderRadius: "18px",
+  background: "#ffffff",
+  textAlign: "center",
+  boxShadow: "0 20px 60px rgba(25,118,210,0.25)",
+  position: "relative",
+  animation: "fadeScaleIn 0.25s ease"
+},
+
+iconCircle: {
+  width: "75px",
+  height: "75px",
+  borderRadius: "50%",
+  margin: "0 auto 15px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "34px",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.1)"
+},
+
+
+
+productName: {
+  fontSize: 14,
+  color: "#555",
+  marginBottom: 10
+},
+
+progressBar: {
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  height: "4px",
+  width: "100%",
+  animation: "progressShrink 2.5s linear",
+  borderRadius: "0 0 18px 18px"
+},
 };
 

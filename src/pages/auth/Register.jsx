@@ -79,7 +79,13 @@ export default function Register() {
   return (
     <div style={styles.container}>
       <form style={styles.box} onSubmit={handleSubmit}>
-        <h2 style={styles.title}>📝 Đăng ký tài khoản</h2>
+        <h2 style={styles.title}>
+          <i
+            className="bi bi-person-plus-fill"
+            style={{ marginRight: "10px", color: "#0ea5e9", fontSize: "26px" }}
+          ></i>
+          Đăng ký tài khoản
+        </h2>
 
         {error && <p style={styles.error}>{error}</p>}
 

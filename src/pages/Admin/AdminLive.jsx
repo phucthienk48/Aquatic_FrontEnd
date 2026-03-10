@@ -4,8 +4,10 @@ import LiveCommentWrite from "../livestream/LiveCommentWrite";
 import LiveCommentList from "../livestream/LiveCommentList";
 import AdminLivestreamPage from "../livestream/AdminLivestreamPage";
 import AdminLivestreamProduct from "../livestream/AdminLivestreamProduct";
+import AdminStreamCamera from "../livestream/AdminStreamCamera";
 
 export default function LiveCommentContainer() {
+
   const [livestreamId, setLivestreamId] = useState(null);
 
   useEffect(() => {
@@ -20,31 +22,53 @@ export default function LiveCommentContainer() {
         gap: 20,
       }}
     >
+
+      {/* LEFT */}
+
       <div>
+
         <AdminLivestreamPage
           livestreamId={livestreamId}
           onSelectLivestream={setLivestreamId}
         />
 
         {livestreamId && (
+
           <div style={{ marginTop: 20 }}>
+
+            {/* CAMERA STREAM */}
+            <AdminStreamCamera
+              livestreamId={livestreamId}
+            />
+
             <AdminLivestreamProduct
               livestreamId={livestreamId}
             />
+
           </div>
+
         )}
+
       </div>
+
+      {/* RIGHT */}
+
       <div>
+
         <LiveCommentWrite
           onSelectLivestream={setLivestreamId}
         />
 
         {livestreamId && (
+
           <LiveCommentList
             livestreamId={livestreamId}
           />
+
         )}
+
       </div>
+
     </div>
   );
 }

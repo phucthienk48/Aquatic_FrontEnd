@@ -8,6 +8,7 @@ export default function Checkout() {
 
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [shippingAddress, setShippingAddress] = useState({
@@ -67,12 +68,22 @@ export default function Checkout() {
       !shippingAddress.phone ||
       !shippingAddress.address
     ) {
-      alert("Vui lòng nhập đầy đủ thông tin giao hàng");
+      setCheckoutNotice({
+        type: "warning",
+        message: "Vui lòng nhập đầy đủ thông tin giao hàng",
+      });
+
+      setTimeout(() => setCheckoutNotice(null), 2500);
       return;
     }
 
     if (paymentMethod === "vietqr" && !isVietQRValid) {
-      alert("Vui lòng nhập họ tên và số điện thoại để tạo mã VietQR");
+      setCheckoutNotice({
+        type: "warning",
+        message: "Vui lòng nhập họ tên và số điện thoại để tạo mã VietQR",
+      });
+
+      setTimeout(() => setCheckoutNotice(null), 2500);
       return;
     }
 
@@ -96,18 +107,33 @@ export default function Checkout() {
         { method: "DELETE" }
       );
 
-      alert("🎉 Đặt hàng thành công!");
-      navigate("/orders");
+      // Thành công
+      setCheckoutNotice({
+        type: "success",
+        message: "Đặt hàng thành công!",
+      });
+
+      setTimeout(() => {
+        setCheckoutNotice(null);
+        navigate("/orders");
+      }, 2200);
+
     } catch (err) {
       console.error(err);
-      alert("❌ Có lỗi xảy ra");
+
+      setCheckoutNotice({
+        type: "error",
+        message: "Có lỗi xảy ra khi đặt hàng",
+      });
+
+      setTimeout(() => setCheckoutNotice(null), 2500);
     }
   };
 
   return (
     <div style={styles.container}>
       <h2 className="text-center mb-4 fw-bold text-primary">
-        <i className="bi bi-receipt-cutoff me-2"></i>
+        <i className="bi bi-wallet2 me-2"></i>
         Thanh toán
       </h2>
 
@@ -325,7 +351,67 @@ export default function Checkout() {
         <i className="bi bi-bag-check-fill"></i>
         Đặt hàng
       </button>
+        {checkoutNotice && (
+          <div style={styles.overlay}>
+            <div style={styles.popup}>
 
+              <div
+                style={{
+                  ...styles.iconCircle,
+                  background:
+                    checkoutNotice.type === "success"
+                      ? "rgba(25,118,210,0.12)"
+                      : checkoutNotice.type === "warning"
+                      ? "rgba(255,193,7,0.15)"
+                      : "rgba(220,53,69,0.12)",
+
+                  color:
+                    checkoutNotice.type === "success"
+                      ? "#1976d2"
+                      : checkoutNotice.type === "warning"
+                      ? "#ffc107"
+                      : "#dc3545",
+                }}
+              >
+                <i
+                  className={`bi ${
+                    checkoutNotice.type === "success"
+                      ? "bi-check-circle-fill"
+                      : checkoutNotice.type === "warning"
+                      ? "bi-exclamation-triangle-fill"
+                      : "bi-x-circle-fill"
+                  }`}
+                />
+              </div>
+
+              <h5
+                style={{
+                  ...styles.title,
+                  color:
+                    checkoutNotice.type === "success"
+                      ? "#1976d2"
+                      : checkoutNotice.type === "warning"
+                      ? "#ffc107"
+                      : "#dc3545",
+                }}
+              >
+                {checkoutNotice.message}
+              </h5>
+
+              <div
+                style={{
+                  ...styles.progressBar,
+                  background:
+                    checkoutNotice.type === "success"
+                      ? "#1976d2"
+                      : checkoutNotice.type === "warning"
+                      ? "#ffc107"
+                      : "#dc3545",
+                }}
+              />
+            </div>
+          </div>
+        )}
     </div>
   );
 }
@@ -413,5 +499,51 @@ muted: {
   fontSize: 14,
   color: "#666",
 },
+overlay: {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.25)",
+  backdropFilter: "blur(5px)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+},
 
+popup: {
+  width: "360px",
+  padding: "32px 28px 40px",
+  borderRadius: "18px",
+  background: "#ffffff",
+  textAlign: "center",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+  position: "relative",
+  animation: "fadeScaleIn 0.25s ease",
+},
+
+iconCircle: {
+  width: "75px",
+  height: "75px",
+  borderRadius: "50%",
+  margin: "0 auto 15px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "34px",
+},
+
+title: {
+  fontWeight: 600,
+  marginBottom: 6,
+},
+
+progressBar: {
+  position: "absolute",
+  bottom: 0,
+  left: 0,
+  height: "4px",
+  width: "100%",
+  animation: "progressShrink 2.5s linear",
+  borderRadius: "0 0 18px 18px",
+},
 };

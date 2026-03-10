@@ -6,10 +6,14 @@ import LiveCommentList from "../livestream/LiveCommentList";
 import LiveCommentWrite from "../livestream/LiveCommentWrite";
 import UserProductPage from "../livestream/UserLivestreamProduct";
 
+import UserWatchLivestream from "../livestream/UserWatchLivestream";
+
+// import { toast } from "react-toastify";
 const API = "http://localhost:5000/api/livestream";
 
 export default function LiveRoom() {
   const [room, setRoom] = useState(null);
+  const [orderSuccess, setOrderSuccess] = useState(null);
 
   useEffect(() => {
     fetchLiveRoom();
@@ -17,9 +21,20 @@ export default function LiveRoom() {
     socket.on("livestreamStarted", handleStart);
     socket.on("livestreamEnded", handleEnd);
 
+    const handleAutoOrder = (data) => {
+      setOrderSuccess(data);
+
+      setTimeout(() => {
+        setOrderSuccess(null);
+      }, 10000);
+    };
+
+    socket.on("autoOrderSuccess", handleAutoOrder);
+
     return () => {
       socket.off("livestreamStarted", handleStart);
       socket.off("livestreamEnded", handleEnd);
+      socket.off("autoOrderSuccess", handleAutoOrder);
     };
   }, []);
 
@@ -103,17 +118,31 @@ export default function LiveRoom() {
             </div>
           </div>
 
-          {/* VIDEO */}
-          <div className="card shadow-sm border-0 mb-3">
-            <div className="card-body" style={styles.videoBox}>
-              <i className="bi bi-camera-video fs-1 text-muted"></i>
-              <p className="text-muted mt-2">
-                {room.status === "live"
-                  ? "Livestream đang phát trực tiếp..."
-                  : "Livestream đã kết thúc"}
-              </p>
-            </div>
-          </div>
+{/* VIDEO */}
+<div className="card shadow-sm border-0 mb-3">
+  <div className="card-body p-0" style={styles.videoBox}>
+
+    {room.status === "live" && (
+      <UserWatchLivestream livestreamId={room._id} />
+    )}
+
+    {room.status === "ended" && room.videoUrl && (
+      <video
+        src={`http://localhost:5000${room.videoUrl}`}
+        controls
+        style={{ width: "100%", height: "100%" }}
+      />
+    )}
+
+    {room.status !== "live" && !room.videoUrl && (
+      <div className="text-center text-muted">
+        <i className="bi bi-camera-video fs-1"></i>
+        <p>Livestream chưa bắt đầu</p>
+      </div>
+    )}
+
+  </div>
+</div>
             <div>
               <div >
               </div>
@@ -146,6 +175,32 @@ export default function LiveRoom() {
         </div>
 
       </div>
+      {orderSuccess && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div style={styles.successIcon}>
+              <i className="bi bi-check-circle-fill"></i>
+            </div>
+
+            <h3 className="fw-bold mt-3">Chốt đơn thành công!</h3>
+
+            <p className="text-muted mb-2">
+              Đơn hàng của bạn đã được tạo
+            </p>
+
+            <h4 className="text-danger fw-bold mb-4">
+              {orderSuccess.totalPrice.toLocaleString()} VNĐ
+            </h4>
+
+            <button
+              className="btn btn-dark px-4"
+              onClick={() => setOrderSuccess(null)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -171,4 +226,31 @@ const styles = {
     maxHeight: "70vh",
     overflowY: "auto",
   },
+overlay: {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(14,165,233,0.15)", // overlay xanh biển nhẹ
+  backdropFilter: "blur(3px)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999
+},
+
+modal: {
+  background: "#ffffff",
+  padding: "35px 30px",
+  borderRadius: "14px",
+  textAlign: "center",
+  width: "360px",
+  boxShadow: "0 10px 30px rgba(14,165,233,0.25)", // shadow xanh biển
+  borderTop: "5px solid #22c55e", // xanh lá
+  animation: "fadeScale 0.25s ease"
+},
+
+successIcon: {
+  fontSize: "55px",
+  color: "#22c55e", // icon xanh lá
+  marginBottom: "15px"
+}
 };

@@ -11,6 +11,7 @@ export default function Product() {
   const [ratings, setRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cartSuccess, setCartSuccess] = useState(null);
 
   /*  FETCH PRODUCTS  */
   useEffect(() => {
@@ -82,9 +83,16 @@ export default function Product() {
     });
   };
 
+
   /*  ADD TO CART  */
   const handleAddToCart = async (product) => {
-    if (!userId) return alert("Vui lòng đăng nhập");
+    if (!userId) {
+      setCartSuccess({
+        type: "error",
+        message: "Vui lòng đăng nhập"
+      });
+      return;
+    }
 
     const image =
       product.images?.[0]?.replace(/^\/+/, "") ||
@@ -107,9 +115,27 @@ export default function Product() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      alert("✅ Đã thêm vào giỏ hàng");
+      // Hiển thị popup
+      setCartSuccess({
+        type: "success",
+        message: "Đã thêm vào giỏ hàng",
+        productName: product.name
+      });
+
+      // Tự đóng sau 2.5s
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
+
     } catch (err) {
-      alert(err.message || "Lỗi thêm giỏ hàng");
+      setCartSuccess({
+        type: "error",
+        message: err.message || "Lỗi thêm giỏ hàng"
+      });
+
+      setTimeout(() => {
+        setCartSuccess(null);
+      }, 2500);
     }
   };
 
@@ -211,6 +237,7 @@ const renderList = (title, icon, list) => (
         );
       })}
     </div>
+
     
   </div>
 );
@@ -223,6 +250,61 @@ const renderList = (title, icon, list) => (
       {renderList("Cá cảnh", "", fishList)}
       {renderList("Thuốc & Hóa chất", "", medicineList)}
       {renderList("Hồ & Thiết bị", "🛠", equipmentList)}
+      {cartSuccess && (
+        <div style={styles.overlay}>
+          <div style={styles.modal}>
+            <div
+              style={{
+                ...styles.successIcon,
+                color:
+                  cartSuccess.type === "success"
+                    ? "#0d6efd"
+                    : "#dc3545",
+                background:
+                  cartSuccess.type === "success"
+                    ? "rgba(13,110,253,0.1)"
+                    : "rgba(220,53,69,0.1)",
+                boxShadow:
+                  cartSuccess.type === "success"
+                    ? "0 8px 20px rgba(13,110,253,0.25)"
+                    : "0 8px 20px rgba(220,53,69,0.25)"
+              }}
+            >
+              <i
+                className={`bi ${
+                  cartSuccess.type === "success"
+                    ? "bi-cart-check-fill"
+                    : "bi-exclamation-circle-fill"
+                }`}
+              ></i>
+            </div>
+
+            <h5
+              style={{
+                color:
+                  cartSuccess.type === "success"
+                    ? "#0d6efd"
+                    : "#dc3545",
+                fontWeight: 600,
+              }}
+            >
+              {cartSuccess.message}
+            </h5>
+
+            {cartSuccess.productName && (
+              <p
+                style={{
+                  marginTop: 8,
+                  fontSize: 14,
+                  color: "#555",
+                }}
+              >
+                {cartSuccess.productName}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -383,7 +465,41 @@ const styles = {
       "linear-gradient(90deg, #dc3545, #fd7e14, #ffc107, #198754, #0dcaf0, #0d6efd, #6f42c1)",
   },
 
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(13, 110, 253, 0.15)", // xanh mờ thay vì đen
+    backdropFilter: "blur(6px)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+  },
 
+  modal: {
+    background: "linear-gradient(145deg, #ffffff, #f0f6ff)",
+    padding: "35px 30px",
+    borderRadius: "18px",
+    width: "360px",
+    textAlign: "center",
+    boxShadow: "0 15px 40px rgba(13,110,253,0.25)",
+    border: "1px solid rgba(13,110,253,0.15)",
+    animation: "bluePop 0.25s ease"
+  },
+
+  successIcon: {
+    width: "80px",
+    height: "80px",
+    margin: "0 auto 15px",
+    borderRadius: "50%",
+    background: "rgba(13,110,253,0.1)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: "40px",
+    color: "#0d6efd",
+    boxShadow: "0 8px 20px rgba(13,110,253,0.3)"
+  },
 
 };
 
