@@ -1,9 +1,9 @@
-// import Header from "../../components/Header";
-// import Footer from "../../components/Footer";
-import Product from "./Product"
+
+import ListProductHome from "../User/components/ListProductHome"
 import Hello from "./Hello"
 import Banner from "./Tools/Banner"
 import BannerKnowledge from "./Tools/BannerKnowledge";
+import BannerNewProducts from "../User/components/BannerNewProducts";
 
 function App() {
   return (
@@ -11,11 +11,14 @@ function App() {
       {/* <Header /> */}
       <main style={{ minHeight: "70vh", padding: "20px" }}>
         <Banner />
-        <Product />
+        {/* <BannerNewProducts /> */}
+        <ListProductHome />
         <BannerKnowledge />
-        {/* <Hello /> */}
+
+        
+       
       </main>
-      {/* <Footer /> */}
+      
     </>
   );
 }

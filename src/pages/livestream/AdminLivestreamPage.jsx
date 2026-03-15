@@ -136,10 +136,10 @@ export default function AdminLivestreamPage() {
   return (
     <div className="container py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>
-          <i className="bi bi-broadcast me-2 text-danger"></i>
-          Quản lý Livestream
-        </h4>
+        <h2 style={styles.pageTitle}>
+          <i className="bi bi-broadcast" style={styles.titleIcon}></i>
+          QUẢN LÝ LIVESTREAM
+        </h2>
 
         <button
           className="btn btn-primary"
@@ -309,7 +309,25 @@ const styles = {
     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
     transform: "translateY(-2px)",
   },
+  pageTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 26,
+    fontWeight: 700,
+    padding: "12px 18px",
+    background: "#eff6ff",
+    color: "#1e40af",
+    borderRadius: 10,
+    marginBottom: 20,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+    textTransform: "uppercase",
+  },
 
+  titleIcon: {
+    fontSize: 30,
+    color: "#3b82f6",
+  },
   cardBody: {
     display: "flex",
     alignItems: "center",

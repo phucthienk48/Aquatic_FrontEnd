@@ -62,31 +62,45 @@ export default function Checkout() {
 
   const transferContent = `${shippingAddress.fullName} ${shippingAddress.phone}`;
 
-  const placeOrder = async () => {
-    if (
-      !shippingAddress.fullName ||
-      !shippingAddress.phone ||
-      !shippingAddress.address
-    ) {
-      setCheckoutNotice({
-        type: "warning",
-        message: "Vui lòng nhập đầy đủ thông tin giao hàng",
-      });
+const phoneRegex = /^0\d{9}$/;
+const isPhoneValid = phoneRegex.test(shippingAddress.phone);
 
-      setTimeout(() => setCheckoutNotice(null), 2500);
-      return;
-    }
+const placeOrder = async () => {
 
-    if (paymentMethod === "vietqr" && !isVietQRValid) {
-      setCheckoutNotice({
-        type: "warning",
-        message: "Vui lòng nhập họ tên và số điện thoại để tạo mã VietQR",
-      });
+  if (
+    !shippingAddress.fullName ||
+    !shippingAddress.phone ||
+    !shippingAddress.address
+  ) {
+    setCheckoutNotice({
+      type: "warning",
+      message: "Vui lòng nhập đầy đủ thông tin giao hàng",
+    });
 
-      setTimeout(() => setCheckoutNotice(null), 2500);
-      return;
-    }
+    setTimeout(() => setCheckoutNotice(null), 2500);
+    return;
+  }
 
+  // kiểm tra số điện thoại
+  if (!isPhoneValid) {
+    setCheckoutNotice({
+      type: "warning",
+      message: "Số điện thoại phải gồm 10 số và bắt đầu bằng 0",
+    });
+
+    setTimeout(() => setCheckoutNotice(null), 2500);
+    return;
+  }
+
+  if (paymentMethod === "vietqr" && !isVietQRValid) {
+    setCheckoutNotice({
+      type: "warning",
+      message: "Vui lòng nhập họ tên và số điện thoại để tạo mã VietQR",
+    });
+
+    setTimeout(() => setCheckoutNotice(null), 2500);
+    return;
+  }
     try {
       const res = await fetch("http://localhost:5000/api/orders", {
         method: "POST",
@@ -166,15 +180,17 @@ export default function Checkout() {
           <span className="input-group-text">
             <i className="bi bi-telephone-fill"></i>
           </span>
-          <input
-            type="tel"
-            className="form-control"
-            placeholder="Số điện thoại"
-            value={shippingAddress.phone}
-            onChange={(e) =>
-              setShippingAddress({ ...shippingAddress, phone: e.target.value })
-            }
-          />
+            <input
+              type="tel"
+              className="form-control"
+              placeholder="Số điện thoại"
+              value={shippingAddress.phone}
+              maxLength={10}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // chỉ cho số
+                setShippingAddress({ ...shippingAddress, phone: value });
+              }}
+            />
         </div>
 
         {/* ĐỊA CHỈ */}

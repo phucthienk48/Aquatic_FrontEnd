@@ -145,8 +145,9 @@ export default function AdminKnowledge() {
   /* ================= UI ================= */
   return (
     <div className="container py-4">
-      <h3 className="mb-3">
-        <i className="bi bi-journal-text me-2"></i>Quản lý kiến thức nuôi cá
+      <h3 style={styles.pageTitle}>
+        <i className="bi bi-journal-text" style={styles.titleIcon}></i>
+        Quản lý kiến thức nuôi cá
       </h3>
 
       {/* ===== ADD BUTTON ===== */}
@@ -324,13 +325,16 @@ export default function AdminKnowledge() {
 
       {/* ===== LIST ===== */}
       <div className="card shadow-sm border-0">
-        <div className="card-header bg-dark text-white">Danh sách bài viết</div>
+        <div style={styles.cardHeader}>
+          <i className="bi bi-journal-text" style={{ marginRight: 8 }}></i>
+          Danh sách bài viết
+        </div>
         <table className="table table-hover mb-0">
           <thead>
             <tr>
               <th>ID</th>
               <th>Tiêu đề</th>
-              <th width="140">Hành động</th>
+              <th width="160">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -343,13 +347,13 @@ export default function AdminKnowledge() {
                     className="btn btn-sm btn-outline-primary me-2"
                     onClick={() => handleEdit(item.knowledgeId)}
                   >
-                    <i className="bi bi-pencil"></i>
+                    <i className="bi bi-pencil me-1"></i> Sửa
                   </button>
                   <button
                     className="btn btn-sm btn-outline-danger"
                     onClick={() => handleDelete(item.knowledgeId)}
                   >
-                    <i className="bi bi-trash"></i>
+                    <i className="bi bi-trash me-1"></i> Xóa
                   </button>
                 </td>
               </tr>
@@ -360,137 +364,183 @@ export default function AdminKnowledge() {
     </div>
   );
 }
-/* ================= STYLE ================= */
 const styles = {
   container: {
     maxWidth: 1200,
     margin: "auto",
     padding: 30,
+    background: "#f8fafc",
   },
-
+cardHeader: {
+  background: "linear-gradient(135deg, #60a5fa, #3b82f6)",
+  color: "#0d0808",
+  fontWeight: 600,
+  fontSize: 20,
+  padding: "14px 18px",
+  borderTopLeftRadius: 12,
+  borderTopRightRadius: 12,
+  display: "flex",
+  alignItems: "center",
+},
   pageTitle: {
-    marginBottom: 20,
-    color: "#dc3545",
+    fontSize: 26,
+    fontWeight: 700,
+    marginBottom: 24,
+    color: "#1f2937",
     display: "flex",
     alignItems: "center",
     gap: 10,
   },
+pageTitle: {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  fontSize: 26,
+  fontWeight: 700,
+  padding: "12px 18px",
+  background: "#eff6ff",
+  color: "#1e40af",
+  borderRadius: 10,
+  marginBottom: 20,
+  boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+  textTransform: "uppercase",
+},
 
+titleIcon: {
+  fontSize: 30,
+  color: "#3b82f6",
+},
   form: {
-    background: "#fff",
-    padding: 24,
-    borderRadius: 12,
-    boxShadow: "0 4px 14px rgba(0,0,0,.08)",
+    background: "#ffffff",
+    padding: 26,
+    borderRadius: 14,
+    boxShadow: "0 10px 28px rgba(0,0,0,0.06)",
     marginBottom: 40,
     display: "flex",
     flexDirection: "column",
-    gap: 12,
+    gap: 14,
+    border: "1px solid #e5e7eb",
   },
 
   formTitle: {
-    marginBottom: 10,
-    color: "#333",
+    fontSize: 18,
+    fontWeight: 600,
+    color: "#111827",
   },
 
   subTitle: {
     marginTop: 10,
-    color: "#0d6efd",
+    fontWeight: 600,
+    color: "#2563eb",
   },
 
   section: {
-    border: "1px dashed #ccc",
-    borderRadius: 8,
-    padding: 12,
-    background: "#fafafa",
+    border: "1px dashed #d1d5db",
+    borderRadius: 10,
+    padding: 14,
+    background: "#f9fafb",
     display: "flex",
     flexDirection: "column",
-    gap: 8,
+    gap: 10,
   },
 
   addBtn: {
-    background: "#e9f2ff",
-    border: "1px dashed #0d6efd",
-    padding: 8,
+    background: "#eff6ff",
+    border: "1px dashed #3b82f6",
+    padding: "8px 10px",
     borderRadius: 6,
     cursor: "pointer",
-    color: "#0d6efd",
+    color: "#2563eb",
     fontWeight: 600,
+    transition: "all .2s",
   },
 
   removeBtn: {
     alignSelf: "flex-end",
     background: "#fff",
     border: "none",
-    color: "#dc3545",
+    color: "#ef4444",
     cursor: "pointer",
+    fontWeight: 500,
   },
 
   actions: {
     display: "flex",
-    gap: 10,
-    marginTop: 10,
+    gap: 12,
+    marginTop: 12,
   },
 
   saveBtn: {
-    background: "#0d6efd",
+    background: "#2563eb",
     color: "#fff",
     border: "none",
-    padding: "8px 16px",
+    padding: "8px 18px",
     borderRadius: 6,
     fontWeight: 600,
+    cursor: "pointer",
   },
 
   cancelBtn: {
-    background: "#6c757d",
+    background: "#9ca3af",
     color: "#fff",
     border: "none",
-    padding: "8px 16px",
+    padding: "8px 18px",
     borderRadius: 6,
+    cursor: "pointer",
   },
 
   listTitle: {
-    marginBottom: 10,
-    color: "#333",
+    marginBottom: 14,
+    fontSize: 18,
+    fontWeight: 600,
+    color: "#1f2937",
   },
 
   table: {
     width: "100%",
-    borderCollapse: "collapse",
-    background: "#fff",
-    boxShadow: "0 4px 14px rgba(0,0,0,.06)",
-    borderRadius: 10,
+    borderCollapse: "separate",
+    borderSpacing: 0,
+    background: "#ffffff",
+    borderRadius: 12,
     overflow: "hidden",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.06)",
+    border: "1px solid #e5e7eb",
   },
 
   editBtn: {
-    background: "#ffc107",
+    background: "#facc15",
     border: "none",
     padding: "6px 10px",
     borderRadius: 6,
     cursor: "pointer",
     marginRight: 6,
+    color: "#000",
   },
 
   deleteBtn: {
-    background: "#dc3545",
+    background: "#ef4444",
     color: "#fff",
     border: "none",
     padding: "6px 10px",
     borderRadius: 6,
     cursor: "pointer",
   },
+
   coverPreview: {
     width: "100%",
     maxHeight: 220,
     objectFit: "cover",
     marginTop: 10,
-    borderRadius: 6,
+    borderRadius: 8,
+    border: "1px solid #e5e7eb",
   },
+
   sectionImage: {
     width: "100%",
     maxHeight: 200,
     objectFit: "cover",
     marginTop: 10,
-    borderRadius: 6,
+    borderRadius: 8,
+    border: "1px solid #e5e7eb",
   },
 };

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-/* ================= MAP HIỂN THỊ ================= */
 const TYPE_LABEL = {
   fish: "Cá cảnh",
   medicine: "Thuốc",
@@ -24,6 +23,10 @@ export default function AdminProductManagement() {
   const [imageFile, setImageFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  const [searchName, setSearchName] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [priceFilter, setPriceFilter] = useState("all");
+
   const [form, setForm] = useState({
     id: "",
     name: "",
@@ -40,7 +43,7 @@ export default function AdminProductManagement() {
     status: "available",
   });
 
-  /* ================= FETCH ================= */
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -52,7 +55,6 @@ export default function AdminProductManagement() {
     setLoading(false);
   };
 
-  /* ================= FORM ================= */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -99,7 +101,6 @@ export default function AdminProductManagement() {
     setImageFile(null);
   };
 
-  /* ================= UPLOAD IMAGE ================= */
   const uploadImage = async () => {
     if (!imageFile) return form.images;
 
@@ -119,7 +120,6 @@ export default function AdminProductManagement() {
     return data.url;
   };
 
-  /* ================= CRUD ================= */
   const submitForm = async () => {
     let imageUrl = form.images;
 
@@ -159,10 +159,37 @@ export default function AdminProductManagement() {
 
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải...</p>;
 
-  /* ================= UI ================= */
+  const filteredProducts = products.filter((p) => {
+
+    // lọc theo tên
+    const matchName = p.name
+      .toLowerCase()
+      .includes(searchName.toLowerCase());
+
+    // lọc theo loại
+    const matchType =
+      typeFilter === "all" || p.type === typeFilter;
+
+    // lọc theo giá
+    let matchPrice = true;
+
+    if (priceFilter === "low") {
+      matchPrice = p.price < 100000;
+    } else if (priceFilter === "medium") {
+      matchPrice = p.price >= 100000 && p.price <= 500000;
+    } else if (priceFilter === "high") {
+      matchPrice = p.price > 500000;
+    }
+
+    return matchName && matchType && matchPrice;
+  });
+
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Quản lý sản phẩm</h2>
+      <h2 style={styles.pageTitle}>
+        <i className="bi bi-box-seam" style={styles.titleIcon}></i>
+        QUẢN LÝ SẢN PHẨM
+      </h2>
 
         <button
         className="btn btn-success d-flex align-items-center gap-2 mb-3"
@@ -172,36 +199,94 @@ export default function AdminProductManagement() {
         Thêm sản phẩm
         </button>
 
+        <div style={styles.filterBar}>
+
+          {/* tìm tên */}
+          <div style={styles.searchBox}>
+            <i className="bi bi-search"></i>
+            <input
+              style={styles.searchInput}
+              placeholder="Tìm tên sản phẩm..."
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+            />
+          </div>
+
+          {/* lọc loại */}
+          <select
+            style={styles.filterSelect}
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="all">Tất cả loại</option>
+            {Object.keys(TYPE_LABEL).map((k) => (
+              <option key={k} value={k}>
+                {TYPE_LABEL[k]}
+              </option>
+            ))}
+          </select>
+
+          {/* lọc giá */}
+          <select
+            style={styles.filterSelect}
+            value={priceFilter}
+            onChange={(e) => setPriceFilter(e.target.value)}
+          >
+            <option value="all">Tất cả giá</option>
+            <option value="low">Dưới 100k</option>
+            <option value="medium">100k - 500k</option>
+            <option value="high">Trên 500k</option>
+          </select>
+
+        </div>
 
       <table style={styles.table}>
         <thead>
-        <tr>
-            <th style={styles.th}>Ảnh</th>
-            <th style={styles.th}>ID</th>
-            <th style={styles.th}>Tên</th>
-            <th style={styles.th}>Loại</th>
-            <th style={styles.th}>Giá</th>
-            <th style={styles.th}>SL</th>
-            <th style={styles.th}>Trạng thái</th>
-            <th style={styles.th}>Thao tác</th>
-        </tr>
+          <tr>
+            <th style={{ ...styles.th, width: 100, textAlign: "center" }}>Ảnh</th>
+            <th style={{ ...styles.th, width: 100, textAlign: "center" }}>ID</th>
+            <th style={{ ...styles.th }}>Tên sản phẩm</th>
+            <th style={{ ...styles.th, width: 170, textAlign: "center" }}>Loại</th>
+            <th style={{ ...styles.th, width: 150, textAlign: "center" }}>Giá</th>
+            {/* <th style={{ ...styles.th, width: 80, textAlign: "center" }}>SL</th> */}
+            <th style={{ ...styles.th, width: 150, textAlign: "center" }}>Trạng thái</th>
+            <th style={{ ...styles.th, width: 160, textAlign: "center" }}>Thao tác</th>
+          </tr>
         </thead>
+
         <tbody>
-          {products.map((p) => (
-            <tr key={p._id}>
-              <td>
+          {filteredProducts.map((p) => (
+            <tr
+              key={p._id}
+              style={styles.tr}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "#f0f9ff")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "#ffffff")
+              }
+            >
+              <td style={{ textAlign: "center" }}>
                 <img
                   src={p.images?.[0] || "https://via.placeholder.com/80"}
                   alt={p.name}
                   style={styles.image}
                 />
               </td>
-              <td>{p.id}</td>
-              <td>{p.name}</td>
-              <td>{TYPE_LABEL[p.type]}</td>
-              <td>{p.price.toLocaleString()} đ</td>
-              <td>{p.quantity}</td>
-              <td>
+
+              <td style={styles.tdCenter}>{p.id}</td>
+
+              <td style={styles.tdName}>{p.name}</td>
+
+              <td style={styles.tdCenter}>{TYPE_LABEL[p.type]}</td>
+
+              <td style={styles.tdPrice}>
+                {p.price.toLocaleString()} đ
+              </td>
+
+              {/* <td style={styles.tdCenter}>{p.quantity}</td> */}
+
+              <td style={styles.tdCenter}>
                 <span
                   style={{
                     ...styles.status,
@@ -214,23 +299,25 @@ export default function AdminProductManagement() {
                   {STATUS_LABEL[p.status]}
                 </span>
               </td>
-              <td>
-                <button
-                className="btn btn-sm btn-outline-primary rounded-circle me-2"
-                onClick={() => openEdit(p)}
-                title="Sửa"
-                >
-                <i className="bi bi-pencil-square"></i>
-                </button>
 
-                <button
-                className="btn btn-sm btn-outline-danger rounded-circle"
-                onClick={() => deleteProduct(p._id)}
-                title="Xóa"
-                >
-                <i className="bi bi-trash"></i>
-                </button>
+              <td style={styles.tdCenter}>
+                <div style={styles.actionGroup}>
+                  <button
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => openEdit(p)}
+                    title="Sửa"
+                  >
+                    <i className="bi bi-pencil-square me-1"></i> Sửa
+                  </button>
 
+                  <button
+                    className="btn btn-sm btn-outline-danger "
+                    onClick={() => deleteProduct(p._id)}
+                    title="Xóa"
+                  >
+                    <i className="bi bi-trash me-1"></i> Xóa
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
@@ -289,46 +376,92 @@ export default function AdminProductManagement() {
   );
 }
 
-/* ================= CSS ================= */
 const styles = {
-  /* ===== PAGE ===== */
   container: {
     padding: 24,
     background: "#f9fafb",
     minHeight: "100vh",
   },
 
-  title: {
-    fontSize: 24,
+  pageTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 26,
     fontWeight: 700,
-    marginBottom: 16,
-    color: "#111827",
+    padding: "12px 18px",
+    background: "#eff6ff",
+    color: "#1e40af",
+    borderRadius: 10,
+    marginBottom: 20,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+    textTransform: "uppercase"
   },
 
-  /* ===== TABLE ===== */
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    background: "#ffffff",
-    borderRadius: 12,
-    overflow: "hidden",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+  titleIcon: {
+    fontSize: 30,
+    color: "#3b82f6"
   },
 
-  th: {
-    padding: 12,
-    background: "#f3f4f6",
-    fontWeight: 600,
-    color: "#374151",
-    borderBottom: "1px solid #e5e7eb",
-    textAlign: "left",
-  },
 
-  td: {
-    padding: 12,
-    borderBottom: "1px solid #e5e7eb",
-    verticalAlign: "middle",
-  },
+table: {
+  width: "100%",
+  borderCollapse: "collapse",
+  background: "#ffffff",
+  borderRadius: 12,
+  overflow: "hidden",
+  boxShadow: "0 6px 16px rgba(37,99,235,0.12)",
+  border: "1px solid #cbd5f5",
+},
+
+th: {
+  padding: "14px 12px",
+  background: "#2563eb",
+  color: "#ffffff",
+  fontWeight: 600,
+  fontSize: 14,
+  textAlign: "left",
+  borderBottom: "2px solid #1d4ed8",
+},
+
+td: {
+  padding: "12px",
+  borderBottom: "2px solid #e5e7eb", // đường kẻ rõ giữa các dòng
+  fontSize: 14,
+  color: "#1f2937",
+  verticalAlign: "middle",
+},
+
+tr: {
+  borderBottom: "1px solid #e5e7eb",
+  transition: "background 0.2s",
+},
+
+tdCenter: {
+  padding: 12,
+  textAlign: "center",
+  borderBottom: "1px solid #e5e7eb",
+},
+
+tdPrice: {
+  padding: 12,
+  textAlign: "right",
+  fontWeight: 600,
+  color: "#1d4ed8",
+  borderBottom: "1px solid #e5e7eb",
+},
+
+tdName: {
+  padding: 12,
+  fontWeight: 500,
+  borderBottom: "1px solid #e5e7eb",
+},
+
+actionGroup: {
+  display: "flex",
+  justifyContent: "center",
+  gap: 8,
+},
 
   image: {
     width: 70,
@@ -387,7 +520,7 @@ const styles = {
     resize: "vertical",
   },
 
-  /* ===== IMAGE PREVIEW ===== */
+
   previewImage: {
     width: 120,
     borderRadius: 8,
@@ -395,7 +528,7 @@ const styles = {
     marginTop: 6,
   },
 
-  /* ===== ACTION ROW ===== */
+
   actionRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -421,6 +554,35 @@ const styles = {
     fontWeight: 600,
     cursor: "pointer",
   },
+  filterBar: {
+  display: "flex",
+  gap: 12,
+  marginBottom: 16,
+  flexWrap: "wrap",
+},
+
+searchBox: {
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  border: "1px solid #d1d5db",
+  borderRadius: 6,
+  padding: "6px 10px",
+  background: "#fff",
+},
+
+searchInput: {
+  border: "none",
+  outline: "none",
+  fontSize: 14,
+},
+
+filterSelect: {
+  padding: "6px 10px",
+  borderRadius: 6,
+  border: "1px solid #d1d5db",
+  fontSize: 14,
+},
 };
 
 

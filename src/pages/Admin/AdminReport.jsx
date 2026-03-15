@@ -208,34 +208,45 @@ export default function AdminReport() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>
-        <i className="bi bi-bar-chart-fill me-2"></i>
-        BÁO CÁO THỐNG KÊ
+      <h2 style={styles.pageTitle}>
+        <i className="bi bi-bar-chart-fill" style={styles.titleIcon}></i>
+          BÁO CÁO THỐNG KÊ
       </h2>
 
       {/* ===== TỔNG QUAN ===== */}
-      <div style={styles.statGrid}>
-        <StatCard
-          icon="bi-receipt"
-          title="Tổng đơn"
-          value={statistics.totalOrders}
-        />
-        <StatCard
-          icon="bi-cash-stack"
-          title="Tổng doanh thu"
-          value={statistics.totalRevenue.toLocaleString() + " VNĐ"}
-        />
-        <StatCard
-          icon="bi-check-circle"
-          title="Hoàn thành"
-          value={statistics.completedOrders}
-        />
-        <StatCard
-          icon="bi-x-circle"
-          title="Đã hủy"
-          value={statistics.canceledOrders}
-        />
-      </div>
+<div className="row g-4" style={styles.statGrid}>
+  <div className="col-md-3">
+    <StatCard
+      icon="bi-receipt"
+      title="Tổng đơn"
+      value={statistics.totalOrders}
+    />
+  </div>
+
+  <div className="col-md-3">
+    <StatCard
+      icon="bi-cash-stack"
+      title="Tổng doanh thu"
+      value={statistics.totalRevenue.toLocaleString() + " VNĐ"}
+    />
+  </div>
+
+  <div className="col-md-3">
+    <StatCard
+      icon="bi-check-circle"
+      title="Hoàn thành"
+      value={statistics.completedOrders}
+    />
+  </div>
+
+  <div className="col-md-3">
+    <StatCard
+      icon="bi-x-circle"
+      title="Đã hủy"
+      value={statistics.canceledOrders}
+    />
+  </div>
+</div>
 
       {/* ===== BỘ LỌC ===== */}
       <div style={{ margin: "16px 0" }}>
@@ -308,13 +319,20 @@ export default function AdminReport() {
 }
 
 /* ===== CARD ===== */
-const StatCard = ({ icon, title, value }) => (
-  <div style={styles.statCard}>
-    <i className={`bi ${icon}`} style={{ fontSize: 22 }}></i>
-    <p style={styles.statTitle}>{title}</p>
-    <h3>{value}</h3>
-  </div>
-);
+function StatCard({ icon, title, value }) {
+  return (
+    <div style={styles.card}>
+      <div style={styles.iconBox}>
+        <i className={`bi ${icon}`} style={styles.icon}></i>
+      </div>
+
+      <div>
+        <div style={styles.title}>{title}</div>
+        <div style={styles.value}>{value}</div>
+      </div>
+    </div>
+  );
+}
 
 /* ===== STYLE ===== */
 const styles = {
@@ -334,5 +352,65 @@ const styles = {
   statTitle: {
     color: "#64748b",
     marginTop: 6,
+  },
+  pageTitle: {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  fontSize: 26,
+  fontWeight: 700,
+  padding: "12px 18px",
+  background: "#eff6ff",
+  color: "#1e40af",
+  borderRadius: 10,
+  marginBottom: 20,
+  boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+},
+
+titleIcon: {
+  fontSize: 30,
+  color: "#3b82f6",
+},
+  statGrid: {
+    marginTop: "20px",
+  },
+
+  card: {
+    background: "#fff",
+    borderRadius: "12px",
+    padding: "20px",
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    transition: "0.3s",
+    cursor: "pointer",
+  },
+
+  iconBox: {
+    width: "55px",
+    height: "55px",
+    borderRadius: "12px",
+    background: "#eef4ff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  icon: {
+    fontSize: "28px",
+    color: "#0d6efd",
+  },
+
+  title: {
+    fontSize: "14px",
+    color: "#777",
+    marginBottom: "4px",
+  },
+
+  value: {
+    fontSize: "20px",
+    fontWeight: "bold",
+    color: "#333",
   },
 };

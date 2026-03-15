@@ -12,6 +12,10 @@ export default function AdminOrder() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [searchName, setSearchName] = useState("");
+  const [priceFilter, setPriceFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   //  Chặn không phải admin
   if (!user || user.role !== "admin") {
     return <Navigate to="/" />;
@@ -84,76 +88,153 @@ export default function AdminOrder() {
 
   if (loading) return <p>Loading...</p>;
 
+  const filteredOrders = orders.filter((o) => {
+
+    // lọc tên khách
+    const matchName =
+      o.user?.username
+        ?.toLowerCase()
+        .includes(searchName.toLowerCase());
+
+    // lọc trạng thái
+    const matchStatus =
+      statusFilter === "all" || o.status === statusFilter;
+
+    // lọc tổng tiền
+    let matchPrice = true;
+
+    if (priceFilter === "low") {
+      matchPrice = o.totalPrice < 200000;
+    } else if (priceFilter === "medium") {
+      matchPrice = o.totalPrice >= 200000 && o.totalPrice <= 1000000;
+    } else if (priceFilter === "high") {
+      matchPrice = o.totalPrice > 1000000;
+    }
+
+    return matchName && matchStatus && matchPrice;
+  });
+
   return (
     <div style={styles.container}>
-      <h2>QUẢN LÝ ĐƠN HÀNG</h2>
+      <h2 style={styles.pageTitle}>
+        <i className="bi bi-receipt-cutoff" style={styles.titleIcon}></i>
+        QUẢN LÝ ĐƠN HÀNG
+      </h2>
 
+    <div style={styles.filterBar}>
+
+      {/* tìm tên khách */}
+      <div style={styles.searchBox}>
+        <i className="bi bi-search"></i>
+        <input
+          style={styles.searchInput}
+          placeholder="Tìm khách hàng..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+      </div>
+
+      {/* lọc trạng thái */}
+      <select
+        style={styles.filterSelect}
+        value={statusFilter}
+        onChange={(e) => setStatusFilter(e.target.value)}
+      >
+        <option value="all">Tất cả trạng thái</option>
+        <option value="chờ xử lý">Chờ xử lý</option>
+        <option value="đã xác nhận">Đã xác nhận</option>
+        <option value="đang giao hàng">Đang giao hàng</option>
+        <option value="hoàn thành">Hoàn thành</option>
+        <option value="đã hủy">Đã hủy</option>
+      </select>
+
+      {/* lọc tổng tiền */}
+      <select
+        style={styles.filterSelect}
+        value={priceFilter}
+        onChange={(e) => setPriceFilter(e.target.value)}
+      >
+        <option value="all">Tất cả giá</option>
+        <option value="low">Dưới 200k</option>
+        <option value="medium">200k - 1 triệu</option>
+        <option value="high">Trên 1 triệu</option>
+      </select>
+
+    </div>
       {/* ===== BẢNG ĐƠN HÀNG ===== */}
-        <table style={styles.table}>
-        <thead>
-            <tr>
-            <th style={styles.th}>Mã</th>
-            <th style={styles.th}>Khách hàng</th>
-            <th style={styles.th}>Tổng tiền</th>
-            <th style={styles.th}>Trạng thái</th>
-            <th style={styles.th}>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            {orders.map((o) => (
-            <tr key={o._id}>
-                <td style={styles.td}>{o._id.slice(-6)}</td>
-                <td style={styles.td}>{o.user?.username}</td>
-                <td style={styles.td}>{o.totalPrice.toLocaleString()} VNĐ</td>
-                <td style={styles.td}>
-                <select
+    <table style={styles.table}>
+      <thead>
+        <tr>
+          <th style={{ ...styles.th, width: "15%" }}>Mã</th>
+          <th style={{ ...styles.th, width: "20%" }}>Khách hàng</th>
+          <th style={{ ...styles.th, width: "20%" }}>Tổng tiền</th>
+          <th style={{ ...styles.th, width: "25%" }}>Trạng thái</th>
+          <th style={{ ...styles.th, width: "20%" }}>Hành động</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {filteredOrders.map((o) => (
+          <tr
+            key={o._id}
+            style={styles.tr}
+            onMouseEnter={(e)=>
+              e.currentTarget.style.background="#f0fdf4"
+            }
+            onMouseLeave={(e)=>
+              e.currentTarget.style.background="#ffffff"
+            }
+          >
+            <td style={styles.td}>{o._id.slice(-6)}</td>
+
+            <td style={{ ...styles.td, fontWeight: 500 }}>
+              {o.user?.username}
+            </td>
+
+            <td style={styles.price}>
+              {o.totalPrice.toLocaleString()} VNĐ
+            </td>
+
+            <td style={styles.td}>
+              <select
                 style={{
-                    ...styles.statusSelect,
-                    ...getStatusStyle(o.status),
+                  ...styles.statusSelect,
+                  ...getStatusStyle(o.status),
                 }}
                 value={o.status}
                 onChange={(e) =>
-                    updateStatus(o._id, e.target.value)
+                  updateStatus(o._id, e.target.value)
                 }
+              >
+                <option value="chờ xử lý">Chờ xử lý</option>
+                <option value="đã xác nhận">Đã xác nhận</option>
+                <option value="đang giao hàng">Đang giao hàng</option>
+                <option value="hoàn thành">Hoàn thành</option>
+                <option value="đã hủy">Đã hủy</option>
+              </select>
+            </td>
+
+            <td style={styles.td}>
+              <div style={styles.actionGroup}>
+                <button
+                  style={styles.viewBtn}
+                  onClick={() => setSelectedOrder(o)}
                 >
-                <option value="chờ xử lý">Chờ Xử Lý</option>
-                <option value="đã xác nhận">Đã Xác Nhận</option>
-                <option value="đang giao hàng">Đang Giao Hàng</option>
-                <option value="hoàn thành">Hoàn Thành</option>
-                <option value="đã hủy">Đã Hủy</option>
-                </select>
+                  <i className="bi bi-eye me-1"></i> Xem
+                </button>
 
-                </td>
-                  <td style={styles.td}>
-                    <div style={styles.actionGroup}>
-                      <button
-                        style={styles.viewBtn}
-                        onClick={() => setSelectedOrder(o)}
-                      >
-                        <i
-                          className="bi bi-eye me-2"
-                          style={{ fontSize: 14 }}
-                        ></i>
-                        Xem
-                      </button>
-
-                      <button
-                        style={styles.deleteBtn}
-                        onClick={() => deleteOrder(o._id)}
-                      >
-                        <i
-                          className="bi bi-trash me-2"
-                          style={{ fontSize: 14 }}
-                        ></i>
-                        Xóa
-                      </button>
-                    </div>
-                  </td>
-
-            </tr>
-            ))}
-        </tbody>
-        </table>
+                <button
+                  style={styles.deleteBtn}
+                  onClick={() => deleteOrder(o._id)}
+                >
+                  <i className="bi bi-trash me-1"></i> Xóa
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
 
             {/* ===== CHI TIẾT ĐƠN HÀNG ===== */}
@@ -203,30 +284,47 @@ export default function AdminOrder() {
             <div style={styles.section}>
               <h4 style={styles.sectionTitle}>Sản phẩm</h4>
 
-              <table style={styles.itemTable}>
-                <thead>
-                  <tr>
-                    <th style={styles.th}>Tên</th>
-                    <th style={styles.th}>SL</th>
-                    <th style={styles.th}>Giá</th>
-                    <th style={styles.th}>Tạm tính</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedOrder.items.map((item, i) => (
-                    <tr key={i}>
-                      <td style={styles.td}>{item.name}</td>
-                      <td style={styles.td}>{item.quantity}</td>
-                      <td style={styles.td}>
-                        {item.price.toLocaleString()} VNĐ
-                      </td>
-                      <td style={styles.td}>
-                        {(item.price * item.quantity).toLocaleString()} VNĐ
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <table style={styles.itemTable}>
+            <thead>
+              <tr>
+                <th style={{ ...styles.th, textAlign: "left" }}>Tên sản phẩm</th>
+                <th style={{ ...styles.th, width: 80 }}>SL</th>
+                <th style={{ ...styles.th, width: 120 }}>Giá</th>
+                <th style={{ ...styles.th, width: 140 }}>Tạm tính</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {selectedOrder.items.map((item, i) => (
+                <tr
+                  key={i}
+                  style={styles.tr}
+                  onMouseEnter={(e)=>
+                    e.currentTarget.style.background="#f0fdf4"
+                  }
+                  onMouseLeave={(e)=>
+                    e.currentTarget.style.background="#ffffff"
+                  }
+                >
+                  <td style={{ ...styles.td, textAlign: "left", fontWeight: 500 }}>
+                    {item.name}
+                  </td>
+
+                  <td style={{ ...styles.td, textAlign: "center" }}>
+                    {item.quantity}
+                  </td>
+
+                  <td style={{ ...styles.td, textAlign: "right", color: "#ea580c" }}>
+                    {item.price.toLocaleString()} VNĐ
+                  </td>
+
+                  <td style={{ ...styles.td, textAlign: "right", fontWeight: 600 }}>
+                    {(item.price * item.quantity).toLocaleString()} VNĐ
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
             </div>
 
             {/* ==== TỔNG TIỀN ==== */}
@@ -262,35 +360,100 @@ const styles = {
     marginBottom: 20,
     color: "#1f2937",
   },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    backgroundColor: "#ffffff",
+    pageTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 26,
+    fontWeight: 700,
+    padding: "12px 18px",
+    background: "#eff6ff",
+    color: "#1e40af",
     borderRadius: 10,
-    overflow: "hidden",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+    marginBottom: 20,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+    textTransform: "uppercase",
   },
 
-  th: {
-    backgroundColor: "#f9fafb",
-    padding: "14px 12px",
-    textAlign: "left",
-    fontSize: 16,
-    textAlign: "center",
-    fontWeight: 600,
-    color: "#374151",
-    borderBottom: "1px solid #e5e7eb",
+  titleIcon: {
+    fontSize: 30,
+    color: "#3b82f6",
   },
 
-  td: {
-    padding: "12px",
-    fontSize: 16,
-    textAlign: "center",
-    color: "#374151",
-    borderBottom: "1px solid #f1f5f9",
-  },
+table: {
+  width: "100%",
+  borderCollapse: "separate",
+  borderSpacing: 0,
+  backgroundColor: "#ffffff",
+  borderRadius: 12,
+  overflow: "hidden",
+  boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
+  border: "1px solid #e5e7eb",
+},
 
+th: {
+  backgroundColor: "#2563eb", // xanh dương
+  color: "#ffffff",
+  padding: "14px 12px",
+  textAlign: "center",
+  fontSize: 15,
+  fontWeight: 600,
+  borderBottom: "2px solid #1d4ed8",
+},
+
+td: {
+  padding: "12px",
+  fontSize: 15,
+  textAlign: "center",
+  color: "#374151",
+  borderBottom: "1px solid #e5e7eb",
+},
+
+itemTable: {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: 10,
+  border: "1px solid #e5e7eb",
+  borderRadius: 8,
+  overflow: "hidden",
+},
+
+tr: {
+  borderBottom: "1px solid #e5e7eb",
+  transition: "background 0.2s",
+},
+
+price: {
+  padding: 12,
+  textAlign: "center",
+  fontWeight: 600,
+  color: "red", // cam nổi bật
+  borderBottom: "1px solid #e5e7eb",
+},
+
+actionGroup: {
+  display: "flex",
+  justifyContent: "center",
+  gap: 8,
+},
+
+viewBtn: {
+  background: "#22c55e",
+  border: "none",
+  color: "#fff",
+  padding: "6px 10px",
+  borderRadius: 6,
+  cursor: "pointer",
+},
+
+deleteBtn: {
+  background: "#ef4444",
+  border: "none",
+  color: "#fff",
+  padding: "6px 10px",
+  borderRadius: 6,
+  cursor: "pointer",
+},
   statusSelect: {
     padding: "6px 10px",
     borderRadius: 6,
@@ -392,6 +555,35 @@ const styles = {
   cursor: "pointer",
   outline: "none",
   transition: "all 0.2s ease",
+},
+filterBar: {
+  display: "flex",
+  gap: 12,
+  marginBottom: 18,
+  flexWrap: "wrap",
+},
+
+searchBox: {
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  border: "1px solid #d1d5db",
+  borderRadius: 6,
+  padding: "6px 10px",
+  background: "#fff",
+},
+
+searchInput: {
+  border: "none",
+  outline: "none",
+  fontSize: 14,
+},
+
+filterSelect: {
+  padding: "6px 10px",
+  borderRadius: 6,
+  border: "1px solid #d1d5db",
+  fontSize: 14,
 },
 
 };

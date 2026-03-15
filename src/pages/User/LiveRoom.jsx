@@ -15,28 +15,55 @@ export default function LiveRoom() {
   const [room, setRoom] = useState(null);
   const [orderSuccess, setOrderSuccess] = useState(null);
 
-  useEffect(() => {
-    fetchLiveRoom();
+useEffect(() => {
 
-    socket.on("livestreamStarted", handleStart);
-    socket.on("livestreamEnded", handleEnd);
+  fetchLiveRoom();
 
-    const handleAutoOrder = (data) => {
-      setOrderSuccess(data);
+  const handleStart = async ({ livestreamId }) => {
 
-      setTimeout(() => {
-        setOrderSuccess(null);
-      }, 10000);
-    };
+    const res = await axios.get(`${API}/${livestreamId}`);
 
-    socket.on("autoOrderSuccess", handleAutoOrder);
+    setRoom(res.data);
 
-    return () => {
-      socket.off("livestreamStarted", handleStart);
-      socket.off("livestreamEnded", handleEnd);
-      socket.off("autoOrderSuccess", handleAutoOrder);
-    };
-  }, []);
+    socket.emit("joinRoom", livestreamId);
+
+  };
+
+  const handleEnd = ({ livestreamId }) => {
+
+    socket.emit("leaveRoom", livestreamId);
+
+    setRoom((prev) =>
+      prev && prev._id === livestreamId
+        ? { ...prev, status: "ended" }
+        : prev
+    );
+
+  };
+
+  const handleAutoOrder = (data) => {
+
+    setOrderSuccess(data);
+
+    setTimeout(() => {
+      setOrderSuccess(null);
+    }, 10000);
+
+  };
+
+  socket.on("livestreamStarted", handleStart);
+  socket.on("livestreamEnded", handleEnd);
+  socket.on("autoOrderSuccess", handleAutoOrder);
+
+  return () => {
+
+    socket.off("livestreamStarted", handleStart);
+    socket.off("livestreamEnded", handleEnd);
+    socket.off("autoOrderSuccess", handleAutoOrder);
+
+  };
+
+}, []);
 
   const fetchLiveRoom = async () => {
     try {
@@ -51,20 +78,6 @@ export default function LiveRoom() {
     } catch (err) {
       console.log(err);
     }
-  };
-
-  const handleStart = async ({ livestreamId }) => {
-    const res = await axios.get(`${API}/${livestreamId}`);
-    setRoom(res.data);
-    socket.emit("joinRoom", livestreamId);
-  };
-
-  const handleEnd = ({ livestreamId }) => {
-    setRoom((prev) =>
-      prev && prev._id === livestreamId
-        ? { ...prev, status: "ended" }
-        : prev
-    );
   };
 
   if (!room) {

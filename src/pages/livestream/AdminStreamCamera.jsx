@@ -1,33 +1,64 @@
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import socket from "../../socket/socket";
+
+const CAMERA_API = "http://localhost:5000/api/camera";
 
 export default function AdminStreamCamera({ livestreamId }) {
 
   const videoRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
 
   const [isRecording, setIsRecording] = useState(false);
 
+  // ======================
+  // INIT
+  // ======================
   useEffect(() => {
 
-    startCamera();
+    if (!livestreamId) return;
 
-    socket.on("endLivestream", (data) => {
-      if (data.livestreamId === livestreamId) {
-        stopRecording();
-      }
-    });
+    socket.emit("joinRoom", livestreamId);
+
+    initCamera();
+
+    socket.on("livestreamEnded", handleLivestreamEnded);
 
     return () => {
-      socket.off("endLivestream");
+
+      socket.emit("leaveRoom", livestreamId);
+
+      socket.off("livestreamEnded", handleLivestreamEnded);
+
+      stopRecordingLocal();
       stopCamera();
+
     };
 
-  }, []);
+  }, [livestreamId]);
 
-  // bật camera
-  const startCamera = async () => {
+
+
+  // ======================
+  // HANDLE LIVESTREAM END
+  // ======================
+  const handleLivestreamEnded = (data) => {
+
+    if (data.livestreamId === livestreamId) {
+
+      stopRecordingLocal();
+
+    }
+
+  };
+
+
+
+  // ======================
+  // INIT CAMERA
+  // ======================
+  const initCamera = async () => {
 
     try {
 
@@ -37,82 +68,167 @@ export default function AdminStreamCamera({ livestreamId }) {
       });
 
       streamRef.current = stream;
-      videoRef.current.srcObject = stream;
+
+      if (videoRef.current) {
+
+        videoRef.current.srcObject = stream;
+
+      }
 
     } catch (err) {
+
       console.error("camera error:", err);
+
+      alert("Không thể truy cập camera");
+
     }
 
   };
 
-  // tắt camera
+
+
+  // ======================
+  // STOP CAMERA DEVICE
+  // ======================
   const stopCamera = () => {
 
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
+    if (!streamRef.current) return;
+
+    streamRef.current.getTracks().forEach(track => track.stop());
+
+    streamRef.current = null;
 
   };
 
-  // bắt đầu livestream
-  const startLivestream = () => {
+
+
+  // ======================
+  // START LIVESTREAM
+  // ======================
+  const startLivestream = async () => {
 
     const stream = streamRef.current;
+
+    if (!stream) {
+
+      alert("Camera chưa sẵn sàng");
+
+      return;
+
+    }
+
+    if (isRecording) return;
 
     const mimeType = "video/webm; codecs=vp9,opus";
 
     if (!MediaRecorder.isTypeSupported(mimeType)) {
-      alert("browser không hỗ trợ codec này");
+
+      alert("Browser không hỗ trợ codec");
+
       return;
+
     }
 
-    socket.emit("startLivestream", livestreamId);
+    try {
 
-    const mediaRecorder = new MediaRecorder(stream, {
-      mimeType
-    });
+      // cập nhật trạng thái camera
+      await axios.post(`${CAMERA_API}/start-camera`, {
+        livestreamId
+      });
 
-    mediaRecorderRef.current = mediaRecorder;
+      socket.emit("startLivestream", livestreamId);
 
-    mediaRecorder.ondataavailable = async (event) => {
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType
+      });
 
-      if (event.data.size > 0) {
+      mediaRecorderRef.current = mediaRecorder;
 
-        const buffer = await event.data.arrayBuffer();
+      mediaRecorder.ondataavailable = async (event) => {
 
-        socket.emit("streamVideo", {
-          livestreamId,
-          chunk: buffer
-        });
+        if (event.data && event.data.size > 0) {
 
-      }
+          const buffer = await event.data.arrayBuffer();
 
-    };
+          socket.emit("streamVideo", {
+            livestreamId,
+            chunk: buffer
+          });
 
-    // gửi video mỗi 300ms
-    mediaRecorder.start(300);
+        }
 
-    setIsRecording(true);
+      };
+
+      // gửi chunk mỗi 1s
+      mediaRecorder.start(1000);
+
+      setIsRecording(true);
+
+    } catch (err) {
+
+      console.error("start livestream error:", err);
+
+    }
 
   };
 
-  // dừng livestream
-  const stopRecording = () => {
 
-    if (mediaRecorderRef.current) {
+
+  // ======================
+  // STOP LOCAL RECORD
+  // ======================
+  const stopRecordingLocal = () => {
+
+    if (!mediaRecorderRef.current) return;
+
+    try {
+
       mediaRecorderRef.current.stop();
+
+    } catch (err) {
+
+      console.error("stop recorder error:", err);
+
     }
 
-    socket.emit("endLivestream", livestreamId);
+    mediaRecorderRef.current = null;
 
     setIsRecording(false);
 
   };
 
+
+
+  // ======================
+  // STOP LIVESTREAM
+  // ======================
+  const stopRecording = async () => {
+
+    try {
+
+      await axios.post(`${CAMERA_API}/stop-camera`, {
+        livestreamId
+      });
+
+      socket.emit("endLivestream", livestreamId);
+
+      stopRecordingLocal();
+
+    } catch (err) {
+
+      console.error("stop camera error:", err);
+
+    }
+
+  };
+
+
+
   return (
+
     <div>
 
-      <h2>admin livestream camera</h2>
+      <h2>Admin Livestream Camera</h2>
 
       <video
         ref={videoRef}
@@ -121,27 +237,34 @@ export default function AdminStreamCamera({ livestreamId }) {
         playsInline
         style={{
           width: "100%",
-          maxWidth: "500px",
-          borderRadius: "10px"
+          maxWidth: "600px",
+          borderRadius: "10px",
+          background: "#000"
         }}
       />
 
       <div style={{ marginTop: "10px" }}>
 
         {!isRecording && (
+
           <button onClick={startLivestream}>
-            bắt đầu livestream
+            Bắt đầu camera livestream
           </button>
+
         )}
 
         {isRecording && (
+
           <button onClick={stopRecording}>
-            dừng livestream
+            Dừng camera livestream
           </button>
+
         )}
 
       </div>
 
     </div>
+
   );
+
 }

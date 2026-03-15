@@ -71,15 +71,15 @@ export default function AdminComment() {
     return <p className="text-center mt-4">⏳ Đang tải bình luận...</p>;
 
   return (
-  <div className="container mt-4">
+  <div className="container mt-4" style={styles.container}>
     {/* ===== HEADER ===== */}
     <div className="d-flex justify-content-between align-items-center mb-3">
-      <h4 className="fw-bold mb-0">
-        <i className="bi bi-chat-dots-fill text-primary me-2"></i>
+      <h4 style={styles.pageTitle}>
+        <i className="bi bi-chat-dots-fill" style={styles.titleIcon}></i>
         Quản lý bình luận
       </h4>
 
-      <span className="badge bg-light text-dark fs-5">
+      <span style={styles.badgeCount}>
         <i className="bi bi-chat-left-text me-1"></i>
         {filteredComments.length} bình luận
       </span>
@@ -87,7 +87,7 @@ export default function AdminComment() {
     </div>
 
     {/* ===== FILTER TOOLBAR ===== */}
-    <div className="card shadow-sm mb-3">
+    <div className="card mb-3" style={styles.filterCard}>
       <div className="card-body py-3">
         <div className="row g-3 align-items-center">
           {/* Rating */}
@@ -138,8 +138,11 @@ export default function AdminComment() {
 
       {/* ===== TABLE ===== */}
       <div className="table-responsive shadow-sm">
-        <table className="table table-bordered align-middle">
-          <thead className="table-light">
+        <table
+          className="table table-bordered align-middle"
+          style={styles.table}
+        >
+          <thead style={styles.tableHeader}>
             <tr>
               <th>User</th>
               <th>Sản phẩm</th>
@@ -149,7 +152,7 @@ export default function AdminComment() {
               <th>Nội dung</th>
               <th>Ảnh</th>
               <th>Thời gian</th>
-              <th></th>
+              <th>Hoạt động</th>
             </tr>
           </thead>
 
@@ -223,7 +226,7 @@ export default function AdminComment() {
                     className="btn btn-sm btn-danger"
                     onClick={() => handleDelete(c._id)}
                   >
-                    <i className="bi bi-trash-fill"></i>
+                    <i className="bi bi-trash-fill me-1"></i> Xóa
                   </button>
                 </td>
               </tr>
@@ -238,23 +241,79 @@ export default function AdminComment() {
 
 /* ===== STYLE ===== */
 const styles = {
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
+
+  container: {
+    background: "#f8fafc",
+    padding: 20,
+    borderRadius: 12
   },
+
   image: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     objectFit: "cover",
-    marginRight: 4,
-    borderRadius: 4,
+    borderRadius: 6,
+    border: "1px solid #e5e7eb",
+    marginRight: 4
   },
+
   deleteBtn: {
-    background: "#e74c3c",
+    background: "linear-gradient(135deg,#ef4444,#dc2626)",
     color: "#fff",
     border: "none",
     padding: "6px 10px",
-    borderRadius: 4,
+    borderRadius: 6,
     cursor: "pointer",
+    transition: "0.2s"
   },
+
+pageTitle: {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  fontSize: 26,
+  fontWeight: 700,
+  padding: "12px 18px",
+  background: "#eff6ff",
+  color: "#1e40af",
+  borderRadius: 10,
+  marginBottom: 20,
+  boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+  textTransform: "uppercase",
+},
+
+titleIcon: {
+  fontSize: 30,
+  color: "#3b82f6",
+},
+
+  filterCard: {
+    borderRadius: 12,
+    border: "none",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)"
+  },
+
+  badgeCount: {
+    background: "linear-gradient(135deg,#22c55e,#16a34a)",
+    color: "#fff",
+    padding: "8px 14px",
+    borderRadius: 20,
+    fontSize: 16,
+    fontWeight: 600
+  },
+
+  table: {
+    borderRadius: "10px",
+    overflow: "hidden",
+    background: "#fff",
+    boxShadow: "0 4px 14px rgba(0,0,0,0.08)"
+  },
+
+  tableHeader: {
+    background: "linear-gradient(135deg, #0d6efd, #3a8bfd)",
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: "14px"
+  },
+
 };

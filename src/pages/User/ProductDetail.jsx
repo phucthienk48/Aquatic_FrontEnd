@@ -19,6 +19,10 @@ export default function ProductDetail() {
   const [ratingCount, setRatingCount] = useState(0);
   const [cartSuccess, setCartSuccess] = useState(null);
 
+  const [suggestProducts, setSuggestProducts] = useState([]);
+  const [ratings, setRatings] = useState({});
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   useEffect(() => {
     if (!id) return;
 
@@ -77,6 +81,97 @@ export default function ProductDetail() {
     </>
   );
 };
+
+useEffect(() => {
+  if (!product?.species) return;
+
+  const fetchSuggestProducts = async () => {
+    try {
+
+      const res = await fetch(
+        "http://localhost:5000/api/product"
+      );
+
+      const result = await res.json();
+      const products = result.data || result;
+
+      const filtered = products
+        .filter(
+          (p) =>
+            p.species === product.species &&
+            p._id !== product._id
+        )
+        .slice(0, 4); // chỉ hiển thị 4 sản phẩm
+
+      setSuggestProducts(filtered);
+
+    } catch (err) {
+      console.error("Lỗi lấy sản phẩm gợi ý", err);
+    }
+  };
+
+  fetchSuggestProducts();
+}, [product]);
+
+  useEffect(() => {
+
+  const fetchRatings = async () => {
+
+    const ratingData = {};
+
+    for (const p of suggestProducts) {
+
+      try {
+
+        const res = await fetch(
+          `http://localhost:5000/api/comment/product/${p._id}`
+        );
+
+        const data = await res.json();
+
+        const count = data.length;
+
+        const avg =
+          count > 0
+            ? data.reduce((s, c) => s + (c.rating || 0), 0) / count
+            : 0;
+
+        ratingData[p._id] = {
+          avg,
+          count
+        };
+
+      } catch (err) {
+        console.error(err);
+      }
+
+    }
+
+    setRatings(ratingData);
+
+  };
+
+  if (suggestProducts.length > 0) {
+    fetchRatings();
+  }
+
+}, [suggestProducts]);
+
+// useEffect(() => {
+
+//   if (suggestProducts.length <= 4) return;
+
+//   const interval = setInterval(() => {
+
+//     setCurrentSlide((prev) =>
+//       prev + 4 >= suggestProducts.length ? 0 : prev + 1
+//     );
+
+//   }, 3000);
+
+//   return () => clearInterval(interval);
+
+// }, [suggestProducts]);
 
   // Chuẩn hóa ảnh
   const getImageSrc = (img) => {
@@ -236,8 +331,8 @@ export default function ProductDetail() {
           </h2>
 
           <div style={styles.infoRow}>
-          <span>Chủng loại:</span>
-          <strong>{product.species}</strong>
+          {/* <span>Chủng loại:</span>
+          <strong>{product.species}</strong> */}
         </div>
 
           {/* ===== DESCRIPTION ===== */}
@@ -257,16 +352,16 @@ export default function ProductDetail() {
           </div>
 
           <div style={styles.priceGroup}>
-            <span style={styles.price}>
+            <span style={{ ...styles.price, fontSize: "30px"}}>
               {product.price.toLocaleString()} VNĐ
             </span>
 
             {hasDiscount && (
               <>
-                <span style={styles.oldPrice}>
+                <span style={{...styles.oldPrice, fontSize: "22px"}}>
                   {product.oldprice.toLocaleString()} VNĐ
                 </span>
-                <span style={styles.discountBadge}>
+                <span style={{...styles.discountBadge, fontSize: "16px"}}>
                   -{discountPercent}%
                 </span>
               </>
@@ -327,7 +422,106 @@ export default function ProductDetail() {
           <p>{product.instruction}</p>
         </div>
       )}
+      {/* ===== SẢN PHẨM GỢI Ý ===== */}
+      <div style={styles.suggestSlider}>
+        <div
+          style={{
+            ...styles.sliderTrack,
+            transform: `translateX(-${currentSlide * 300}px)`
+          }}
+        >
+        {suggestProducts
+          .slice(currentSlide, currentSlide + 4)
+          .map((p) => {
 
+          const hasDiscount = p.oldprice && p.oldprice > p.price;
+
+          const discountPercent = hasDiscount
+            ? Math.round(((p.oldprice - p.price) / p.oldprice) * 100)
+            : 0;
+
+          return (
+            <div
+              key={p._id}
+              style={styles.card}
+              onMouseEnter={(e)=>{
+                e.currentTarget.style.transform="translateY(-8px)";
+                e.currentTarget.style.boxShadow="0 15px 30px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e)=>{
+                e.currentTarget.style.transform="translateY(0)";
+                e.currentTarget.style.boxShadow="0 5px 15px rgba(0,0,0,0.08)";
+              }}
+            >
+
+              <img
+                src={getImageSrc(p.images?.[0])}
+                alt={p.name}
+                style={styles.cardImage}
+                onClick={() => navigate(`/product/${p._id}`)}
+              />
+
+              <div style={styles.cardBody}>
+
+                <div style={styles.cardName}>
+                  {p.name}
+                </div>
+
+                {/*  Rating */}
+                <div style={styles.ratingRow}>
+                  {[...Array(5)].map((_, i) => (
+                    <i
+                      key={i}
+                      className={`bi ${
+                        i < Math.round(ratings[p._id]?.avg || 0)
+                          ? "bi-star-fill"
+                          : "bi-star"
+                      }`}
+                      style={styles.star}
+                    />
+                  ))}
+                    <span style={styles.ratingText}>
+                      {(ratings[p._id]?.avg || 0).toFixed(1)} ({ratings[p._id]?.count || 0})
+                    </span>
+                </div>
+
+                {/* PRICE */}
+                <div style={styles.priceRow}>
+
+                  {hasDiscount && (
+                    <span style={styles.oldPrice}>
+                      {p.oldprice.toLocaleString()} VNĐ
+                    </span>
+                  )}
+
+                  <span style={styles.price}>
+                    {p.price.toLocaleString()} VNĐ
+                  </span>
+
+                  {hasDiscount && (
+                    <span style={styles.discount}>
+                      -{discountPercent}%
+                    </span>
+                  )}
+
+                </div>
+
+                <button
+                  style={styles.buyBtn}
+                  disabled={product.status !== "available"}
+                  onClick={handleAddToCart}
+                >
+                  <i className="bi bi-cart-plus"></i>{" "}
+                  Chọn mua
+                </button>
+
+              </div>
+
+            </div>
+          );
+        })}
+      </div>
+    </div>
       <ProductComment productId={id} />
       {cartSuccess && (
       <div style={styles.overlay}>
@@ -498,7 +692,7 @@ const styles = {
   },
 
   price: {
-    fontSize: "28px",
+    fontSize: "35px",
     fontWeight: "700",
     color: "#ee4d2d"
   },
@@ -642,6 +836,108 @@ progressBar: {
   width: "100%",
   animation: "progressShrink 2.5s linear",
   borderRadius: "0 0 18px 18px"
+},
+/* ===== SUGGEST PRODUCT ===== */
+
+suggestSlider: {
+  overflow: "hidden",
+  width: "100%",
+  marginTop: 40
+},
+
+card: {
+  width: 280,
+  background: "#f7f7f7",
+  borderRadius: 16,
+  padding: 10,
+  boxShadow: "0 5px 15px rgba(0,0,0,0.08)"
+},
+
+cardImage: {
+  width: "100%",
+  height: 200,
+  objectFit: "cover",
+  borderRadius: 12,
+  cursor: "pointer"
+},
+
+cardBody: {
+  padding: "10px 6px"
+},
+
+cardName: {
+  fontSize: 18,
+  fontWeight: 600,
+  textAlign: "center",
+  marginBottom: 6
+},
+
+ratingRow: {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 4,
+  marginBottom: 6
+},
+
+star: {
+  color: "#f4b400",
+  fontSize: 14
+},
+
+ratingText: {
+  marginLeft: 6,
+  fontSize: 14,
+  color: "#555"
+},
+
+priceRow: {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 8,
+  marginBottom: 10
+},
+
+oldPrice: {
+  textDecoration: "line-through",
+  color: "#888",
+  fontSize: 14
+},
+
+price: {
+  color: "#e53935",
+  fontSize: 15,
+  fontWeight: 700
+},
+
+discount: {
+  background: "#e53935",
+  color: "#fff",
+  fontSize: 13,
+  padding: "2px 6px",
+  borderRadius: 6
+},
+
+buyBtn: {
+  width: "100%",
+  background: "#1e6ee6",
+  color: "#fff",
+  border: "none",
+  padding: "10px 0",
+  borderRadius: 10,
+  fontSize: 16,
+  fontWeight: 600,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 6
+},
+sliderTrack: {
+  display: "flex",
+  gap: 20,
+  transition: "transform 0.6s ease"
 },
 };
 

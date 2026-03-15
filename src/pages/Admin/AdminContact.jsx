@@ -51,10 +51,10 @@ export default function AdminContact() {
 
   return (
     <div className="container py-4">
-      <h3 className="mb-4">
-        <i className="bi bi-envelope-paper-fill me-2"></i>
-        Quản lý liên hệ
-      </h3>
+      <h2 style={styles.pageTitle}>
+        <i className="bi bi-envelope-paper-fill" style={styles.titleIcon}></i>
+        QUẢN LÝ LIÊN HỆ
+      </h2>
 
       <div className="table-responsive">
         <table className="table table-hover align-middle shadow-sm">
@@ -92,29 +92,29 @@ export default function AdminContact() {
                 </td>
                 <td className="text-center">
                   <button
-                    className="btn btn-sm btn-outline-primary rounded-circle me-2"
+                    className="btn btn-sm btn-outline-primary me-2"
                     title="Xem chi tiết"
                     onClick={() => setSelected(c)}
                   >
-                    <i className="bi bi-eye"></i>
+                    <i className="bi bi-eye me-1"></i> Xem
                   </button>
 
                   {c.status === "new" && (
                     <button
-                      className="btn btn-sm btn-outline-success rounded-circle me-2"
+                      className="btn btn-sm btn-outline-success me-2"
                       title="Đánh dấu đã xử lý"
                       onClick={() => updateStatus(c._id, "processed")}
                     >
-                      <i className="bi bi-check2-circle"></i>
+                      <i className="bi bi-check2-circle me-1"></i> Đánh dấu
                     </button>
                   )}
 
                   <button
-                    className="btn btn-sm btn-outline-danger rounded-circle"
+                    className="btn btn-sm btn-outline-danger"
                     title="Xóa"
                     onClick={() => deleteContact(c._id)}
                   >
-                    <i className="bi bi-trash"></i>
+                    <i className="bi bi-trash me-1"></i> Xóa
                   </button>
                 </td>
               </tr>
@@ -212,7 +212,25 @@ const styles = {
     borderRadius: "12px",
     overflow: "hidden",
   },
+  pageTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 26,
+    fontWeight: 700,
+    padding: "12px 18px",
+    background: "#eff6ff",
+    color: "#1e40af",
+    borderRadius: 10,
+    marginBottom: 20,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+    textTransform: "uppercase",
+  },
 
+  titleIcon: {
+    fontSize: 30,
+    color: "#3b82f6",
+  },
   theadTh: {
     fontWeight: 600,
     fontSize: "15px",
@@ -259,7 +277,7 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: "50%",
+    borderRadius: "5px",
     transition: "all 0.2s ease",
   },
 

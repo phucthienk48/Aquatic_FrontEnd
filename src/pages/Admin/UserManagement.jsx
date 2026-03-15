@@ -10,6 +10,9 @@ export default function UserManagement() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -20,7 +23,7 @@ export default function UserManagement() {
     isActive: true,
   });
 
-  /* ================= FETCH USERS ================= */
+  /* FETCH USERS */
   const fetchUsers = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/users");
@@ -37,7 +40,7 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
-  /* ================= HANDLE FORM ================= */
+  /* HANDLE FORM */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -61,7 +64,7 @@ export default function UserManagement() {
     setShowForm(false);
   };
 
-  /* ================= UPLOAD AVATAR ================= */
+  /* UPLOAD AVATAR */
   const uploadAvatar = async () => {
     if (!avatarFile) return editingUser?.avatar || "";
 
@@ -88,7 +91,7 @@ export default function UserManagement() {
     }
   };
 
-  /* ================= CREATE / UPDATE ================= */
+  /* CREATE / UPDATE */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -132,7 +135,7 @@ export default function UserManagement() {
     }
   };
 
-  /* ================= EDIT ================= */
+  /* EDIT */
   const handleEdit = (user) => {
     setEditingUser(user);
     setAvatarFile(null);
@@ -148,7 +151,7 @@ export default function UserManagement() {
     setShowForm(true);
   };
 
-  /* ================= DELETE ================= */
+  /* DELETE */
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa user này?")) return;
 
@@ -164,15 +167,53 @@ export default function UserManagement() {
 
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải...</p>;
 
-  /* ================= UI ================= */
+  const filteredUsers = users.filter((u) => {
+
+    const matchSearch =
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase());
+
+    const matchRole =
+      roleFilter === "all" || u.role === roleFilter;
+
+    return matchSearch && matchRole;
+  });
+
+  /* UI */
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Quản lý người dùng</h2>
+     <h2 style={styles.pageTitle}>
+        <i className="bi bi-people-fill" style={styles.titleIcon}></i>
+        QUẢN LÝ NGƯỜI DÙNG
+      </h2>
 
       <button style={styles.addBtn} onClick={() => setShowForm(true)}>
         + Thêm user
       </button>
+          <div style={styles.filterBar}>
 
+            <div style={styles.searchBox}>
+              <i className="bi bi-search" style={styles.searchIcon}></i>
+
+              <input
+                style={styles.searchInput}
+                placeholder="Tìm username hoặc email..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+
+            <select
+              style={styles.filterSelect}
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+            >
+              <option value="all">Tất cả role</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+
+          </div>
       {/* ===== FORM ===== */}
       {showForm && (
         <form style={styles.form} onSubmit={handleSubmit}>
@@ -294,7 +335,7 @@ export default function UserManagement() {
         </thead>
 
         <tbody>
-          {users.map((u) => (
+          {filteredUsers.map((u) => (
             <tr key={u._id} style={styles.tr}>
               <td style={styles.tdCenter}>
                 <img
@@ -328,7 +369,8 @@ export default function UserManagement() {
                     onClick={() => handleEdit(u)}
                     title="Chỉnh sửa"
                   >
-                    <i className="bi bi-pencil-square"></i>
+                    <i className="bi bi-pencil-square me-1"></i>
+                     Sửa
                   </button>
 
                   <button
@@ -336,7 +378,7 @@ export default function UserManagement() {
                     onClick={() => handleDelete(u._id)}
                     title="Xóa"
                   >
-                    <i className="bi bi-trash"></i>
+                    <i className="bi bi-trash me-1"></i> Xóa
                   </button>
                 </div>
               </td>
@@ -349,7 +391,7 @@ export default function UserManagement() {
   );
 }
 
-/* ================= STYLES ================= */
+/* STYLES */
 const styles = {
   container: {
     padding: 24,
@@ -357,11 +399,24 @@ const styles = {
     minHeight: "100vh",
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: 600,
-    marginBottom: 16,
-    color: "#333",
+  pageTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 26,
+    fontWeight: 700,
+    padding: "12px 18px",
+    background: "#eff6ff",
+    color: "#1e40af",
+    borderRadius: 10,
+    marginBottom: 20,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.05)",
+    textTransform: "uppercase",
+  },
+
+  titleIcon: {
+    fontSize: 30,
+    color: "#3b82f6",
   },
 
   addBtn: {
@@ -410,53 +465,54 @@ const styles = {
     marginLeft: 8,
   },
 
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    background: "#ffffff",
-    borderRadius: 12,
-    overflow: "hidden",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-  },
+table: {
+  width: "100%",
+  borderCollapse: "collapse",
+  background: "#ffffff",
+  borderRadius: 12,
+  overflow: "hidden",
+  boxShadow: "0 6px 16px rgba(37, 99, 235, 0.15)", // bóng xanh
+  border: "1px solid #dbeafe", // viền xanh nhạt
+},
 
-  th: {
-    padding: "14px 12px",
-    background: "#f3f4f6",
-    fontWeight: 600,
-    color: "#374151",
-    borderBottom: "1px solid #e5e7eb",
-    textAlign: "left",
-    fontSize: 14,
-  },
+th: {
+  padding: "14px 12px",
+  background: "#eff6ff", // xanh rất nhạt
+  fontWeight: 600,
+  color: "#1e3a8a", // xanh đậm
+  borderBottom: "2px solid #bfdbfe",
+  textAlign: "left",
+  fontSize: 14,
+},
 
-  thCenter: {
-    padding: "14px 12px",
-    background: "#f3f4f6",
-    fontWeight: 600,
-    color: "#374151",
-    borderBottom: "1px solid #e5e7eb",
-    textAlign: "center",
-    fontSize: 14,
-  },
+thCenter: {
+  padding: "14px 12px",
+  background: "#eff6ff",
+  fontWeight: 600,
+  color: "#1e3a8a",
+  borderBottom: "2px solid #bfdbfe",
+  textAlign: "center",
+  fontSize: 14,
+},
 
-  tr: {
-    transition: "background 0.2s",
-  },
+tr: {
+  transition: "all 0.2s",
+},
 
-  td: {
-    padding: "12px",
-    borderBottom: "1px solid #e5e7eb",
-    color: "#374151",
-    fontSize: 14,
-  },
+td: {
+  padding: "12px",
+  borderBottom: "1px solid #e0f2fe",
+  color: "#1f2937",
+  fontSize: 14,
+},
 
-  tdCenter: {
-    padding: "12px",
-    borderBottom: "1px solid #e5e7eb",
-    textAlign: "center",
-    verticalAlign: "middle",
-    fontSize: 14,
-  },
+tdCenter: {
+  padding: "12px",
+  borderBottom: "1px solid #e0f2fe",
+  textAlign: "center",
+  verticalAlign: "middle",
+  fontSize: 14,
+},
 
   avatar: {
     width: 42,
@@ -505,5 +561,36 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
   },
+  filterBar: {
+  display: "flex",
+  gap: 12,
+  marginBottom: 16,
+},
+
+searchBox: {
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+},
+
+searchIcon: {
+  position: "absolute",
+  left: 10,
+  fontSize: 16,
+  color: "#6b7280",
+},
+
+searchInput: {
+  padding: "8px 12px 8px 32px",
+  borderRadius: 6,
+  border: "1px solid #ddd",
+  minWidth: 220,
+},
+
+filterSelect: {
+  padding: "8px 12px",
+  borderRadius: 6,
+  border: "1px solid #ddd",
+},
 };
 
