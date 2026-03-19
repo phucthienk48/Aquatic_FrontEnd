@@ -1,0 +1,176 @@
+/* --- BIẾN CHUNG --- */
+:root {
+  --primary-color: #004d4d;
+  --secondary-color: #008080;
+  --white: #ffffff;
+  --transition: all 0.3s ease;
+}
+
+/* --- HEADER CHÍNH --- */
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--white);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.top-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  padding: 10px 0;
+  color: var(--white);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --- LOGO --- */
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.logo-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  object-fit: cover;
+}
+
+.shop-name {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.shop-slogan {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* --- THANH TÌM KIẾM --- */
+.search-wrapper {
+  flex: 1;
+  margin: 0 30px;
+  max-width: 500px;
+}
+
+/* --- HÀNH ĐỘNG (GIỎ HÀNG, USER) --- */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.action-icon { font-size: 22px; }
+.action-label { font-size: 12px; margin-top: 2px; }
+
+.badge-count {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background: #ff4d4d;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* --- NAVIGATION (DESKTOP) --- */
+.bottom-nav {
+  background: var(--white);
+  border-bottom: 1px solid #eee;
+}
+
+.nav-list {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+  gap: 35px;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.nav-item:hover { color: var(--secondary-color); }
+
+/* --- RESPONSIVE CHO IPAD (Dưới 1024px) --- */
+@media (max-width: 1024px) {
+  .search-wrapper { margin: 0 15px; }
+  .nav-list { gap: 20px; }
+}
+
+/* --- RESPONSIVE CHO ĐIỆN THOẠI (Dưới 768px) --- */
+@media (max-width: 768px) {
+  .top-header { padding: 8px 0; }
+  
+  /* Ẩn bớt text để tiết kiệm diện tích */
+  .action-label, .shop-slogan, .shop-name {
+    display: none; 
+  }
+
+  .logo-img { width: 40px; height: 40px; }
+
+  .search-wrapper {
+    margin: 0 10px;
+  }
+}
+
+/* --- MENU MOBILE SIDEBAR --- */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 280px;
+  background: white;
+  z-index: 2001;
+  padding: 20px;
+}
+
+.mobile-link {
+  display: block;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+}
+
+.menu-toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  margin-right: 10px;
+}

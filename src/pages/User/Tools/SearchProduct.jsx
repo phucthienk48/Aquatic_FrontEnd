@@ -21,15 +21,10 @@ export default function SearchProduct({ isMobile }) {
     const delay = setTimeout(async () => {
       try {
         setLoading(true);
-
         const res = await fetch(
-          `http://localhost:5000/api/product/search?keyword=${encodeURIComponent(
-            keyword
-          )}`
+          `http://localhost:5000/api/product/search?keyword=${encodeURIComponent(keyword)}`
         );
-
-        const data = await res.json(); // backend trả mảng
-
+        const data = await res.json();
         setProducts(data || []);
         setShow(true);
       } catch (err) {
@@ -49,10 +44,8 @@ export default function SearchProduct({ isMobile }) {
         setShow(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   /* HANDLERS */
@@ -60,219 +53,217 @@ export default function SearchProduct({ isMobile }) {
     if (!keyword.trim()) return;
     navigate(`/product?keyword=${keyword}`);
     setShow(false);
+    setKeyword("");
   };
 
   const handleSelectProduct = (id) => {
     navigate(`/product/${id}`);
     setShow(false);
+    setKeyword("");
   };
 
-  /* RENDER */
   return (
-    <>
-      {/* SEARCH BOX */}
-      <div
-        style={{
-          ...styles.searchBox,
-          width: isMobile ? "100%" : "300px",
-        }}
-      >
+    <div style={styles.searchWrapper} ref={boxRef}>
+      {/* SEARCH INPUT BOX */}
+      <div style={{
+        ...styles.searchBox,
+        width: isMobile ? "100%" : "400px",
+        borderColor: show ? "#008080" : "#eee"
+      }}>
         <input
           style={styles.searchInput}
-          placeholder="Tìm kiếm sản phẩm..."
+          placeholder="Bạn đang tìm loài cá nào?..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onFocus={() => keyword && setShow(true)}
           onKeyDown={(e) => e.key === "Enter" && handleSearchAll()}
         />
         <button style={styles.searchBtn} onClick={handleSearchAll}>
-          <i className="bi bi-search"></i>
+          {loading ? (
+            <div className="spinner-border spinner-border-sm text-success"></div>
+          ) : (
+            <i className="bi bi-search"></i>
+          )}
         </button>
       </div>
 
-      {/* OVERLAY RESULT */}
+      {/* RESULT DROPDOWN */}
       {show && (
-        <div style={styles.overlay}>
-          <div style={styles.resultBox} ref={boxRef}>
-            {/* HEADER */}
-            <div style={styles.header}>
-              Kết quả cho:{" "}
-              <span style={{ color: "#ee4d2d" }}>{keyword}</span>
-            </div>
+        <div style={{
+          ...styles.resultDropdown,
+          width: isMobile ? "calc(100vw - 24px)" : "550px",
+          left: isMobile ? "50%" : "0",
+          transform: isMobile ? "translateX(-50%)" : "none",
+        }}>
+          {/* HEADER */}
+          <div style={styles.header}>
+            <i className="bi bi-water" style={{marginRight: 8, color: '#008080'}}></i>
+            Kết quả tìm kiếm cho: <span style={styles.keywordHighlight}>"{keyword}"</span>
+          </div>
 
-            {/* BODY */}
-            <div style={styles.list}>
-              {loading && (
-                <div style={styles.loading}>Đang tìm kiếm...</div>
-              )}
-
-              {!loading && products.length === 0 && (
-                <div style={styles.empty}>
-                  Không tìm thấy sản phẩm phù hợp
-                </div>
-              )}
-
-              {products.map((item) => (
-                <div
-                  key={item._id}
-                  style={styles.item}
-                  onClick={() => handleSelectProduct(item._id)}
-                >
-                  <img
-                    src={
-                      item.images?.[0] ||
-                      "https://via.placeholder.com/60"
-                    }
-                    alt={item.name}
-                    style={styles.image}
-                  />
-
-                  <div style={{ flex: 1 }}>
-                    <div style={styles.name}>{item.name}</div>
-
-                    <div style={styles.priceBox}>
-                      <span style={styles.price}>
-                        {item.price?.toLocaleString()}đ
-                      </span>
-                      {item.oldprice && (
-                        <span style={styles.oldprice}>
-                          {item.oldprice.toLocaleString()}đ
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* FOOTER */}
-            {products.length > 0 && (
-              <div style={styles.footer} onClick={handleSearchAll}>
-                Xem tất cả kết quả cho{" "}
-                <span style={{ color: "#ee4d2d" }}>{keyword}</span>
+          {/* LIST */}
+          <div style={styles.list}>
+            {!loading && products.length === 0 && (
+              <div style={styles.empty}>
+                <i className="bi bi-search-heart" style={{fontSize: 24, display: 'block', marginBottom: 8}}></i>
+                Rất tiếc, chưa tìm thấy sản phẩm này...
               </div>
             )}
+
+            {products.map((item) => (
+              <div
+                key={item._id}
+                style={styles.item}
+                onClick={() => handleSelectProduct(item._id)}
+                className="search-item-hover"
+              >
+                <img
+                  src={item.images?.[0] || "https://via.placeholder.com/60"}
+                  alt={item.name}
+                  style={styles.image}
+                />
+
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <div style={styles.name}>{item.name}</div>
+                  <div style={styles.priceBox}>
+                    <span style={styles.price}>{item.price?.toLocaleString()}đ</span>
+                    {item.oldprice && (
+                      <span style={styles.oldprice}>{item.oldprice.toLocaleString()}đ</span>
+                    )}
+                  </div>
+                </div>
+                <i className="bi bi-chevron-right" style={styles.arrowIcon}></i>
+              </div>
+            ))}
           </div>
+
+          {/* FOOTER */}
+          {products.length > 0 && (
+            <div style={styles.footer} onClick={handleSearchAll}>
+              Xem tất cả <strong>{products.length}</strong> sản phẩm thủy sinh
+            </div>
+          )}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
-/* STYLES (Shopee-like) */
 const styles = {
+  searchWrapper: {
+    position: "relative",
+    zIndex: 1001,
+  },
   searchBox: {
     display: "flex",
     alignItems: "center",
-    background: "#fff",
-    borderRadius: 24,
-    border: "1px solid #ddd",
+    background: "#f8f9fa",
+    borderRadius: "12px",
+    border: "2px solid #eee",
     overflow: "hidden",
+    transition: "all 0.3s ease",
+    boxShadow: "inset 0 1px 3px rgba(0,0,0,0.05)",
   },
-
   searchInput: {
     flex: 1,
-    padding: "10px 14px",
+    padding: "10px 16px",
     border: "none",
     outline: "none",
-    fontSize: 14,
+    fontSize: "14px",
+    background: "transparent",
+    color: "#333",
   },
-
   searchBtn: {
-    padding: "0 14px",
+    padding: "0 16px",
     background: "transparent",
     border: "none",
     cursor: "pointer",
-    color: "#555",
+    color: "#008080",
+    fontSize: "18px",
   },
-
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.4)",
-    zIndex: 999,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    paddingTop: 110,
-  },
-
-  resultBox: {
-    width: 680,
-    maxWidth: "95%",
-    background: "#fff",
-    borderRadius: 8,
+  resultDropdown: {
+    position: "absolute",
+    top: "calc(100% + 10px)",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "16px",
     overflow: "hidden",
-    boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
+    boxShadow: "0 15px 35px rgba(0,0,0,0.2)",
+    border: "1px solid rgba(0, 128, 128, 0.1)",
+    backdropFilter: "blur(10px)",
   },
-
   header: {
-    padding: 12,
-    fontWeight: 600,
-    borderBottom: "1px solid #eee",
+    padding: "12px 16px",
+    fontSize: "13px",
+    color: "#666",
+    borderBottom: "1px solid #f0f0f0",
+    background: "#fcfdfd",
   },
-
+  keywordHighlight: {
+    color: "#008080",
+    fontWeight: "bold",
+  },
   list: {
-    maxHeight: "55vh",
+    maxHeight: "400px",
     overflowY: "auto",
   },
-
   item: {
     display: "flex",
-    gap: 12,
-    padding: 12,
+    alignItems: "center",
+    gap: "12px",
+    padding: "12px 16px",
     cursor: "pointer",
-    borderBottom: "1px solid #f2f2f2",
+    borderBottom: "1px solid #f8f8f8",
+    transition: "background 0.2s",
+    position: "relative",
   },
-
   image: {
-    width: 60,
-    height: 60,
-    borderRadius: 6,
+    width: "50px",
+    height: "50px",
+    borderRadius: "8px",
     objectFit: "cover",
+    border: "1px solid #eee",
   },
-
   name: {
-    fontSize: 14,
-    lineHeight: "18px",
-    marginBottom: 6,
-    fontWeight: 500,
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: "4px",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
-
   priceBox: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: "8px",
   },
-
   price: {
-    color: "#ee4d2d",
-    fontWeight: 600,
+    color: "#2db36c", // Màu xanh lá cây thủy sinh
+    fontWeight: "700",
+    fontSize: "14px",
   },
-
   oldprice: {
-    fontSize: 13,
+    fontSize: "12px",
     textDecoration: "line-through",
     color: "#999",
   },
-
+  arrowIcon: {
+    color: "#ccc",
+    fontSize: "12px",
+  },
   footer: {
-    padding: 12,
+    padding: "12px",
     textAlign: "center",
-    fontWeight: 500,
+    fontSize: "13px",
+    color: "#fff",
+    background: "linear-gradient(90deg, #008080, #004d4d)",
     cursor: "pointer",
-    background: "#fafafa",
+    fontWeight: "500",
   },
-
-  loading: {
-    padding: 16,
-    textAlign: "center",
-    color: "#666",
-  },
-
   empty: {
-    padding: 20,
+    padding: "30px",
     textAlign: "center",
     color: "#999",
+    fontSize: "14px",
   },
 };

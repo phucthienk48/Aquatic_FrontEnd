@@ -184,7 +184,7 @@ export default function UserManagement() {
     <div style={styles.container}>
      <h2 style={styles.pageTitle}>
         <i className="bi bi-people-fill" style={styles.titleIcon}></i>
-        QUẢN LÝ NGƯỜI DÙNG
+        QUẢN LÝ TÀI KHOẢN
       </h2>
 
       <button style={styles.addBtn} onClick={() => setShowForm(true)}>
