@@ -64,11 +64,35 @@ export default function Register() {
     }
   };
 
-  // Hiệu ứng bong bóng khí
   const bubbles = Array.from({ length: 10 });
 
   return (
     <div style={styles.container}>
+      {/* Nhúng CSS Responsive trực tiếp */}
+      <style>{`
+        @media (max-width: 992px) {
+          .glass-wrapper {
+            width: 100% !important;
+            max-width: 600px;
+            flex-direction: column;
+          }
+          .left-side {
+            display: none !important;
+          }
+          .right-side {
+            padding: 30px 20px !important;
+          }
+        }
+        @media (max-width: 600px) {
+          .grid-fields {
+            grid-template-columns: 1fr !important;
+          }
+          .title {
+            font-size: 22px !important;
+          }
+        }
+      `}</style>
+
       {/* Bong bóng nền */}
       {bubbles.map((_, i) => (
         <motion.div
@@ -96,9 +120,10 @@ export default function Register() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
         style={styles.glassWrapper}
+        className="glass-wrapper"
       >
-        {/* Bên trái: Hình ảnh & Welcome */}
-        <div style={styles.leftSide}>
+        {/* Bên trái: Hình ảnh (Sẽ ẩn trên mobile bằng CSS) */}
+        <div style={styles.leftSide} className="left-side">
           <div style={styles.overlay}></div>
           <div style={styles.leftContent}>
             <i className="bi bi-droplet-half" style={styles.mainIcon}></i>
@@ -110,10 +135,10 @@ export default function Register() {
         </div>
 
         {/* Bên phải: Form đăng ký */}
-        <div style={styles.rightSide}>
+        <div style={styles.rightSide} className="right-side">
           <form style={styles.form} onSubmit={handleSubmit}>
             <div style={styles.header}>
-              <h2 style={styles.title}>Đăng Ký Tài Khoản</h2>
+              <h2 style={styles.title} className="title">Đăng Ký Tài Khoản</h2>
               <p style={styles.subtitle}>Điền thông tin để tham gia cộng đồng</p>
             </div>
 
@@ -130,8 +155,7 @@ export default function Register() {
               )}
             </AnimatePresence>
 
-            <div style={styles.gridFields}>
-              {/* Tên đăng nhập */}
+            <div style={styles.gridFields} className="grid-fields">
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Tên đăng nhập *</label>
                 <div style={styles.inputWrapper}>
@@ -140,7 +164,6 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Email */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Email *</label>
                 <div style={styles.inputWrapper}>
@@ -149,7 +172,6 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Số điện thoại */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Số điện thoại</label>
                 <div style={styles.inputWrapper}>
@@ -158,7 +180,6 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Địa chỉ */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Địa chỉ</label>
                 <div style={styles.inputWrapper}>
@@ -167,7 +188,6 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Mật khẩu */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Mật khẩu *</label>
                 <div style={styles.inputWrapper}>
@@ -176,9 +196,8 @@ export default function Register() {
                 </div>
               </div>
 
-              {/* Nhập lại mật khẩu */}
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Xác nhận mật khẩu *</label>
+                <label style={styles.label}>Xác nhận *</label>
                 <div style={styles.inputWrapper}>
                   <i className="bi bi-shield-check" style={styles.icon}></i>
                   <input style={styles.input} type="password" name="confirmPassword" placeholder="••••••••" value={form.confirmPassword} onChange={handleChange} />
@@ -227,10 +246,11 @@ const styles = {
   },
   glassWrapper: {
     display: "flex",
-    width: "1100px",
+    width: "100%",
+    maxWidth: "1100px", // Đổi từ fixed width sang maxWidth
     minHeight: "650px",
     background: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "40px",
+    borderRadius: "30px", // Giảm bo góc một chút cho mobile
     overflow: "hidden",
     boxShadow: "0 25px 50px rgba(0,0,0,0.4)",
     zIndex: 10,
@@ -240,8 +260,7 @@ const styles = {
     flex: 0.8,
     background: "url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80') center center/cover",
     position: "relative",
-    display: "none", // Ẩn trên mobile nếu cần, hiện trên desktop
-    "@media (min-width: 768px)": { display: "flex" },
+    display: "flex",
   },
   overlay: {
     position: "absolute",
@@ -251,7 +270,7 @@ const styles = {
   leftContent: {
     position: "relative",
     zIndex: 2,
-    padding: "60px",
+    padding: "40px",
     color: "#fff",
     display: "flex",
     flexDirection: "column",
@@ -259,81 +278,69 @@ const styles = {
     alignItems: "center",
     textAlign: "center",
   },
-  mainIcon: {
-    fontSize: "60px",
-    marginBottom: "20px",
-    color: "#40e0d0",
-  },
-  welcomeTitle: {
-    fontSize: "32px",
-    fontWeight: "800",
-    marginBottom: "15px",
-  },
-  welcomeText: {
-    fontSize: "16px",
-    lineHeight: "1.6",
-    opacity: 0.9,
-  },
+  mainIcon: { fontSize: "60px", marginBottom: "20px", color: "#40e0d0" },
+  welcomeTitle: { fontSize: "28px", fontWeight: "800", marginBottom: "15px" },
+  welcomeText: { fontSize: "15px", lineHeight: "1.6", opacity: 0.9 },
   rightSide: {
     flex: 1.2,
-    padding: "50px 60px",
+    padding: "40px 50px",
     background: "#fff",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
   },
   form: { width: "100%" },
-  header: { marginBottom: "30px" },
+  header: { marginBottom: "25px" },
   title: { fontSize: "28px", color: "#004d4d", fontWeight: "800", margin: 0 },
-  subtitle: { fontSize: "15px", color: "#666", marginTop: "5px" },
+  subtitle: { fontSize: "14px", color: "#666", marginTop: "5px" },
   gridFields: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "20px",
-    marginBottom: "30px",
+    gap: "15px",
+    marginBottom: "25px",
   },
   inputGroup: { display: "flex", flexDirection: "column" },
-  label: { fontSize: "13px", fontWeight: "700", color: "#444", marginBottom: "8px", textTransform: "uppercase" },
+  label: { fontSize: "12px", fontWeight: "700", color: "#444", marginBottom: "6px", textTransform: "uppercase" },
   inputWrapper: {
     display: "flex",
     alignItems: "center",
     background: "#f0f7f7",
     border: "1px solid #e0eeee",
-    borderRadius: "12px",
-    padding: "0 15px",
+    borderRadius: "10px",
+    padding: "0 12px",
     transition: "all 0.3s",
   },
-  icon: { color: "#008080", fontSize: "16px" },
+  icon: { color: "#008080", fontSize: "14px" },
   input: {
     flex: 1,
-    padding: "12px",
+    padding: "10px",
     border: "none",
     background: "transparent",
     outline: "none",
-    fontSize: "15px",
+    fontSize: "14px",
   },
   submitBtn: {
     width: "100%",
-    padding: "16px",
-    borderRadius: "12px",
+    padding: "14px",
+    borderRadius: "10px",
     border: "none",
     background: "linear-gradient(135deg, #008080 0%, #004d4d 100%)",
     color: "#fff",
     fontSize: "16px",
     fontWeight: "700",
     cursor: "pointer",
-    boxShadow: "0 10px 20px rgba(0, 80, 80, 0.2)",
+    boxShadow: "0 8px 15px rgba(0, 80, 80, 0.2)",
   },
   disabledBtn: { background: "#ccc", cursor: "not-allowed", boxShadow: "none" },
-  footerLink: { marginTop: "25px", textAlign: "center", fontSize: "14px", color: "#666" },
+  footerLink: { marginTop: "20px", textAlign: "center", fontSize: "14px", color: "#666" },
   link: { color: "#008080", fontWeight: "700", textDecoration: "none" },
   errorAlert: {
     background: "#fff0f0",
     color: "#d9534f",
-    padding: "12px 15px",
-    borderRadius: "10px",
-    fontSize: "14px",
-    marginBottom: "20px",
-    borderLeft: "5px solid #d9534f",
+    padding: "10px 15px",
+    borderRadius: "8px",
+    fontSize: "13px",
+    marginBottom: "15px",
+    borderLeft: "4px solid #d9534f",
   },
 };

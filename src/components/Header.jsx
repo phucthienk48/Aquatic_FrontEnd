@@ -6,25 +6,24 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function Header() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
   const [cartCount, setCartCount] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Trạng thái đóng mở menu mobile
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  /* LOAD USER & CART */
+  // Xác định loại thiết bị
+  const isMobile = width < 768;      
+  const isTablet = width >= 768 && width <= 1024; 
+  const isDesktop = width > 1024;    
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      const userId = parsedUser._id || parsedUser.id;
-      if (userId) fetchCartCount(userId);
+      fetchCartCount(parsedUser._id || parsedUser.id);
     }
-  }, []);
 
-  /* RESPONSIVE CHECK */
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 992);
-    handleResize();
+    const handleResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -38,13 +37,10 @@ export default function Header() {
   const fetchCartCount = async (userId) => {
     try {
       const res = await fetch(`http://localhost:5000/api/cart/${userId}`);
-      if (!res.ok) return;
       const cart = await res.json();
       const total = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
       setCartCount(total);
-    } catch (err) {
-      console.error("Lỗi lấy giỏ hàng:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const navLinks = [
@@ -58,21 +54,19 @@ export default function Header() {
 
   return (
     <header style={styles.header}>
-      {/* --- TOP HEADER --- */}
+     
       <div style={styles.topHeader}>
-        <div style={styles.container} className="header-container">
+        <div style={{ ...styles.container, padding: isMobile ? "0px 10px" : "0 20px" }}>
           
-          {/* Mobile Menu Toggle */}
-          {isMobile && (
+          {!isDesktop && (
             <button style={styles.menuIcon} onClick={() => setIsMenuOpen(true)}>
               <i className="bi bi-list"></i>
             </button>
           )}
 
-          {/* LOGO */}
           <div style={styles.logo} onClick={() => navigate("/")}>
-            <img src="/data/logo.png" alt="Logo" style={styles.logoImg} />
-            {!isMobile && (
+            <img src="/data/logo.png" alt="Logo" style={isMobile ? styles.logoImgMobile : styles.logoImg} />
+            {!isMobile && ( 
               <div style={styles.logoText}>
                 <h1 style={styles.shopName}>THIÊN PHÚC</h1>
                 <span style={styles.shopSlogan}>AQUAWORLD</span>
@@ -80,44 +74,47 @@ export default function Header() {
             )}
           </div>
 
-          {/* SEARCH (Ẩn trên mobile nhỏ, chỉ hiện icon hoặc thu gọn) */}
-          <div style={styles.searchContainer}>
-            <SearchProduct isMobile={isMobile} />
+          <div style={{ 
+            ...styles.searchContainer, 
+            display: (isMobile && width < 400) ? "none" : "block" // Ẩn search trên mobile cực nhỏ nếu cần
+          }}>
+            <SearchProduct isMobile={!isDesktop} />
           </div>
 
-          {/* ACTIONS */}
+          {/* . ACTIONS */}
           <div style={styles.actions}>
-            {/* Giỏ hàng */}
             <div style={styles.actionItem} onClick={() => navigate("/cart")}>
               <div style={styles.iconBadgeWrapper}>
                 <i className="bi bi-bag-check" style={styles.actionIcon}></i>
                 {cartCount > 0 && <span style={styles.badge}>{cartCount}</span>}
               </div>
-              {!isMobile && <span style={styles.actionText}>Giỏ hàng</span>}
+              {isDesktop && <span style={styles.actionText}>Giỏ hàng</span>}
             </div>
 
-            {/* User */}
+            {/* User Profile */}
             {!user ? (
-              <div style={styles.authButtons}>
-                <button style={styles.loginBtn} onClick={() => navigate("/login")}>Đăng nhập</button>
-              </div>
+              <button style={styles.loginBtn} onClick={() => navigate("/login")}>
+                {isMobile ? <i className="bi bi-person"></i> : "Đăng nhập"}
+              </button>
             ) : (
               <div style={styles.userDropdown}>
                 <div style={styles.actionItem} onClick={() => navigate("/profile")}>
                   <img src={user.avatar || "/default-avatar.png"} style={styles.avatarMini} alt="user" />
-                  {!isMobile && <span style={styles.actionText}>{user.username}</span>}
+                  {isDesktop && <span style={styles.actionText}>{user.username}</span>}
                 </div>
-                <button onClick={handleLogout} style={styles.logoutBtnIcon} title="Đăng xuất">
-                  <i className="bi bi-box-arrow-right"></i>
-                </button>
+                {isDesktop && (
+                  <button onClick={handleLogout} style={styles.logoutBtnIcon}>
+                    <i className="bi bi-box-arrow-right"></i>
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* --- BOTTOM HEADER (Desktop Navigation) --- */}
-      {!isMobile && (
+      {/* --- BOTTOM HEADER (Chỉ hiện trên Laptop/Desktop) --- */}
+      {isDesktop && (
         <div style={styles.bottomHeader}>
           <nav style={styles.nav}>
             {navLinks.map((link) => (
@@ -129,41 +126,39 @@ export default function Header() {
         </div>
       )}
 
-      {/* --- MOBILE SIDEBAR MENU --- */}
+      {/* --- MOBILE/TABLET SIDEBAR MENU --- */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMenuOpen(false)}
-              style={styles.overlay}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsMenuOpen(false)} style={styles.overlay}
             />
             <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
               style={styles.mobileMenu}
             >
               <div style={styles.mobileMenuHeader}>
-                <h2 style={styles.mobileMenuTitle}>MENU</h2>
+                <div style={styles.logoMobile}>
+                  <img src="/data/logo.png" style={{width: "40px"}} alt="logo" />
+                  <span style={{fontWeight: 'bold', marginLeft: '10px'}}>MENU</span>
+                </div>
                 <button onClick={() => setIsMenuOpen(false)} style={styles.closeBtn}>
                   <i className="bi bi-x-lg"></i>
                 </button>
               </div>
               <div style={styles.mobileLinks}>
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    style={styles.mobileLink}
-                  >
+                  <Link key={link.path} to={link.path} onClick={() => setIsMenuOpen(false)} style={styles.mobileLink}>
                     {link.name}
                   </Link>
                 ))}
+                {user && (
+                   <button onClick={handleLogout} style={styles.mobileLogoutBtn}>
+                    <i className="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                  </button>
+                )}
               </div>
             </motion.div>
           </>
@@ -181,191 +176,234 @@ const styles = {
     background: "#fff",
     boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
   },
+
   topHeader: {
     background: "linear-gradient(135deg, #004d4d 0%, #008080 100%)",
-    padding: "10px 0",
+    padding: "12px 0",
     color: "#fff",
   },
+
   container: {
-    maxWidth: "1200px",
+    maxWidth: "1250px",
     margin: "0 auto",
-    padding: "0 15px",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: "10px",
   },
+
   logo: {
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
-    gap: "12px",
+    gap: "10px",
   },
+
   logoImg: {
-    width: "50px",
-    height: "50px",
+    width: "45px",
+    height: "45px",
     borderRadius: "50%",
     border: "2px solid #fff",
     objectFit: "cover",
   },
+
+  logoImgMobile: {
+    width: "38px",
+    height: "38px",
+    borderRadius: "50%",
+    border: "2px solid #fff",
+  },
+
   logoText: {
     display: "flex",
     flexDirection: "column",
   },
+
   shopName: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "800",
     margin: 0,
-    letterSpacing: "1px",
-    lineHeight: "1",
+    letterSpacing: "0.5px",
   },
+
   shopSlogan: {
-    fontSize: "11px",
-    letterSpacing: "2px",
+    fontSize: "13px",
+    letterSpacing: "1px",
     opacity: 0.8,
   },
+
   searchContainer: {
     flex: 1,
-    margin: "0 30px",
-    maxWidth: "500px",
+    margin: "0 10px",
+    minWidth: "150px",
   },
+
   actions: {
     display: "flex",
     alignItems: "center",
-    gap: "20px",
+    gap: "15px",
   },
+
   actionItem: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     cursor: "pointer",
-    position: "relative",
-    transition: "0.3s",
   },
+
   actionIcon: {
-    fontSize: "22px",
+    fontSize: "25px",
   },
+
   actionText: {
-    fontSize: "12px",
+    fontSize: "13px",
     marginTop: "2px",
   },
+
   iconBadgeWrapper: {
     position: "relative",
   },
+
   badge: {
     position: "absolute",
-    top: "-5px",
-    right: "-10px",
+    top: "-8px",
+    right: "-12px",
     background: "#ff4d4d",
     color: "#fff",
     fontSize: "10px",
-    padding: "2px 6px",
-    borderRadius: "10px",
+    padding: "1px 5px",
+    borderRadius: "50%",
     fontWeight: "bold",
   },
+
+
   avatarMini: {
-    width: "30px",
-    height: "30px",
+    width: "38px",
+    height: "38px",
     borderRadius: "50%",
-    border: "2px solid #fff",
+    border: "1.5px solid #fff",
   },
+
   userDropdown: {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "8px",
   },
+
   logoutBtnIcon: {
-    background: "rgba(255,255,255,0.2)",
+    background: "rgba(255,255,255,0.15)",
     border: "none",
     color: "#fff",
-    padding: "5px 8px",
-    borderRadius: "5px",
+    padding: "10px 15px",
+    borderRadius: "4px",
     cursor: "pointer",
   },
+
   loginBtn: {
     background: "#fff",
     color: "#004d4d",
     border: "none",
-    padding: "8px 16px",
-    borderRadius: "20px",
+    padding: "6px 12px",
+    borderRadius: "15px",
     fontWeight: "bold",
+    fontSize: "18px",
     cursor: "pointer",
   },
-  /* BOTTOM HEADER */
+
   bottomHeader: {
     background: "#fff",
     borderBottom: "1px solid #eee",
   },
+
   nav: {
     maxWidth: "1200px",
-    margin: "0 auto",
+    margin: "8px auto",
     display: "flex",
     justifyContent: "center",
-    padding: "12px 0",
-    gap: "40px",
+    padding: "10px 0",
+    gap: "30px",
   },
+
   navLink: {
     textDecoration: "none",
     color: "#333",
-    fontSize: "14px",
+    fontSize: "16px",
     fontWeight: "700",
     transition: "0.3s",
-    position: "relative",
-    paddingBottom: "5px",
   },
-  /* MOBILE MENU STYLES */
+
   menuIcon: {
     background: "none",
     border: "none",
     color: "#fff",
-    fontSize: "28px",
+    fontSize: "24px",
     cursor: "pointer",
   },
+
   overlay: {
     position: "fixed",
-    top: 0, left: 0, right: 0, bottom: 0,
-    background: "rgba(0,0,0,0.5)",
-    zIndex: 1001,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: "rgba(0,0,0,0.6)",
+    zIndex: 2000,
   },
+
   mobileMenu: {
     position: "fixed",
-    top: 0, left: 0, bottom: 0,
+    top: 0,
+    left: 0,
+    bottom: 0,
     width: "280px",
     background: "#fff",
-    zIndex: 1002,
+    zIndex: 2001,
     padding: "20px",
     display: "flex",
     flexDirection: "column",
+    boxShadow: "5px 0 15px rgba(0,0,0,0.1)",
   },
+
   mobileMenuHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "30px",
+    marginBottom: "20px",
     borderBottom: "1px solid #eee",
     paddingBottom: "15px",
   },
-  mobileMenuTitle: {
-    margin: 0,
-    fontSize: "18px",
-    color: "#004d4d",
-  },
+
   closeBtn: {
     background: "none",
     border: "none",
-    fontSize: "20px",
-    cursor: "pointer",
+    fontSize: "22px",
+    color: "#333",
   },
+
   mobileLinks: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "5px",
   },
+
   mobileLink: {
     textDecoration: "none",
     color: "#333",
-    fontSize: "16px",
+    fontSize: "15px",
     fontWeight: "600",
-    padding: "10px 0",
-    borderBottom: "1px solid #f9f9f9",
+    padding: "12px 15px",
+    borderRadius: "8px",
+    transition: "0.2s",
+  },
+
+  mobileLogoutBtn: {
+    marginTop: "20px",
+    padding: "12px",
+    background: "#fff1f0",
+    color: "#ff4d4f",
+    border: "none",
+    borderRadius: "8px",
+    textAlign: "left",
+    fontWeight: "bold",
   },
 };

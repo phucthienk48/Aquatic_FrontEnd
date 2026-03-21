@@ -3,21 +3,18 @@ import { useParams, Link } from "react-router-dom";
 
 export default function KnowledgeDetail() {
   const { id } = useParams();
-
   const [knowledge, setKnowledge] = useState(null);
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [width, setWidth] = useState(window.innerWidth);
 
-  const getImageSrc = (img) => {
-    if (!img) return "/data/placeholder.jpg";
-    if (img.startsWith("http")) return img;
-    if (img.startsWith("/")) return img;
-    return `/${img}`;
-  };
-
+  // Theo dõi kích thước màn hình
   useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
     fetchData();
+    return () => window.removeEventListener("resize", handleResize);
   }, [id]);
 
   const fetchData = async () => {
@@ -27,19 +24,15 @@ export default function KnowledgeDetail() {
         fetch(`http://localhost:5000/api/knowledge`)
       ]);
 
-      if (!detailRes.ok || !listRes.ok)
-        throw new Error("Không thể tải dữ liệu");
+      if (!detailRes.ok || !listRes.ok) throw new Error("Không thể tải dữ liệu");
 
       const detailData = await detailRes.json();
       const listData = await listRes.json();
 
       setKnowledge(detailData.data || detailData.knowledge || detailData);
-
-      const arr = Array.isArray(listData)
-        ? listData
-        : listData.data || listData.knowledges || [];
-
+      const arr = Array.isArray(listData) ? listData : listData.data || listData.knowledges || [];
       setList(arr.filter((k) => k.knowledgeId !== id));
+      window.scrollTo(0, 0); // Cuộn lên đầu trang khi đổi bài viết
     } catch (err) {
       setError(err.message || "Có lỗi xảy ra");
     } finally {
@@ -47,229 +40,315 @@ export default function KnowledgeDetail() {
     }
   };
 
-  if (loading)
-    return <p style={{ textAlign: "center", marginTop: 60 }}>⏳ Đang tải...</p>;
+  const getImageSrc = (img) => {
+    if (!img) return "/data/placeholder.jpg";
+    if (img.startsWith("http") || img.startsWith("/")) return img;
+    return `/${img}`;
+  };
 
-  if (error)
-    return (
-      <p style={{ textAlign: "center", color: "red", marginTop: 60 }}>
-        {error}
-      </p>
-    );
-
+  if (loading) return <div style={styles.center}>⏳ Đang tải nội dung...</div>;
+  if (error) return <div style={styles.center}><p style={{color: 'red'}}>{error}</p></div>;
   if (!knowledge) return null;
+
+  const isMobile = width < 992; // Điểm ngắt cho Tablet/Mobile
 
   return (
     <div style={styles.container}>
-      <div style={styles.layout}>
+      <div style={{ ...styles.layout, gridTemplateColumns: isMobile ? "1fr" : "2.5fr 1fr" }}>
+        
         {/* MAIN CONTENT */}
-        <div style={styles.main}>
-          <Link to="/knowledge" style={styles.back}>
-            <i className="bi bi-arrow-left-circle"></i> Quay lại danh sách
+        <article style={styles.main}>
+          <Link to="/knowledge" style={styles.backBtn}>
+            <i className="bi bi-arrow-left"></i> Quay lại cẩm nang
           </Link>
 
-          <h1 style={styles.title}>
-            <i className="bi bi-journal-richtext"></i> {knowledge.title}
-          </h1>
+          <header style={styles.header}>
+            <span style={styles.category}>CẨM NANG THỦY SINH</span>
+            <h1 style={styles.title}>{knowledge.title}</h1>
+            <div style={styles.meta}>
+              <span><i className="bi bi-calendar3"></i> Cập nhật: {new Date().toLocaleDateString('vi-VN')}</span>
+              <span><i className="bi bi-person"></i> Bởi: Thiên Phúc AquaWorld</span>
+            </div>
+          </header>
 
-          <img
-            src={getImageSrc(knowledge.img)}
-            alt={knowledge.title}
-            style={styles.image}
-          />
+          <img src={getImageSrc(knowledge.img)} alt={knowledge.title} style={styles.mainImage} />
 
-          {/* SUMMARY */}
-          <section style={styles.section}>
-            <h3 style={styles.sectionTitle}>
-              <i className="bi bi-bookmark-star-fill"></i> Tóm tắt
-            </h3>
-            <p style={styles.text}>{knowledge.summary}</p>
-          </section>
+          {/* TÓM TẮT */}
+          <div style={styles.summaryBox}>
+            <p style={styles.summaryText}><strong>Tóm tắt:</strong> {knowledge.summary}</p>
+          </div>
 
-          {/* CONTENT */}
-          <section style={styles.section}>
-            <h3 style={styles.sectionTitle}>
-              <i className="bi bi-list-check"></i> Nội dung chi tiết
-            </h3>
-
-            {knowledge.instructions.map((item, index) => (
-              <div key={index} style={styles.instructionBlock}>
-                <h4 style={styles.heading}>
-                  <i className="bi bi-droplet-half"></i>
-                  {index + 1}. {item.heading}
-                </h4>
-
+          {/* NỘI DUNG CHI TIẾT */}
+          <div style={styles.contentBody}>
+            <h3 style={styles.sectionHeading}>Hướng dẫn chi tiết</h3>
+            {knowledge.instructions?.map((item, index) => (
+              <div key={index} style={styles.stepBlock}>
+                <div style={styles.stepHeader}>
+                  <span style={styles.stepNumber}>{index + 1}</span>
+                  <h4 style={styles.stepTitle}>{item.heading}</h4>
+                </div>
+                
                 {item.image && (
-                  <img
-                    src={getImageSrc(item.image)}
-                    alt={item.heading}
-                    style={styles.stepImage}
-                  />
+                  <img src={getImageSrc(item.image)} alt={item.heading} style={styles.stepImg} />
                 )}
-
-                <p style={styles.instructionText}>{item.content}</p>
+                
+                <p style={styles.stepDescription}>{item.content}</p>
               </div>
             ))}
-          </section>
-        </div>
+          </div>
+        </article>
 
-        {/* SIDEBAR */}
-        <aside style={styles.sidebar}>
-          <h4 style={styles.sidebarTitle}>
-            <i className="bi bi-newspaper"></i> Bài viết khác
-          </h4>
+        {/* SIDEBAR (Bài viết liên quan) */}
+        <aside style={isMobile ? styles.mobileSidebar : styles.sidebar}>
+          <h4 style={styles.sidebarTitle}>BÀI VIẾT LIÊN QUAN</h4>
+          <div style={styles.sidebarList}>
+            {list.slice(0, 5).map((item) => (
+              <Link key={item.knowledgeId} to={`/knowledge/${item.knowledgeId}`} style={styles.sideItem}>
+                <img src={getImageSrc(item.img)} alt={item.title} style={styles.sideImg} />
+                <div style={styles.sideInfo}>
+                  <p style={styles.sideTitle}>{item.title}</p>
+                  <span style={styles.sideDate}>Xem chi tiết <i className="bi bi-chevron-right"></i></span>
+                </div>
+              </Link>
+            ))}
+          </div>
 
-          {list.slice(0, 6).map((item) => (
-            <Link
-              key={item.knowledgeId}
-              to={`/knowledge/${item.knowledgeId}`}
-              style={styles.sidebarItem}
-            >
-              <img
-                src={getImageSrc(item.img)}
-                alt={item.title}
-                style={styles.sidebarImage}
-              />
-              <div>
-                <p style={styles.sidebarText}>{item.title}</p>
-              </div>
-            </Link>
-          ))}
+          {/* Banner quảng cáo nhỏ hoặc box hỗ trợ */}
+          <div style={styles.supportBox}>
+            <h5>Cần hỗ trợ tư vấn?</h5>
+            <p>Liên hệ ngay đội ngũ chuyên gia Thiên Phúc AquaWorld.</p>
+            <button style={styles.supportBtn}>Hotline: 0397.960.604</button>
+          </div>
         </aside>
+
       </div>
     </div>
   );
 }
+
 const styles = {
   container: {
-    background: "#f5f7fa",
-    padding: "32px 0",
+    background: "#f8f9fa",
+    padding: "40px 0",
+    minHeight: "100vh",
+    fontFamily: "'Inter', sans-serif",
+  },
+
+  center: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "300px",
   },
 
   layout: {
     maxWidth: 1200,
     margin: "0 auto",
     display: "grid",
-    gridTemplateColumns: "3fr 1fr",
-    gap: 32,
+    gap: 30,
     padding: "0 20px",
   },
 
   main: {
     background: "#fff",
-    padding: 28,
-    borderRadius: 16,
+    padding: "35px",
+    borderRadius: "20px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
   },
 
-  sidebar: {
-    background: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    height: "fit-content",
-    position: "sticky",
-    top: 20,
-  },
-
-  back: {
+  backBtn: {
     display: "inline-flex",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 16,
+    gap: 8,
+    color: "#666",
     textDecoration: "none",
-    color: "#0d6efd",
-    fontWeight: 500,
+    fontSize: "14px",
+    fontWeight: "600",
+    marginBottom: "25px",
+    transition: "0.2s",
+  },
+
+  header: {
+    marginBottom: "30px",
+  },
+
+  category: {
+    color: "#2a9d8f",
+    fontWeight: "800",
+    fontSize: "12px",
+    letterSpacing: "1px",
   },
 
   title: {
-    fontSize: 28,
-    fontWeight: 700,
-    marginBottom: 20,
-    color: "#1f3b4d",
+    fontSize: "32px",
+    fontWeight: "800",
+    color: "#1d3557",
+    margin: "10px 0 15px",
+    lineHeight: "1.3",
   },
 
-  image: {
-    width: "100%",
-    maxHeight: 420,
-    objectFit: "cover",
-    borderRadius: 14,
-    marginBottom: 28,
-  },
-
-  section: {
-    marginBottom: 36,
-  },
-
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 600,
-    marginBottom: 14,
-    color: "#0d6efd",
+  meta: {
     display: "flex",
-    alignItems: "center",
-    gap: 8,
+    gap: "20px",
+    color: "#888",
+    fontSize: "13px",
   },
 
-  text: {
-    fontSize: 16,
-    lineHeight: 1.8,
+  mainImage: {
+    width: "100%",
+    maxHeight: "500px",
+    objectFit: "cover",
+    borderRadius: "15px",
+    marginBottom: "30px",
+  },
+
+  summaryBox: {
+    background: "#f1f8f7",
+    padding: "20px",
+    borderRadius: "12px",
+    borderLeft: "5px solid #2a9d8f",
+    marginBottom: "35px",
+  },
+
+  summaryText: {
+    margin: 0,
+    fontSize: "16px",
+    lineHeight: "1.7",
     color: "#444",
   },
 
-  instructionBlock: {
-    padding: 20,
-    borderRadius: 14,
-    background: "#f9fafb",
-    marginBottom: 20,
+  sectionHeading: {
+    fontSize: "22px",
+    fontWeight: "700",
+    color: "#1d3557",
+    marginBottom: "25px",
+    borderBottom: "2px solid #eee",
+    paddingBottom: "10px",
   },
 
-  heading: {
-    fontSize: 17,
-    fontWeight: 600,
-    marginBottom: 10,
+  stepBlock: {
+    marginBottom: "40px",
+  },
+
+  stepHeader: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: "15px",
+    marginBottom: "15px",
   },
 
-  stepImage: {
-    width: "100%",
-    borderRadius: 12,
-    margin: "12px 0",
-  },
-
-  instructionText: {
-    lineHeight: 1.9,
-    color: "#333",
-  },
-
-  sidebarTitle: {
-    fontSize: 18,
-    fontWeight: 600,
-    marginBottom: 16,
+  stepNumber: {
+    width: "32px",
+    height: "32px",
+    background: "#1d3557",
+    color: "#fff",
+    borderRadius: "50%",
     display: "flex",
     alignItems: "center",
-    gap: 8,
-  },
-
-  sidebarItem: {
-    display: "flex",
-    gap: 12,
-    marginBottom: 14,
-    textDecoration: "none",
-    color: "#222",
-  },
-
-  sidebarImage: {
-    width: 64,
-    height: 64,
-    objectFit: "cover",
-    borderRadius: 8,
+    justifyContent: "center",
+    fontWeight: "bold",
+    fontSize: "14px",
     flexShrink: 0,
   },
 
-  sidebarText: {
-    fontSize: 14,
-    lineHeight: 1.4,
-    fontWeight: 500,
+  stepTitle: {
+    margin: 0,
+    fontSize: "19px",
+    fontWeight: "700",
+    color: "#333",
+  },
+
+  stepImg: {
+    width: "100%",
+    borderRadius: "12px",
+    margin: "15px 0",
+    boxShadow: "0 5px 15px rgba(0,0,0,0.08)",
+  },
+
+  stepDescription: {
+    fontSize: "16px",
+    lineHeight: "1.8",
+    color: "#4a4a4a",
+  },
+
+  sidebar: {
+    position: "sticky",
+    top: "100px",
+    height: "fit-content",
+  },
+
+  mobileSidebar: {
+    marginTop: "30px",
+  },
+
+  sidebarTitle: {
+    fontSize: "16px",
+    fontWeight: "800",
+    color: "#1d3557",
+    marginBottom: "20px",
+    letterSpacing: "0.5px",
+  },
+
+  sidebarList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+  },
+
+  sideItem: {
+    display: "flex",
+    gap: "12px",
+    textDecoration: "none",
+    color: "inherit",
+    transition: "0.3s",
+  },
+
+  sideImg: {
+    width: "85px",
+    height: "70px",
+    borderRadius: "10px",
+    objectFit: "cover",
+    flexShrink: 0,
+  },
+
+  sideInfo: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+
+  sideTitle: {
+    fontSize: "14px",
+    fontWeight: "700",
+    margin: "0 0 5px",
+    lineHeight: "1.4",
+    color: "#333",
+  },
+
+  sideDate: {
+    fontSize: "12px",
+    color: "#2a9d8f",
+    fontWeight: "600",
+  },
+
+  supportBox: {
+    background: "#1d3557",
+    color: "#fff",
+    padding: "25px",
+    borderRadius: "15px",
+    marginTop: "30px",
+    textAlign: "center",
+  },
+
+  supportBtn: {
+    width: "100%",
+    marginTop: "15px",
+    padding: "10px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#2a9d8f",
+    color: "#fff",
+    fontWeight: "bold",
+    cursor: "pointer",
   },
 };

@@ -187,7 +187,7 @@ export default function AdminProductManagement() {
   return (
     <div style={styles.container}>
       <h2 style={styles.pageTitle}>
-        <i className="bi bi-box-seam" style={styles.titleIcon}></i>
+        <i className="bi-bag-check-fill" style={styles.titleIcon}></i>
         QUẢN LÝ SẢN PHẨM
       </h2>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import WriteComment from "./WriteComment"
+import WriteComment from "./WriteComment";
 
 export default function Orders() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -8,15 +8,19 @@ export default function Orders() {
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  /*  FETCH ORDERS  */
+  // Theo dõi kích thước màn hình
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchOrders = async () => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/orders/user/${userId}`
-      );
+      const res = await fetch(`http://localhost:5000/api/orders/user/${userId}`);
       const data = await res.json();
-      console.log("ORDERS API:", data);
       setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
@@ -30,39 +34,26 @@ export default function Orders() {
     fetchOrders();
   }, [userId]);
 
-  /*  CANCEL ORDER  */
   const cancelOrder = async (orderId) => {
-    if (!window.confirm("Bạn chắc chắn muốn hủy đơn hàng này?")) return;
-
+    if (!window.confirm("🐟 Bạn có chắc chắn muốn hủy đơn hàng này không?")) return;
     try {
-      await fetch(
-        `http://localhost:5000/api/orders/${orderId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ status: "đã hủy" }),
-        }
-      );
-
-      fetchOrders(); // reload lại danh sách
+      await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "đã hủy" }),
+      });
+      fetchOrders();
     } catch (err) {
-      console.error("Cancel order error:", err);
       alert("Hủy đơn thất bại");
     }
   };
 
-  /*  GUARDS  */
-  if (!userId)
-    return <p style={styles.center}>⚠️ Vui lòng đăng nhập</p>;
-
-  if (loading)
-    return <p style={styles.center}>⏳ Đang tải đơn hàng...</p>;
-
-  if (orders.length === 0)
-    return <p style={styles.center}>📦 Bạn chưa có đơn hàng nào</p>;
+  if (!userId) return <div style={styles.center}>⚠️ Vui lòng đăng nhập để xem đơn hàng</div>;
+  if (loading) return <div style={styles.center}><div className="spinner-border text-primary"></div><p>Đang lặn tìm đơn hàng...</p></div>;
+  if (orders.length === 0) return <div style={styles.center}>🐚 Bạn chưa có đơn hàng nào</div>;
 
   const getImageUrl = (image) => {
     if (!image) return "/data/placeholder.jpg";
@@ -70,322 +61,289 @@ export default function Orders() {
     return `/${image.replace(/^\/+/, "")}`;
   };
 
-  /*  RENDER  */
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>
-        <i className="bi bi-box-seam" style={{ marginRight: 8 }}></i>
-        Đơn hàng của tôi
-      </h2>
+      {/* Thêm CSS Media Queries trực tiếp vào JSX */}
+      <style>{`
+        @media (max-width: 768px) {
+          .order-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+          .order-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+          .order-footer { flex-direction: column !important; gap: 15px; align-items: flex-start !important; }
+          .total-price { font-size: 1.2rem !important; }
+          .cancel-btn { width: 100%; }
+        }
+      `}</style>
+
+      <div style={styles.pageHeader}>
+        <h2 style={{...styles.title, fontSize: isMobile ? "1.5rem" : "2rem"}}>
+          <i className="bi-box-seam-fill" style={{ marginRight: 10 }}></i>
+          Đơn Hàng
+        </h2>
+        <p style={{ color: "#666" }}>Theo dõi những chú cá đang bơi về nhà bạn</p>
+      </div>
 
       {orders.map((order) => (
-        <div key={order._id} style={styles.orderBox}>
-          {/*  HEADER  */}
-            <div style={styles.header}>
-              <div>
-                <p style={styles.headerLine}>
-                  <i className="bi bi-receipt" style={styles.headerIcon}></i>
-                  <b> Mã đơn:</b> MDH{order._id.slice(-8).toUpperCase()}
-                </p>
-
-                <p style={styles.headerLine}>
-                  <i className="bi bi-calendar-event" style={styles.headerIcon}></i>
-                  <b> Ngày đặt:</b>{" "}
-                  {new Date(order.createdAt).toLocaleString()}
-                </p>
+        <div key={order._id} style={styles.orderCard}>
+          {/* HEADER */}
+          <div style={styles.orderHeader} className="order-header">
+            <div>
+              <span style={styles.orderId}>#MDH{order._id.slice(-8).toUpperCase()}</span>
+              <div style={styles.dateText}>
+                <i className="bi bi-clock-history"></i> {new Date(order.createdAt).toLocaleString()}
               </div>
-
-              <span style={statusStyle(order.status)}>
-                <i className="bi bi-info-circle me-1"></i>
-                {order.status}
-              </span>
             </div>
-          {/*  USER INFO  */}
-          {order.user && (
-            <div style={styles.section}>
-              <h4>
-                <i
-                  className="bi bi-person-circle"
-                  style={{ marginRight: 8, color: "#1976d2" }}
-                ></i>
-                Thông tin người đặt
-              </h4>
-
-              <p>
-                <i className="bi bi-person" style={{ marginRight: 6 }}></i>
-                <b>Tài khoản:</b> {order.user.username}
-              </p>
-
-              <p>
-                <i className="bi bi-envelope" style={{ marginRight: 6 }}></i>
-                <b>Email:</b> {order.user.email}
-              </p>
-            </div>
-          )}
-
-          {/*  SHIPPING ADDRESS  */}
-          {order.shippingAddress && (
-            <div style={styles.section}>
-              <h4>
-                <i
-                  className="bi bi-geo-alt-fill"
-                  style={{ marginRight: 8, color: "#d32f2f" }}
-                ></i>
-                Địa chỉ giao hàng
-              </h4>
-
-              <p>
-                <i className="bi bi-person-badge" style={{ marginRight: 6 }}></i>
-                <b>Họ tên:</b> {order.shippingAddress.fullName}
-              </p>
-
-              <p>
-                <i className="bi bi-telephone" style={{ marginRight: 6 }}></i>
-                <b>SĐT:</b> {order.shippingAddress.phone}
-              </p>
-
-              <p>
-                <i className="bi bi-house-door" style={{ marginRight: 6 }}></i>
-                <b>Địa chỉ:</b> {order.shippingAddress.address}
-              </p>
-
-              {order.shippingAddress.note && (
-                <p>
-                  <i className="bi bi-sticky" style={{ marginRight: 6 }}></i>
-                  <b>Ghi chú:</b> {order.shippingAddress.note}
-                </p>
-              )}
-
-            </div>
-          )}
-
-          {/*  PAYMENT  */}
-          <div style={styles.section}>
-          <h4>
-            <i
-              className="bi bi-credit-card-2-front"
-              style={{ marginRight: 8, color: "#1976d2" }}
-            ></i>
-            Thanh toán
-          </h4>
-
-          <p>
-            <i
-              className="bi bi-wallet2"
-              style={{ marginRight: 6, color: "#555" }}
-            ></i>
-            <b>Phương thức:</b> {order.paymentMethod?.toUpperCase()}
-          </p>
-
-          </div>
-
-          {/*  ITEMS  */}
-          <div style={styles.section}>
-            <h4>
-              <i
-                className="bi bi-cart-check"
-                style={{ marginRight: 8, color: "#2e7d32" }}
-              ></i>
-              Sản phẩm
-            </h4>
-
-            {order.items.map((item, index) => (
-              <div key={index} style={styles.item}>
-                <img
-                  src={getImageUrl(item.image)}
-                  alt={item.name}
-                  style={styles.image}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/data/placeholder.jpg";
-                  }}
-                />
-                <div style={styles.info}>
-                  <h5 style={{ marginBottom: 4 }}>{item.name}</h5>
-
-                  <p>
-                    <i className="bi bi-stack" /> Số lượng: {item.quantity}
-                  </p>
-
-                  <p>
-                    <i className="bi bi-cash-coin" /> Đơn giá:{" "}
-                    {item.price.toLocaleString()} VNĐ
-                  </p>
-
-                  <p style={styles.subtotal}>
-                    Thành tiền: {(item.price * item.quantity).toLocaleString()} VNĐ
-                  </p>
-                    {order.status === "hoàn thành" && (
-                      <div style={styles.commentBox}>
-                        <div style={styles.commentHeader}>
-                          <i className="bi bi-star-fill" style={{ color: "#fbc02d" }}></i>
-                          <span style={{ marginLeft: 6 }}>
-                            { /* đã có comment hay chưa */ }
-                            Đánh giá sản phẩm
-                          </span>
-                        </div>
-
-                        <WriteComment
-                          userId={userId}
-                          productId={
-                            typeof item.product === "object"
-                              ? item.product._id
-                              : item.product
-                          }
-                          orderId={order._id}
-                        />
-                      </div>
-                    )}
-
-
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/*  TOTAL  */}
-          <div style={styles.footer}>
-            <span><b>Tổng tiền:</b></span>
-            <span style={styles.total}>
-              {order.totalPrice.toLocaleString()} VNĐ
+            <span style={statusStyle(order.status)}>
+              <i className="bi-box-seam-fill"></i> {order.status}
             </span>
           </div>
 
-          {/*  ACTION  */}
-          {order.status === "chờ xử lý" && (
-            <div style={{ marginTop: 16, textAlign: "right" }}>
-              <button
-                style={styles.cancelBtn}
+          <div style={styles.cardBody}>
+            <div style={styles.gridContainer} className="order-grid">
+              
+              {/* CỘT TRÁI: THÔNG TIN TÀI KHOẢN & VẬN CHUYỂN */}
+              <div style={styles.infoSection}>
+                <h5 style={styles.sectionTitle}><i className="bi bi-person-badge"></i> Chủ bể</h5>
+                <div style={styles.accountBox}>
+                  <p style={{margin: "2px 0"}}><strong>User:</strong> {order.user?.username || "N/A"}</p>
+                  <p style={{margin: "2px 0"}}><strong>Email:</strong> {order.user?.email || "N/A"}</p>
+                </div>
+
+                <h5 style={styles.sectionTitle}><i className="bi bi-geo-alt"></i> Nơi nhận cá</h5>
+                <div style={styles.shippingBox}>
+                  <p><strong>{order.shippingAddress?.fullName}</strong></p>
+                  <p><i className="bi bi-telephone"></i> {order.shippingAddress?.phone}</p>
+                  <p style={styles.addressText}><i className="bi bi-map"></i> {order.shippingAddress?.address}</p>
+                </div>
+
+                {order.shippingAddress?.note && (
+                  <div style={styles.noteBox}>
+                    <p style={{margin: 0, fontStyle: 'italic', fontSize: '0.85rem'}}>"{order.shippingAddress.note}"</p>
+                  </div>
+                )}
+
+                <p style={styles.paymentMethod}>
+                  <i className="bi bi-wallet2"></i> {order.paymentMethod?.toUpperCase()}
+                </p>
+              </div>
+
+              {/* CỘT PHẢI: DANH SÁCH SẢN PHẨM */}
+              <div style={styles.itemsSection}>
+                <h5 style={styles.sectionTitle}><i className="bi bi-fish"></i> Sản phẩm</h5>
+                {order.items.map((item, index) => (
+                  <div key={index} style={styles.productItem}>
+                    <img 
+                      src={getImageUrl(item.image)} 
+                      alt={item.name} 
+                      style={styles.productImg} 
+                    />
+                    <div style={styles.productInfo}>
+                      <div style={styles.productName}>{item.name}</div>
+                      <div style={styles.productDetail}>
+                        {item.quantity} x <span style={{color: '#0077be', fontWeight: 600}}>{item.price.toLocaleString()}đ</span>
+                      </div>
+                      
+                      {order.status === "hoàn thành" && (
+                        <div style={styles.reviewBox}>
+                          <WriteComment 
+                            userId={userId} 
+                            productId={typeof item.product === "object" ? item.product._id : item.product} 
+                            orderId={order._id} 
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* FOOTER */}
+          <div style={styles.orderFooter} className="order-footer">
+            <div style={styles.totalWrapper}>
+              <span>Tổng thanh toán:</span>
+              <span style={styles.totalPrice} className="total-price">{order.totalPrice.toLocaleString()} VNĐ</span>
+            </div>
+            {order.status === "chờ xử lý" && (
+              <button 
+                style={styles.cancelBtn} 
+                className="cancel-btn"
                 onClick={() => cancelOrder(order._id)}
               >
-                <i className="bi bi-x-circle-fill" style={{ marginRight: 6 }}></i> Hủy đơn hàng
-
+                Hủy đơn hàng
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-
-/*  STYLES  */
-
 const styles = {
-  cancelBtn: {
-  background: "#ef4444",
-  color: "#fff",
-  border: "none",
-  padding: "10px 18px",
-  borderRadius: 8,
-  fontWeight: 600,
-  cursor: "pointer",
-},
-
   container: {
-    maxWidth: 950,
+    maxWidth: "1000px",
     margin: "20px auto",
-    padding: 16,
+    padding: "0 15px",
+    fontFamily: "'Segoe UI', Roboto, sans-serif",
+  },
+  pageHeader: {
+    textAlign: "center",
+    marginBottom: "30px",
   },
   title: {
-    textAlign: "center",
-    marginBottom: 24,
+    color: "#005f73",
+    fontWeight: "800",
+    textTransform: "uppercase",
+    marginBottom: "5px"
   },
-  center: {
-    textAlign: "center",
-    marginTop: 40,
-    fontSize: 18,
-  },
-  orderBox: {
-    border: "1px solid #ddd",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
+  orderCard: {
     background: "#fff",
+    borderRadius: "15px",
+    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.05)",
+    marginBottom: "25px",
+    overflow: "hidden",
+    border: "1px solid #eee",
   },
-  header: {
+  orderHeader: {
+    background: "linear-gradient(135deg, #0077be 0%, #00a8cc 100%)",
+    padding: "15px 20px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    color: "#fff",
+  },
+  orderId: {
+    fontSize: "1rem",
+    fontWeight: "bold",
+  },
+  dateText: {
+    fontSize: "0.8rem",
+    opacity: 0.9,
+  },
+  cardBody: {
+    padding: "20px",
+  },
+  gridContainer: {
+    display: "grid",
+    gridTemplateColumns: "1.2fr 1.8fr",
+    gap: "30px",
+  },
+  sectionTitle: {
+    fontSize: "0.95rem",
+    color: "#005f73",
     borderBottom: "1px solid #eee",
-    paddingBottom: 10,
-    marginBottom: 12,
+    paddingBottom: "5px",
+    marginBottom: "10px",
+    fontWeight: "700",
   },
-  section: {
-    marginBottom: 14,
+  infoSection: {
+    fontSize: "0.9rem",
+    color: "#444",
   },
-  item: {
+  accountBox: {
+    background: "#f8f9fa",
+    padding: "10px",
+    borderRadius: "8px",
+    marginBottom: "15px",
+    borderLeft: "3px solid #0077be",
+  },
+  shippingBox: {
+    marginBottom: "10px",
+  },
+  addressText: {
+    color: "#666",
+    fontSize: "0.85rem",
+  },
+  noteBox: {
+    background: "#fff9c4",
+    padding: "8px 12px",
+    borderRadius: "8px",
+    marginBottom: "15px",
+    border: "1px dashed #fbc02d",
+  },
+  paymentMethod: {
+    display: "inline-block",
+    background: "#e3f2fd",
+    color: "#0077be",
+    padding: "4px 10px",
+    borderRadius: "5px",
+    fontSize: "0.8rem",
+    fontWeight: "600",
+  },
+  itemsSection: {
+    maxHeight: "450px",
+    overflowY: "auto",
+  },
+  productItem: {
     display: "flex",
-    gap: 12,
-    padding: "10px 0",
-    borderBottom: "1px solid #eee",
+    gap: "12px",
+    marginBottom: "12px",
+    paddingBottom: "12px",
+    borderBottom: "1px solid #f5f5f5",
   },
-  image: {
-    width: 90,
-    height: 90,
+  productImg: {
+    width: "60px",
+    height: "60px",
     objectFit: "cover",
-    borderRadius: 8,
+    borderRadius: "8px",
   },
-  info: {
-    flex: 1,
+  productName: {
+    fontWeight: "600",
+    fontSize: "0.95rem",
   },
-  subtotal: {
-    color: "#1976d2",
-    fontWeight: 600,
+  productDetail: {
+    fontSize: "0.85rem",
+    color: "#666",
   },
-  footer: {
+  orderFooter: {
+    background: "#fafafa",
+    padding: "15px 20px",
     display: "flex",
     justifyContent: "space-between",
-    marginTop: 16,
-    paddingTop: 10,
-    borderTop: "2px dashed #ddd",
-    fontSize: 18,
-    fontWeight: 700,
+    alignItems: "center",
+    borderTop: "1px solid #eee",
   },
-  total: {
-    color: "#2e7d32",
+  totalPrice: {
+    color: "#d90429",
+    fontSize: "1.5rem",
+    fontWeight: "800",
+    marginLeft: "10px",
   },
-  commentBox: {
-  marginTop: 12,
-  padding: 12,
-  background: "#fafafa",
-  borderRadius: 10,
-  border: "1px dashed #ddd",
-},
-
-commentHeader: {
-  display: "flex",
-  alignItems: "center",
-  fontWeight: 600,
-  marginBottom: 8,
-},
-
+  cancelBtn: {
+    background: "#ff7f50",
+    color: "#fff",
+    border: "none",
+    padding: "10px 20px",
+    borderRadius: "8px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  center: {
+    textAlign: "center",
+    padding: "80px 20px",
+  }
 };
 
-/*  STATUS COLOR  */
 const statusStyle = (status) => {
   const base = {
-    padding: "6px 14px",
-    borderRadius: 20,
-    color: "#fff",
-    fontSize: 14,
-    textTransform: "capitalize",
-    fontWeight: 600,
+    padding: "5px 12px",
+    borderRadius: "20px",
+    fontSize: "0.75rem",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
+    backgroundColor: "#fff"
   };
 
   switch (status) {
-    case "chờ xử lý":
-      return { ...base, background: "#f9a825" };
-    case "đã xác nhận":
-      return { ...base, background: "#0288d1" };
-    case "đang giao hàng":
-      return { ...base, background: "#6a1b9a" };
-    case "hoàn thành":
-      return { ...base, background: "#2e7d32" };
-    case "đã hủy":
-      return { ...base, background: "#c62828" };
-    default:
-      return base;
+    case "chờ xử lý": return { ...base, color: "#f39c12" };
+    case "đã xác nhận": return { ...base, color: "#3498db" };
+    case "đang giao hàng": return { ...base, color: "#9b59b6" };
+    case "hoàn thành": return { ...base, color: "#27ae60" };
+    case "đã hủy": return { ...base, color: "#e74c3c" };
+    default: return base;
   }
 };

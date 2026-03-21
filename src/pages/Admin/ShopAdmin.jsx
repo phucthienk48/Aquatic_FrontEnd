@@ -274,11 +274,11 @@ export default function AdminShop() {
                   ) : (
                     <p className="text-muted small italic">Chưa liên kết mạng xã hội</p>
                   )}
-                  <div className="mt-3 d-flex gap-2 text-info fs-3">
+                  {/* <div className="mt-3 d-flex gap-2 text-info fs-3">
                      <i className="bi bi-water"></i>
                      <i className="bi bi-tsunami"></i>
                      <i className="bi bi-brightness-high"></i>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

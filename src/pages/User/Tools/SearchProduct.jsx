@@ -126,9 +126,9 @@ export default function SearchProduct({ isMobile }) {
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={styles.name}>{item.name}</div>
                   <div style={styles.priceBox}>
-                    <span style={styles.price}>{item.price?.toLocaleString()}đ</span>
+                    <span style={styles.price}>{item.price?.toLocaleString()} VNĐ</span>
                     {item.oldprice && (
-                      <span style={styles.oldprice}>{item.oldprice.toLocaleString()}đ</span>
+                      <span style={styles.oldprice}>{item.oldprice.toLocaleString()} VNĐ</span>
                     )}
                   </div>
                 </div>
@@ -238,7 +238,7 @@ const styles = {
     gap: "8px",
   },
   price: {
-    color: "#2db36c", // Màu xanh lá cây thủy sinh
+    color: "red", 
     fontWeight: "700",
     fontSize: "14px",
   },
