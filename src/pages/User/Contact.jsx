@@ -66,7 +66,7 @@ export default function Contact() {
       <div className="row g-4">
         {/*  FORM  */}
         <div className="col-md-6">
-          <form style={styles.formCard} onSubmit={handleSubmit}>
+          <form style={styles.formCard} className="user-form-container" onSubmit={handleSubmit}>
             <h4 style={styles.formTitle}>
               <i className="bi bi-chat-dots-fill me-2"></i>
               Gửi tin nhắn
@@ -137,7 +137,7 @@ export default function Contact() {
               />
             </div>
 
-            <button style={styles.button} disabled={loading}>
+            <button style={styles.button} className="user-form-btn" disabled={loading}>
               {loading ? (
                 <>
                   <span className="spinner-border spinner-border-sm me-2"></span>

@@ -68,30 +68,6 @@ export default function Register() {
 
   return (
     <div style={styles.container}>
-      {/* Nhúng CSS Responsive trực tiếp */}
-      <style>{`
-        @media (max-width: 992px) {
-          .glass-wrapper {
-            width: 100% !important;
-            max-width: 600px;
-            flex-direction: column;
-          }
-          .left-side {
-            display: none !important;
-          }
-          .right-side {
-            padding: 30px 20px !important;
-          }
-        }
-        @media (max-width: 600px) {
-          .grid-fields {
-            grid-template-columns: 1fr !important;
-          }
-          .title {
-            font-size: 22px !important;
-          }
-        }
-      `}</style>
 
       {/* Bong bóng nền */}
       {bubbles.map((_, i) => (
@@ -120,7 +96,7 @@ export default function Register() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
         style={styles.glassWrapper}
-        className="glass-wrapper"
+        className="glass-card"
       >
         {/* Bên trái: Hình ảnh (Sẽ ẩn trên mobile bằng CSS) */}
         <div style={styles.leftSide} className="left-side">
@@ -209,6 +185,7 @@ export default function Register() {
               whileHover={{ scale: 1.02, backgroundColor: "#00a8a8" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
+              className="user-form-btn"
               style={{ ...styles.submitBtn, ...(loading ? styles.disabledBtn : {}) }}
               disabled={loading}
             >

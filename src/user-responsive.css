@@ -1,0 +1,148 @@
+/* src/user-responsive.css */
+
+/* ========================================
+   BASE / UTILITIES
+   ======================================== */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header-container {
+    padding: 0 15px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 10px !important;
+  }
+}
+
+/* ========================================
+   PRODUCT GRID
+   ======================================== */
+.product-grid {
+  display: grid !important;
+  gap: 20px !important;
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .product-card {
+    padding: 12px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .product-grid {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+  .product-card {
+    padding: 15px !important;
+  }
+  .product-card button {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+}
+
+/* ========================================
+   PRODUCT CARD (Specific overriding)
+   ======================================== */
+.product-card .name {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* ========================================
+   FORMS (Login / Register / Contact)
+   ======================================== */
+.user-form-container {
+  width: 100% !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+}
+
+.user-form-input {
+  width: 100% !important;
+}
+
+.user-form-btn {
+  width: 100% !important;
+  min-height: 44px !important;
+}
+
+.glass-card {
+  display: flex !important;
+}
+
+@media (max-width: 768px) {
+  .user-form-container {
+    padding: 15px !important;
+  }
+  
+  .glass-card {
+    flex-direction: column !important;
+    width: 95% !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .glass-card .left-side {
+    display: none !important; /* Hide image on mobile to save space */
+  }
+  
+  .glass-card .right-side {
+    padding: 25px !important;
+  }
+  
+  .grid-fields {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .title {
+    font-size: 22px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .glass-card {
+    width: 90% !important;
+  }
+}
+
+
+/* ========================================
+   LIVESTREAM / VIDEO
+   ======================================== */
+.livestream-container {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+.livestream-video {
+  width: 100% !important;
+  height: auto !important;
+}

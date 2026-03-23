@@ -75,10 +75,21 @@ export default function UserWatchLivestream({ livestreamId }) {
       const chunks = res.data || [];
       if (chunks.length === 0) return;
 
-      // CHỈ LẤY 2 CHUNK CUỐI CÙNG (giảm độ trễ)
-      const latestChunks = chunks.slice(-2);
+      // Do mảng API trả về đã được đảo ngược (mới nhất nằm trên cùng), Header sẽ nằm ở vị trí CHÓT mảng!
+      const firstChunk = chunks[chunks.length - 1];
+      
+      // LẤY 2 CHUNK CẬP NHẬT MỚI NHẤT (nằm ở vị trí 0 và 1)
+      const latestChunks = chunks.slice(0, 2);
 
-      for (const chunk of latestChunks) {
+      const chunksToLoad = [firstChunk];
+      
+      // Mặc dù lấy các chunk mới nhất, ta bắt buộc phải đảo ngược (reverse) về thứ tự thời gian tuyến tính thì video webm mới phát được
+      latestChunks.reverse().forEach((c) => {
+        if (c.url !== firstChunk.url) chunksToLoad.push(c);
+      });
+
+      for (const chunk of chunksToLoad) {
+        if (!chunk.url) continue;
         const response = await fetch(`http://localhost:5000${chunk.url}`);
         const buffer = await response.arrayBuffer();
         queueRef.current.push(new Uint8Array(buffer));
@@ -136,6 +147,7 @@ export default function UserWatchLivestream({ livestreamId }) {
         muted
         playsInline
         controls
+        className="livestream-video"
         style={{
           width: "100%",
           maxWidth: "700px",

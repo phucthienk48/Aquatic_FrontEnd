@@ -74,9 +74,10 @@ export default function Login() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
         style={styles.glassCard}
+        className="glass-card"
       >
         {/* Phần Hình ảnh Thủy sinh */}
-        <div style={styles.leftSide}>
+        <div style={styles.leftSide} className="left-side">
           <div style={styles.imageOverlay}>
             <motion.div 
               initial={{ scale: 0.8, opacity: 0 }}
@@ -90,7 +91,7 @@ export default function Login() {
         </div>
 
         {/* Phần Form Đăng nhập */}
-        <div style={styles.rightSide}>
+        <div style={styles.rightSide} className="right-side">
           <form style={styles.form} onSubmit={handleSubmit}>
             <div style={styles.header}>
               <h2 style={styles.title}>Đăng Nhập</h2>
@@ -153,6 +154,7 @@ export default function Login() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               style={{ ...styles.submitBtn, ...(loading ? styles.disabled : {}) }}
+              className="user-form-btn"
               disabled={loading}
             >
               {loading ? "Đang kết nối..." : "Đăng nhập"}

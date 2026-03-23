@@ -56,7 +56,7 @@ export default function Header() {
     <header style={styles.header}>
      
       <div style={styles.topHeader}>
-        <div style={{ ...styles.container, padding: isMobile ? "0px 10px" : "0 20px" }}>
+        <div style={styles.container} className="header-container">
           
           {!isDesktop && (
             <button style={styles.menuIcon} onClick={() => setIsMenuOpen(true)}>

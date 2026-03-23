@@ -21,7 +21,21 @@ export default function AdminStreamCamera({ livestreamId }) {
 
     socket.emit("joinRoom", livestreamId);
 
-    initCamera();
+    const setupCamera = async () => {
+      await initCamera();
+      
+      try {
+        const res = await axios.get(`${CAMERA_API}/status/${livestreamId}`);
+        if (res.data.success && res.data.isCameraOn) {
+          // Tự động khôi phục luồng live nếu camera đã bật trước khi refresh
+          startLivestream();
+        }
+      } catch (err) {
+        console.error("Fetch camera status error:", err);
+      }
+    };
+
+    setupCamera();
 
     socket.on("livestreamEnded", handleLivestreamEnded);
 

@@ -160,7 +160,7 @@ const renderList = (title, icon, list) => (
     </div>
     <div style={styles.divider}></div>
     {/* GRID SẢN PHẨM */}
-    <div style={styles.grid}>
+    <div style={styles.grid} className="product-grid">
       {list.map((item) => {
         const hasDiscount =
           item.oldprice && item.oldprice > item.price;
@@ -171,6 +171,7 @@ const renderList = (title, icon, list) => (
           <div
             key={item._id}
             style={styles.card}
+            className="product-card"
             onClick={() => navigate(`/product/${item._id}`)}
           >
             <img
@@ -179,7 +180,7 @@ const renderList = (title, icon, list) => (
               style={styles.image}
             />
 
-            <h4 style={styles.name}>{item.name}</h4>
+            <h4 style={styles.name} className="name">{item.name}</h4>
 
             {/* RATING */}
             <div style={styles.rating}>

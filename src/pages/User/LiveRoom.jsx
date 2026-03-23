@@ -90,7 +90,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="container-fluid py-3">
+    <div className="container-fluid py-3 livestream-container">
       <div className="row g-3">
 
         <div className="col-lg-8">
@@ -133,7 +133,7 @@ useEffect(() => {
 
 {/* VIDEO */}
 <div className="card shadow-sm border-0 mb-3">
-  <div className="card-body p-0" style={styles.videoBox}>
+  <div className="card-body p-0 livestream-video-box" style={styles.videoBox}>
 
     {room.status === "live" && (
       <UserWatchLivestream livestreamId={room._id} />
@@ -143,7 +143,8 @@ useEffect(() => {
       <video
         src={`http://localhost:5000${room.videoUrl}`}
         controls
-        style={{ width: "100%", height: "100%" }}
+        className="livestream-video"
+        style={{ width: "100%", height: "100%", maxHeight: "100%" }}
       />
     )}
 
