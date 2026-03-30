@@ -146,7 +146,7 @@ function checkDefaultQuestion(text) {
   );
 
   if (found) return found.answer; // trả về câu trả lời tương ứng
-  return null; // không phải câu hỏi mặc định
+  return null; 
 }
 
 export default function FloatingChat() {
@@ -352,7 +352,6 @@ export default function FloatingChat() {
   );
 }
 
-// Bạn có thể giữ nguyên styles trước đó hoặc điều chỉnh thêm
 
 const styles = {
   widgetWrapper: { position: "fixed", bottom: "20px", right: "20px", zIndex: 1000, fontFamily: "Arial, sans-serif" },

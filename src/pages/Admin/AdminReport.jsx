@@ -115,7 +115,7 @@ export default function AdminReport() {
       {/* STATS GRID */}
       <div style={styles.statGrid}>
         <StatCard title="Tổng Đơn Hàng" value={stats.total} icon="bi-bag-check" color="#005f73" />
-        <StatCard title="Doanh Thu Tổng" value={stats.revenue.toLocaleString() + "đ"} icon="bi-cash-coin" color="#0a9396" />
+        <StatCard title="Doanh Thu Tổng" value={stats.revenue.toLocaleString() + " VNĐ"} icon="bi-cash-coin" color="#0a9396" />
         <StatCard title="Hoàn Thành" value={stats.completed} icon="bi-check2-circle" color="#27ae60" />
         <StatCard title="Đơn Hủy" value={stats.canceled} icon="bi-trash3" color="#ae2012" />
       </div>
@@ -161,7 +161,7 @@ export default function AdminReport() {
                       <td style={{ fontWeight: 500 }}>{p.name}</td>
                       <td className="text-center">{p.quantity}</td>
                       <td className="text-end" style={{ color: "#d90429", fontWeight: 600 }}>
-                        {p.revenue.toLocaleString()}đ
+                        {p.revenue.toLocaleString()} VNĐ
                       </td>
                     </tr>
                   ))}

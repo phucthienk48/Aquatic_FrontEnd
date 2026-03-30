@@ -11,6 +11,7 @@ export default function RecommendProduct() {
   const [ratings, setRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cartSuccess, setCartSuccess] = useState(null);
 
   /* FETCH RECOMMEND */
   useEffect(() => {
@@ -86,9 +87,14 @@ export default function RecommendProduct() {
     });
   };
 
-  /* ADD TO CART */
   const handleAddToCart = async (product) => {
-    if (!userId) return alert("Vui lòng đăng nhập");
+    if (!userId) {
+      setCartSuccess({
+        type: "error",
+        message: "Vui lòng đăng nhập",
+      });
+      return;
+    }
 
     const image =
       product.images?.[0]?.replace(/^\/+/, "") ||
@@ -111,11 +117,28 @@ export default function RecommendProduct() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
 
-      alert("✅ Đã thêm vào giỏ hàng");
+      setCartSuccess({
+        type: "success",
+        message: "Đã thêm vào giỏ hàng",
+        productName: product.name,
+      });
     } catch (err) {
-      alert(err.message || "Lỗi thêm giỏ hàng");
+      setCartSuccess({
+        type: "error",
+        message: err.message || "Lỗi thêm giỏ hàng",
+      });
     }
   };
+
+useEffect(() => {
+  if (cartSuccess) {
+    const timer = setTimeout(() => {
+      setCartSuccess(null);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }
+}, [cartSuccess]);
 
   if (loading) return <p style={{ padding: 20 }}>⏳ Đang tải gợi ý...</p>;
   if (error) return <p style={{ color: "red", padding: 20 }}>{error}</p>;
@@ -209,6 +232,7 @@ export default function RecommendProduct() {
             </div>
           );
         })}
+
       </div>
     </div>
   );
@@ -224,7 +248,63 @@ export default function RecommendProduct() {
         "",
         products
       )}
+      {cartSuccess && (
+  <div style={styles.overlay}>
+    <div style={styles.popup}>
+      <div
+        style={{
+          ...styles.iconCircle,
+          background:
+            cartSuccess.type === "success"
+              ? "rgba(25,118,210,0.12)"
+              : "rgba(220,53,69,0.12)",
+          color:
+            cartSuccess.type === "success"
+              ? "#1976d2"
+              : "#dc3545",
+        }}
+      >
+        <i
+          className={`bi ${
+            cartSuccess.type === "success"
+              ? "bi-cart-check-fill"
+              : "bi-exclamation-circle-fill"
+          }`}
+        />
+      </div>
+
+      <h5
+        style={{
+          ...styles.title,
+          color:
+            cartSuccess.type === "success"
+              ? "#1976d2"
+              : "#dc3545",
+        }}
+      >
+        {cartSuccess.message}
+      </h5>
+
+      {cartSuccess.productName && (
+        <p style={styles.productName}>
+          {cartSuccess.productName}
+        </p>
+      )}
+
+      <div
+        style={{
+          ...styles.progressBar,
+          background:
+            cartSuccess.type === "success"
+              ? "#1976d2"
+              : "#dc3545",
+        }}
+      />
     </div>
+  </div>
+)}
+    </div>
+
   );
 }
 
@@ -320,4 +400,51 @@ const styles = {
     background:
       "linear-gradient(90deg, #dc3545, #fd7e14, #ffc107, #198754, #0dcaf0, #0d6efd, #6f42c1)",
   },
+  overlay: {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.3)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+},
+
+popup: {
+  background: "#fff",
+  padding: "25px 30px",
+  borderRadius: 14,
+  textAlign: "center",
+  minWidth: 280,
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+  animation: "fadeIn .3s ease",
+},
+
+iconCircle: {
+  width: 60,
+  height: 60,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 30,
+  margin: "0 auto 10px",
+},
+
+productName: {
+  fontSize: 20,
+  color: "#555",
+  marginTop: 1,
+},
+
+progressBar: {
+  height: 4,
+  width: "100%",
+  marginTop: 15,
+  borderRadius: 4,
+  animation: "progress 2.5s linear",
+},
 };
