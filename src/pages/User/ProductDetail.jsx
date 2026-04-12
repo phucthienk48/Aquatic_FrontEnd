@@ -418,8 +418,11 @@ useEffect(() => {
       {/* ===== INSTRUCTION ===== */}
       {product.instruction && (
         <div style={styles.section}>
-          <h3>Hướng dẫn chăm sóc</h3>
-          <p>{product.instruction}</p>
+          <h3 class=" fw-bold text-success my-4">
+              <i class="bi bi-stars text-warning me-2"></i>
+              Sản phẩm dành riêng cho bạn
+              <i class="bi bi-stars text-warning ms-2"></i>
+          </h3>
         </div>
       )}
       {/* ===== SẢN PHẨM GỢI Ý ===== */}

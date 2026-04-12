@@ -13,6 +13,9 @@ export default function UserManagement() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5; // số user mỗi trang
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -48,6 +51,10 @@ export default function UserManagement() {
       [name]: type === "checkbox" ? checked : value,
     });
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter]);
 
   const resetForm = () => {
     setFormData({
@@ -179,6 +186,12 @@ export default function UserManagement() {
     return matchSearch && matchRole;
   });
 
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   /* UI */
   return (
     <div style={styles.container}>
@@ -335,7 +348,7 @@ export default function UserManagement() {
         </thead>
 
         <tbody>
-          {filteredUsers.map((u) => (
+          {currentUsers.map((u) => (
             <tr key={u._id} style={styles.tr}>
               <td style={styles.tdCenter}>
                 <img
@@ -386,6 +399,48 @@ export default function UserManagement() {
           ))}
         </tbody>
       </table>
+      <div style={styles.pagination}>
+        {/* Prev */}
+        <button
+          style={{
+            ...styles.pageBtn,
+            ...(currentPage === 1 && styles.pageBtnDisabled),
+          }}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        >
+          ⬅
+        </button>
+
+        {/* Page numbers */}
+        {[...Array(totalPages)].map((_, i) => {
+          const page = i + 1;
+          return (
+            <button
+              key={page}
+              style={{
+                ...styles.pageBtn,
+                ...(currentPage === page && styles.pageBtnActive),
+              }}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          );
+        })}
+
+        {/* Next */}
+        <button
+          style={{
+            ...styles.pageBtn,
+            ...(currentPage === totalPages && styles.pageBtnDisabled),
+          }}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+        >
+          ➡
+        </button>
+      </div>
 
     </div>
   );
@@ -592,5 +647,46 @@ filterSelect: {
   borderRadius: 6,
   border: "1px solid #ddd",
 },
+pagination: {
+  marginTop: 20,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap",
+},
+
+pageBtn: {
+  minWidth: 36,
+  height: 36,
+  padding: "0 12px",
+  borderRadius: 8,
+  border: "1px solid #dbeafe",
+  background: "#ffffff",
+  color: "#1e3a8a",
+  cursor: "pointer",
+  fontSize: 14,
+  fontWeight: 500,
+  transition: "all 0.2s ease",
+},
+
+pageBtnActive: {
+  background: "#2563eb",
+  color: "#fff",
+  border: "1px solid #2563eb",
+  boxShadow: "0 4px 10px rgba(37, 99, 235, 0.3)",
+},
+
+pageBtnDisabled: {
+  opacity: 0.5,
+  cursor: "not-allowed",
+},
+
+pageInfo: {
+  fontSize: 14,
+  color: "#374151",
+  padding: "0 8px",
+},
+
 };
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-/* ===== MAP LABEL ===== */
 const STATUS_LABEL = {
   new: "Mới",
   processed: "Đã xử lý",
@@ -11,7 +10,6 @@ export default function AdminContact() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
 
-  /* ================= FETCH ================= */
   const fetchContacts = async () => {
     const res = await fetch("http://localhost:5000/api/contact");
     const data = await res.json();
@@ -23,7 +21,6 @@ export default function AdminContact() {
     fetchContacts();
   }, []);
 
-  /* ================= ACTION ================= */
   const updateStatus = async (id, status) => {
     await fetch(`http://localhost:5000/api/contact/${id}/status`, {
       method: "PUT",
@@ -132,7 +129,6 @@ export default function AdminContact() {
         </table>
       </div>
 
-      {/* ================= MODAL CHI TIẾT ================= */}
       {selected && (
         <div
           className="modal fade show"

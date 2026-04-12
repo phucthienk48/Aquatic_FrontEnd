@@ -208,19 +208,21 @@ export default function AdminShop() {
           backgroundImage: shop.banner ? `linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5)), url(${shop.banner})` : 'linear-gradient(45deg, #0077b6, #00b4d8)' 
         }}
       >
+      </div>
+
+      <div className="container">
+        <div className="card shadow border-0 rounded-4" style={{ marginTop: "-100px" }}>
+
         <div className="container position-relative h-100">
            {/* Nút chỉnh sửa lơ lửng trên banner */}
            <button 
-            className="btn btn-light btn-sm rounded-pill position-absolute top-0 end-0 mt-3 shadow" 
+            className="btn btn-outline-primary btn-sm rounded-pill position-absolute top-1 end-2 mt-3 shadow"
             onClick={() => setEditing(true)}
           >
             <i className="bi bi-pencil-fill me-1"></i> Thay đổi thông tin
           </button>
         </div>
-      </div>
 
-      <div className="container">
-        <div className="card shadow border-0 rounded-4" style={{ marginTop: "-100px" }}>
           <div className="card-body p-4 p-md-5">
             <div className="text-center position-relative">
               {shop.logo && <img src={shop.logo} style={styles.mainLogo} className="border-4 border-white shadow" />}

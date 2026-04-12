@@ -27,6 +27,9 @@ export default function AdminProductManagement() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [priceFilter, setPriceFilter] = useState("all");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 5;
+
   const [form, setForm] = useState({
     id: "",
     name: "",
@@ -47,6 +50,10 @@ export default function AdminProductManagement() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchName, typeFilter, priceFilter]);
 
   const fetchProducts = async () => {
     const res = await fetch("http://localhost:5000/api/product");
@@ -184,6 +191,14 @@ export default function AdminProductManagement() {
     return matchName && matchType && matchPrice;
   });
 
+  const indexOfLast = currentPage * productsPerPage;
+  const indexOfFirst = indexOfLast - productsPerPage;
+
+  const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+
   return (
     <div style={styles.container}>
       <h2 style={styles.pageTitle}>
@@ -255,7 +270,7 @@ export default function AdminProductManagement() {
         </thead>
 
         <tbody>
-          {filteredProducts.map((p) => (
+          {currentProducts.map((p) => (
             <tr
               key={p._id}
               style={styles.tr}
@@ -323,6 +338,49 @@ export default function AdminProductManagement() {
           ))}
         </tbody>
       </table>
+
+    <div style={styles.pagination}>
+      {/* Prev */}
+      <button
+        style={{
+          ...styles.pageBtn,
+          ...(currentPage === 1 && styles.pageBtnDisabled),
+        }}
+        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      >
+        ⬅
+      </button>
+
+      {/* Page number */}
+      {[...Array(totalPages)].map((_, i) => {
+        const page = i + 1;
+        return (
+          <button
+            key={page}
+            style={{
+              ...styles.pageBtn,
+              ...(currentPage === page && styles.pageBtnActive),
+            }}
+            onClick={() => setCurrentPage(page)}
+          >
+            {page}
+          </button>
+        );
+      })}
+
+      {/* Next */}
+      <button
+        style={{
+          ...styles.pageBtn,
+          ...(currentPage === totalPages && styles.pageBtnDisabled),
+        }}
+        onClick={() =>
+          setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+        }
+      >
+        ➡
+      </button>
+    </div>
 
       {showForm && (
         <div style={styles.modal}>
@@ -582,6 +640,40 @@ filterSelect: {
   borderRadius: 6,
   border: "1px solid #d1d5db",
   fontSize: 14,
+},
+pagination: {
+  marginTop: 20,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap",
+},
+
+pageBtn: {
+  minWidth: 36,
+  height: 36,
+  padding: "0 12px",
+  borderRadius: 8,
+  border: "1px solid #cbd5f5",
+  background: "#ffffff",
+  color: "#1d4ed8",
+  cursor: "pointer",
+  fontSize: 14,
+  fontWeight: 500,
+  transition: "all 0.2s",
+},
+
+pageBtnActive: {
+  background: "#2563eb",
+  color: "#fff",
+  border: "1px solid #2563eb",
+  boxShadow: "0 4px 10px rgba(37,99,235,0.3)",
+},
+
+pageBtnDisabled: {
+  opacity: 0.5,
+  cursor: "not-allowed",
 },
 };
 

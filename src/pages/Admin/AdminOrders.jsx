@@ -16,6 +16,9 @@ export default function AdminOrder() {
   const [priceFilter, setPriceFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
+
   if (!user || user.role !== "admin") {
     return <Navigate to="/" />;
   }
@@ -23,6 +26,10 @@ export default function AdminOrder() {
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchName, priceFilter, statusFilter]);
 
   const fetchOrders = async () => {
     try {
@@ -64,6 +71,23 @@ export default function AdminOrder() {
     return matchName && matchStatus && matchPrice;
   });
 
+  const indexOfLast = currentPage * ordersPerPage;
+  const indexOfFirst = indexOfLast - ordersPerPage;
+
+  const currentOrders = filteredOrders.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  const handlePrint = () => {
+    const printContents = document.getElementById("invoice-print").innerHTML;
+    const originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+
+    window.location.reload(); // reload lại để tránh lỗi UI
+  };
   if (loading) return (
     <div style={styles.center}>
       <div className="spinner-border text-primary"></div>
@@ -107,7 +131,7 @@ export default function AdminOrder() {
         </select>
 
         <select style={styles.filterSelect} value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)}>
-          <option value="all">💎 Tất cả giá</option>
+          <option value="all">Tất cả giá</option>
           <option value="low">Dưới 200k</option>
           <option value="medium">200k - 1 triệu</option>
           <option value="high">Trên 1 triệu</option>
@@ -127,7 +151,7 @@ export default function AdminOrder() {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((o) => (
+            {currentOrders.map((o) => (
               <tr key={o._id} style={styles.tr}>
                 <td style={styles.td}><b>#{o._id.slice(-6).toUpperCase()}</b></td>
                 <td style={styles.td}>
@@ -163,11 +187,53 @@ export default function AdminOrder() {
           </tbody>
         </table>
       </div>
+            <div style={styles.pagination}>
+              {/* Prev */}
+              <button
+                style={{
+                  ...styles.pageBtn,
+                  ...(currentPage === 1 && styles.pageBtnDisabled),
+                }}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                ⬅
+              </button>
 
+              {/* Page number */}
+              {[...Array(totalPages)].map((_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={page}
+                    style={{
+                      ...styles.pageBtn,
+                      ...(currentPage === page && styles.pageBtnActive),
+                    }}
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              {/* Next */}
+              <button
+                style={{
+                  ...styles.pageBtn,
+                  ...(currentPage === totalPages && styles.pageBtnDisabled),
+                }}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                ➡
+              </button>
+            </div>
       {/* MODAL CHI TIẾT ĐƠN HÀNG */}
       {selectedOrder && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
+            <div id="invoice-print">
             <div style={styles.modalHeader}>
               <h3>Chi tiết đơn hàng #{selectedOrder._id.slice(-6).toUpperCase()}</h3>
               <button style={styles.closeIcon} onClick={() => setSelectedOrder(null)}>&times;</button>
@@ -222,13 +288,19 @@ export default function AdminOrder() {
                 </table>
               </div>
 
+
+
               <div style={styles.modalFooterPrice}>
                 Tổng cộng: <span>{selectedOrder.totalPrice.toLocaleString()} VNĐ</span>
               </div>
             </div>
 
             <button style={styles.modalCloseBtn} onClick={() => setSelectedOrder(null)}>Đóng lại</button>
+            <button style={styles.printBtn} onClick={handlePrint}>
+  <i className="bi bi-printer"></i> In hóa đơn
+</button>
           </div>
+            </div>
         </div>
       )}
     </div>
@@ -388,5 +460,51 @@ const styles = {
     width: "100%", padding: "12px", borderRadius: "10px", border: "none",
     backgroundColor: "#005f73", color: "#fff", fontWeight: "600", marginTop: "20px", cursor: "pointer"
   },
-  center: { textAlign: "center", padding: "100px" }
+  center: { textAlign: "center", padding: "100px" },
+
+pagination: {
+  marginTop: 20,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 8,
+  flexWrap: "wrap",
+},
+
+pageBtn: {
+  minWidth: 36,
+  height: 36,
+  padding: "0 12px",
+  borderRadius: 8,
+  border: "1px solid #0a9396",
+  background: "#ffffff",
+  color: "#005f73",
+  cursor: "pointer",
+  fontSize: 14,
+  fontWeight: 600,
+  transition: "all 0.2s",
+},
+
+pageBtnActive: {
+  background: "#0a9396",
+  color: "#fff",
+  border: "1px solid #0a9396",
+  boxShadow: "0 4px 10px rgba(10,147,150,0.3)",
+},
+
+pageBtnDisabled: {
+  opacity: 0.5,
+  cursor: "not-allowed",
+},
+printBtn: {
+  width: "100%",
+  padding: "12px",
+  borderRadius: "10px",
+  border: "none",
+  backgroundColor: "#2d6a4f",
+  color: "#fff",
+  fontWeight: "600",
+  marginTop: "10px",
+  cursor: "pointer"
+},
 };
